@@ -423,7 +423,7 @@ exports.forgetPassword = async (req, res) => {
       statuscode: 200,
       success: true,
       message: "otp send successfully",
-      // result: { otp },
+      result: { otpValue },
     });
   } catch (error) {
     return res.send({
