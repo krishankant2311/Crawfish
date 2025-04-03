@@ -891,7 +891,7 @@ exports.getAllUser = async (req, res) => {
       });
     }
 
-    const allUser = await User.find({}).skip(skip).limit(limit);
+    const allUser = await User.find({}).skip(skip).limit(limit).select("-token -password -otp");
     const totalUser = await User.countDocuments({});
     return res.send({
       statusCode: 200,
@@ -951,7 +951,8 @@ exports.getAllActiveUser = async (req, res) => {
 
     const allUser = await User.find({ status: "Active" })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .select("-token -password -otp");
     const totalUser = await User.countDocuments({ status: "Active" });
     return res.send({
       statusCode: 200,
@@ -1012,7 +1013,8 @@ exports.getAllRecentUser = async (req, res) => {
     const allUser = await User.find()
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .select("-token -password -otp");
     const totalUser = await User.countDocuments({});
     return res.send({
       statusCode: 200,

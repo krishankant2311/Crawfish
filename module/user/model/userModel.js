@@ -71,20 +71,20 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    preferences: {
-      sendTargetNotification: {
-        type: Boolean,
-        default: true,
-      },
-      specialOffers: {
-        type: Boolean,
-        default: true,
-      },
-      systemChanges: {
-        type: Boolean,
-        default: false,
-      },
-    },
+    // preferences: {
+    //   sendTargetNotification: {
+    //     type: Boolean,
+    //     default: true,
+    //   },
+    //   specialOffers: {
+    //     type: Boolean,
+    //     default: true,
+    //   },
+    //   systemChanges: {
+    //     type: Boolean,
+    //     default: false,
+    //   },
+    // },
 
     logOut: {
       type: Date,
