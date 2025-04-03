@@ -29,6 +29,7 @@ const scrapingRouter = require("./scrapping/scrappingGoogleMap")
 const homepageRouter = require("./module/homepage/routes/homepageRoute")
 const notificationRouter = require("./module/notification/routes/notificationRoute")
 dotenv.config()
+
 app.use(bodyParser.json());
 
 

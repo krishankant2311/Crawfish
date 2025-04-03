@@ -83,22 +83,58 @@ exports.signup = async (req, res) => {
         result: {},
       });
     }
+    const { otpValue, otpExpiry } = generateOTP();
+    console.log(otpValue, otpExpiry);
+    const name = fullName;
+    const sub = "sign up verification";
+    const html = emailVerification(otpValue, name);
     const user = await User.findOne({ email });
+
+    const mailSend = sendEmail(sub, email, html);
+    if (!mailSend) {
+      return res.send({
+        statusCode: 200,
+        success: true,
+        message: "otp didn't send",
+        result: { otpValue },
+      });
+    }
+
+    const ene_password = bcrypt.hashSync(password, 10);
+
     if (user) {
+      if(user.status === "Delete"){
+        user.email = email;
+        user.fullName = fullName;
+        user.password=ene_password;
+        user.number= number;
+        user.otp.otpValue= otpValue;
+        user.otp.otpExpiry= otpExpiry;
+        user.status = "Pending";
+        await user.save();
+        return res.send({
+          statusCode:200,
+          success:true,
+          message:"user created successfully",
+          result:{otpValue}
+        })
+        }
+    
       return res.send({
         statuscode: 404,
         success: false,
         message: "user already exist",
         result: {},
       });
+    
     }
     // console.log(user);
 
-    const { otpValue, otpExpiry } = generateOTP();
-    console.log(otpValue, otpExpiry);
-    const name = fullName;
-    const sub = "sign up verification";
-    const html = emailVerification(otpValue, name);
+    // const { otpValue, otpExpiry } = generateOTP();
+    // console.log(otpValue, otpExpiry);
+    // const name = fullName;
+    // const sub = "sign up verification";
+    // const html = emailVerification(otpValue, name);
 
     // let { otpValue, otpExpiry } = generateOTP();
     // const name = fullName;
@@ -113,17 +149,17 @@ exports.signup = async (req, res) => {
     //   await sendEmail(title, email, body);
     // // }
 
-    const mailSend = sendEmail(sub, email, html);
-    if (!mailSend) {
-      return res.send({
-        statusCode: 200,
-        success: true,
-        message: "otp didn't send",
-        result: { otpValue },
-      });
-    }
+    // const mailSend = sendEmail(sub, email, html);
+    // if (!mailSend) {
+    //   return res.send({
+    //     statusCode: 200,
+    //     success: true,
+    //     message: "otp didn't send",
+    //     result: { otpValue },
+    //   });
+    // }
 
-    const ene_password = bcrypt.hashSync(password, 10);
+    // const ene_password = bcrypt.hashSync(password, 10);
     const createNewUser = new User({
       email,
       fullName,
@@ -140,7 +176,7 @@ exports.signup = async (req, res) => {
       statuscode: 200,
       success: true,
       message: "user created and otp send successfully",
-      result: {},
+      result: {otpValue},
     });
   } catch (error) {
     return res.send({
