@@ -88,6 +88,7 @@ exports.signup = async (req, res) => {
     const name = fullName;
     const sub = "sign up verification";
     const html = emailVerification(otpValue, name);
+
     const user = await User.findOne({ email });
 
     const mailSend = sendEmail(sub, email, html);
@@ -334,7 +335,7 @@ exports.login = async (req, res) => {
       return res.send({
         statuscode: 400,
         success: false,
-        message: "unauthorise access",
+        message: "Please verify OTP",
         result: {},
       });
     }
@@ -1262,10 +1263,6 @@ exports.userStatus = async (req, res) => {
       );
       io.emit("statusUpdated", { status: "Offline" });
     });
-  });
-
-  server.listen(5000, () => {
-    console.log("Server running on port 5000");
   });
 };
 
