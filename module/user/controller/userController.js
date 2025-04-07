@@ -27,6 +27,179 @@ const isStrongPassword = (password, newPassword) => {
   return validator.isStrongPassword(password, newPassword, options);
 };
 
+// exports.signup = async (req, res) => {
+//   try {
+//     let { email, fullName, number, password } = req.body;
+//     email = email?.toLowerCase()?.trim();
+//     fullName = fullName?.trim();
+//     password = password?.trim();
+//     number = Number.parseInt(number);
+//     if (!email) {
+//       return res.send({
+//         statuscode: 400,
+//         success: false,
+//         message: "email required",
+//         result: {},
+//       });
+//     }
+//     if (!isValidEmail(email)) {
+//       return res.send({
+//         statuscode: 400,
+//         success: false,
+//         message: "invalid email",
+//         result: {},
+//       });
+//     }
+//     if (!fullName) {
+//       return res.send({
+//         statuscode: 400,
+//         success: false,
+//         message: "fullname required",
+//         result: {},
+//       });
+//     }
+//     if (!number) {
+//       return res.send({
+//         statuscode: 400,
+//         success: false,
+//         message: "Mo. number required",
+//         result: {},
+//       });
+//     }
+//     if (!password) {
+//       return res.send({
+//         statuscode: 400,
+//         success: false,
+//         message: "password required",
+//         result: {},
+//       });
+//     }
+//     if (!isStrongPassword(password)) {
+//       return res.send({
+//         statuscode: 400,
+//         success: false,
+//         message:
+//           "password should be 8 digits and must contain atleast 1 capital letter and 1 symbol",
+//         result: {},
+//       });
+//     }
+//     const { otpValue, otpExpiry } = generateOTP();
+//     console.log(otpValue, otpExpiry);
+//     const name = fullName;
+//     const sub = "sign up verification";
+//     const html = emailVerification(otpValue, name);
+
+//     const user = await User.findOne({ email });
+
+//     // const mailSend = sendEmail(sub, email, html);
+//     // if (!mailSend) {
+//     //   return res.send({
+//     //     statusCode: 400,
+//     //     success: false,
+//     //     message: "otp didn't send",
+//     //     result: { otpValue },
+//     //   });
+//     // }
+
+//     const ene_password = bcrypt.hashSync(password, 10);
+
+//     if (user) {
+
+//       if (user.status === "Delete") {
+//         user.email = email;
+//         user.fullName = fullName;
+//         user.password = ene_password;
+//         user.number = number;
+//         user.otp.otpValue = otpValue;
+//         user.otp.otpExpiry = otpExpiry;
+//         user.status = "Pending";
+//         await user.save();
+
+//         const mailSend = sendEmail(sub, email, html);
+//         if (!mailSend) {
+//           return res.send({
+//             statusCode: 400,
+//             success: false,
+//             message: "otp didn't send",
+//             result: {  },
+//           });
+//         }
+
+//         return res.send({
+//           statusCode: 200,
+//           success: true,
+//           message: "user created successfully",
+//           result: { otpValue },
+//         });
+//       }
+
+//       return res.send({
+//         statuscode: 404,
+//         success: false,
+//         message: "user already exist",
+//         result: { otpValue },
+//       });
+//     }
+//     // console.log(user);
+
+//     // const { otpValue, otpExpiry } = generateOTP();
+//     // console.log(otpValue, otpExpiry);
+//     // const name = fullName;
+//     // const sub = "sign up verification";
+//     // const html = emailVerification(otpValue, name);
+
+//     // let { otpValue, otpExpiry } = generateOTP();
+//     // const name = fullName;
+//     // const title = "Forget Password otp";
+//     // const body = emailVerification(otpValue, name);
+//     // user.otp = {
+//     //   otpValue,
+//     //   otpExpiry,
+//     // };
+//     // console.log("hgfeyj"+ user.otp);
+//     // // if (admin && admin.email) {
+//     //   await sendEmail(title, email, body);
+//     // // }
+
+//     // const mailSend = sendEmail(sub, email, html);
+//     // if (!mailSend) {
+//     //   return res.send({
+//     //     statusCode: 200,
+//     //     success: true,
+//     //     message: "otp didn't send",
+//     //     result: { otpValue },
+//     //   });
+//     // }
+
+//     // const ene_password = bcrypt.hashSync(password, 10);
+//     const createNewUser = new User({
+//       email,
+//       fullName,
+//       password: ene_password,
+//       number: number,
+//       otp: {
+//         otpValue: otpValue,
+//         otpExpiry: otpExpiry,
+//       },
+//     });
+
+//     await createNewUser.save();
+//     return res.send({
+//       statuscode: 200,
+//       success: true,
+//       message: "user created and otp send successfully",
+//       result: {otpValue},
+//     });
+//   } catch (error) {
+//     return res.send({
+//       statuscode: 500,
+//       success: false,
+//       message: error.message + " Error in user signuo API ",
+//       result: {},
+//     });
+//   }
+// };
+
 exports.signup = async (req, res) => {
   try {
     let { email, fullName, number, password } = req.body;
@@ -34,46 +207,42 @@ exports.signup = async (req, res) => {
     fullName = fullName?.trim();
     password = password?.trim();
     number = Number.parseInt(number);
-    if (!email) {
+
+    if (!email)
       return res.send({
         statuscode: 400,
         success: false,
         message: "email required",
         result: {},
       });
-    }
-    if (!isValidEmail(email)) {
+    if (!isValidEmail(email))
       return res.send({
         statuscode: 400,
         success: false,
         message: "invalid email",
         result: {},
       });
-    }
-    if (!fullName) {
+    if (!fullName)
       return res.send({
         statuscode: 400,
         success: false,
         message: "fullname required",
         result: {},
       });
-    }
-    if (!number) {
+    if (!number)
       return res.send({
         statuscode: 400,
         success: false,
         message: "Mo. number required",
         result: {},
       });
-    }
-    if (!password) {
+    if (!password)
       return res.send({
         statuscode: 400,
         success: false,
         message: "password required",
         result: {},
       });
-    }
     if (!isStrongPassword(password)) {
       return res.send({
         statuscode: 400,
@@ -83,107 +252,101 @@ exports.signup = async (req, res) => {
         result: {},
       });
     }
-    const { otpValue, otpExpiry } = generateOTP();
-    console.log(otpValue, otpExpiry);
-    const name = fullName;
-    const sub = "sign up verification";
-    const html = emailVerification(otpValue, name);
 
     const user = await User.findOne({ email });
-
-    const mailSend = sendEmail(sub, email, html);
-    if (!mailSend) {
-      return res.send({
-        statusCode: 200,
-        success: true,
-        message: "otp didn't send",
-        result: { otpValue },
-      });
-    }
-
     const ene_password = bcrypt.hashSync(password, 10);
 
+    // ✅ User exists
     if (user) {
-      if(user.status === "Delete"){
-        user.email = email;
+      // if(user.status === "Pending" || user.status === "Block" || user.status === "Active"){
+      //   return res.send({
+      //     statusCode:400,
+      //     success:false,
+      //     message:"user already exist",
+      //     result:{}
+      //   })
+      // }
+      if (user.status === "Delete") {
+        // Generate OTP only here
+        const { otpValue, otpExpiry } = generateOTP();
+        const html = emailVerification(otpValue, fullName);
+        const sub = "Sign Up Verification";
+
         user.fullName = fullName;
-        user.password=ene_password;
-        user.number= number;
-        user.otp.otpValue= otpValue;
-        user.otp.otpExpiry= otpExpiry;
+        user.password = ene_password;
+        user.number = number;
+        user.otp = { otpValue, otpExpiry };
         user.status = "Pending";
         await user.save();
-        return res.send({
-          statusCode:200,
-          success:true,
-          message:"user created successfully",
-          result:{otpValue}
-        })
+
+        const mailSend = await sendEmail(sub, email, html);
+        if (!mailSend) {
+          return res.send({
+            statusCode: 400,
+            success: false,
+            message: "OTP didn't send",
+            result: {},
+          });
         }
-    
+
+        return res.send({
+          statusCode: 200,
+          success: true,
+          message: "User re-registered. OTP sent",
+          result: { otpValue },
+        });
+      }
+      let message = "User already exists";
+      if (user.status === "Pending")
+        message = "OTP already sent. Please verify.";
+      if (user.status === "Blocked")
+        message = "Account blocked. Contact support.";
+
       return res.send({
-        statuscode: 404,
+        statuscode: 409,
         success: false,
-        message: "user already exist",
+        message,
         result: {},
       });
-    
     }
-    // console.log(user);
 
-    // const { otpValue, otpExpiry } = generateOTP();
-    // console.log(otpValue, otpExpiry);
-    // const name = fullName;
-    // const sub = "sign up verification";
-    // const html = emailVerification(otpValue, name);
+    // ✅ New User – now generate OTP
+    const { otpValue, otpExpiry } = generateOTP();
+    const html = emailVerification(otpValue, fullName);
+    const sub = "Sign Up Verification";
 
-    // let { otpValue, otpExpiry } = generateOTP();
-    // const name = fullName;
-    // const title = "Forget Password otp";
-    // const body = emailVerification(otpValue, name);
-    // user.otp = {
-    //   otpValue,
-    //   otpExpiry,
-    // };
-    // console.log("hgfeyj"+ user.otp);
-    // // if (admin && admin.email) {
-    //   await sendEmail(title, email, body);
-    // // }
-
-    // const mailSend = sendEmail(sub, email, html);
-    // if (!mailSend) {
-    //   return res.send({
-    //     statusCode: 200,
-    //     success: true,
-    //     message: "otp didn't send",
-    //     result: { otpValue },
-    //   });
-    // }
-
-    // const ene_password = bcrypt.hashSync(password, 10);
-    const createNewUser = new User({
+    const newUser = new User({
       email,
       fullName,
       password: ene_password,
-      number: number,
-      otp: {
-        otpValue: otpValue,
-        otpExpiry: otpExpiry,
-      },
+      number,
+      otp: { otpValue, otpExpiry },
+      status: "Pending",
     });
 
-    await createNewUser.save();
+    await newUser.save();
+
+    const mailSend = await sendEmail(sub, email, html);
+    if (!mailSend) {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "OTP didn't send",
+        result: {},
+      });
+    }
+
     return res.send({
       statuscode: 200,
       success: true,
-      message: "user created and otp send successfully",
-      result: {otpValue},
+      message: "User created and OTP sent successfully",
+      result: { otpValue },
     });
   } catch (error) {
     return res.send({
       statuscode: 500,
       success: false,
-      message: error.message + " Error in user signuo API ",
+      message: error.message + " Error in signup API",
       result: {},
     });
   }
@@ -892,7 +1055,10 @@ exports.getAllUser = async (req, res) => {
       });
     }
 
-    const allUser = await User.find({}).skip(skip).limit(limit).select("-token -password -otp");
+    const allUser = await User.find({})
+      .skip(skip)
+      .limit(limit)
+      .select("-token -password -otp");
     const totalUser = await User.countDocuments({});
     return res.send({
       statusCode: 200,
@@ -1106,7 +1272,7 @@ exports.updateUserProfile = async (req, res) => {
     return res.send({
       statusCode: 500,
       success: false,
-      message:error.message + "ERROR in update user profile",
+      message: error.message + "ERROR in update user profile",
       result: {},
     });
   }
@@ -1279,7 +1445,7 @@ exports.deleteUser = async (req, res) => {
         result: {},
       });
     }
-let user = await User.findOne({_id: userId})
+    let user = await User.findOne({ _id: userId });
     if (!user) {
       return res.send({
         statusCode: 404,
@@ -1299,16 +1465,16 @@ let user = await User.findOne({_id: userId})
     user.status = "Delete";
     user.accessToken = "";
     await user.save();
-    return res.send ({
-        statusCode: 200,
-        success: true,
-        message: "user deleted successfully",
-        result: {
-          name:user.fullName,
-          email:user.email,
-          status: user.status,
-        },
-      })
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: "user deleted successfully",
+      result: {
+        name: user.fullName,
+        email: user.email,
+        status: user.status,
+      },
+    });
   } catch (error) {
     console.log(error);
     return res.send({
@@ -1318,14 +1484,14 @@ let user = await User.findOne({_id: userId})
       result: {},
     });
   }
-}
+};
 exports.handleStatus = async (req, res) => {
   try {
     let token = req.token;
     let { userId } = req.params;
     let { status } = req.body;
 
-    if (!status) {      
+    if (!status) {
       return res.send({
         statusCode: 400,
         success: false,

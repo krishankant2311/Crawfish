@@ -73,7 +73,7 @@ exports.addfavourite = async(req,res) => {
     }
     if(favourite.status==="Inactive"){
         favourite.status = "Active"
-        favourite.isFavourite = "yes"
+        favourite.isFavourite = "true"
         await favourite.save()
         return res.send({
             statusCode:200,
@@ -86,7 +86,7 @@ exports.addfavourite = async(req,res) => {
     const newfavourite = new Favourite({
      userId:token._id,
      restaurantId: resId,
-     isFavourite:yes,
+     isFavourite:true,
     });
     await newfavourite.save();
     return res.send({
