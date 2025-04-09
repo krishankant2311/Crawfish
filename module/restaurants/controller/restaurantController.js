@@ -545,7 +545,7 @@ exports.deleteRestaurant = async (req, res) => {
 exports.getRestaurant = async (req, res) => {
   try {
     let token = req.token;
-    const restaurant = await Restaurant.findOne({ _id: token._id });
+    const restaurant = await Restaurant.findOne({ _id: token._id }).select("-token -otp -password -securityToken");
     if (!restaurant) {
       return res.send({
         statusCode: 400,
@@ -1613,7 +1613,7 @@ exports.getAllActiverestaurant = async (req, res) => {
       });
     }
 
-    const allRestaurant = await Restaurant.find({ status: "Active" }).select("-otp -securityToken -password -token -phoneNumber")
+    const allRestaurant = await Restaurant.find({ status: "Active" }).select("-otp -securityToken -password -token -phoneNumber ")
       .skip(skip)
       .limit(limit);
 
@@ -1662,7 +1662,7 @@ exports.getAllRestaurant = async(req,res) => {
       });
     }
 
-    const allRestaurant = await Restaurant.find({ status: "Active" }).select("restaurantName phoneNumber " )
+    const allRestaurant = await Restaurant.find({ status: "Active" }).select("-otp -password -phoneNumber -token -securityToken " )
       .skip(skip)
       .limit(limit);
 
@@ -1736,7 +1736,7 @@ exports.topRatedRestaurant = async(req,res) => {
         result:{}
       })
     }
-    console.log(restaurant);
+    // console.log(restaurant);
 
 
     

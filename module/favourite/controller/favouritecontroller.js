@@ -136,7 +136,7 @@ exports.getAllFavouriteRestaurant = async(req,res) => {
             })
         }
 
-        const restaurant = await Restaurant.find({ status:"Active" });
+        const restaurant = await Restaurant.find({ status:"Active" }).select("-token -otp -phoneNumber -password -securityToken");
         if(!restaurant){
             return res.send({
                 statusCode:404,

@@ -39,7 +39,7 @@ exports.searchRestaurant = async (req, res) => {
     if (query) {
       searchQuery.restaurantName = { $regex: query, $options: "i" };
     }
-    const restaurant = await Restaurant.find(searchQuery)
+    const restaurant = await Restaurant.find(searchQuery).select("-token -securityToken -otp -password -phoneNumber")
       .limit(10)
       .sort({ name: 1 });
     if (restaurant.length === 0) {
@@ -50,6 +50,13 @@ exports.searchRestaurant = async (req, res) => {
         result: {},
       });
     }
+
+    // const search = new Search({
+    //   query:query,
+    //   userId : token._id,
+    // })
+
+    // await search.save();
     return res.send({
       statuscode: 200,
       success: true,
@@ -96,10 +103,19 @@ exports.getRecentSearches = async (req, res) => {
       });
     }
 
-    const recentSearches = await Search.find({ userId: token._id })
+    const recentSearches = await Search.find({ userId:token._id })
       .sort({ createdAt: -1 })
       .limit(10);
 
+
+if(!recentSearches){
+  return res.send({
+    statudsCode:404,
+    success:false,
+    message:"recent search not found",
+    result:{}
+  })
+}
     return res.send({
       statusCode: 200,
       success: true,
@@ -123,7 +139,7 @@ exports.saveRecentSearch = async (req, res) => {
     // console.log("query", query);
 
     if (!query) {
-      return res.status(400).json({
+      return res.send(400)({
         statusCode: 400,
         success: false,
         message: "User search query is missing",
@@ -162,6 +178,19 @@ exports.saveRecentSearch = async (req, res) => {
       { userId: token._id, query: query, createdAt: new Date(), status:"Active" },
       { upsert: true, new: true }
     );
+    if(!search){
+      const createsearch = new Search({
+         query:query,
+         userId:token._id
+        })
+         await createsearch.save()
+        return res.send({
+          statusCode:200,
+          success:true,
+          message:"recent search save successfully",
+          result:{createsearch}
+        })
+    }
 
     return res.send({
       statusCode: 200,

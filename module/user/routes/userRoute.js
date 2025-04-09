@@ -21,6 +21,7 @@ route.get("/getallActive-user",upload.none(),verifyJWT,userController.getAllActi
 route.get("/getRecent-user",upload.none(),verifyJWT,userController.getAllRecentUser)
 route.post("/resend-otp",upload.none(),userController.resendOTP)
 route.post("/delete-user/:userId",verifyJWT,upload.none(),userController.deleteUser)
+route.post("/save-location/:userId",verifyJWT,upload.none(),userController.saveLocation)
 route.post("/update-userStatus/:userId",verifyJWT,upload.none(),userController.handleStatus)
 route.get("/get-profile/:userId",verifyJWT,upload.none(),userController.getprofile)
 
