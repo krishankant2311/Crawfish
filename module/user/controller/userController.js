@@ -10,6 +10,7 @@ const emailVerification = require("../../../templates/emailVerification");
 // const qrcode = require("qrcode");
 // const crypto = require("crypto");
 const Admin = require("../../admin/model/adminModel");
+// const numberValidator = require("libphonenumber.js")
 const socketIo = require("socket.io");
 const Restaurant = require("../../restaurants/model/restaurantModel");
 const isValidEmail = (email) => {
@@ -206,7 +207,8 @@ exports.signup = async (req, res) => {
     email = email?.toLowerCase()?.trim();
     fullName = fullName?.trim();
     password = password?.trim();
-    number = Number.parseInt(number);
+    number = number?.trim();
+    // number = Number.parseInt(number);
 
     if (!email)
       return res.send({
@@ -229,20 +231,31 @@ exports.signup = async (req, res) => {
         message: "fullname required",
         result: {},
       });
-    if (!number)
+    if (!number){
       return res.send({
         statuscode: 400,
         success: false,
         message: "Mo. number required",
         result: {},
       });
-    if (!password)
+    }
+    console.log(number.length)
+      if (number.length !== 10) {
+        return res.send({
+          statusCode: 400,
+          success: false,
+          message: "Mobile number must be 10 digits.",
+          result: {},
+        });
+      }
+    if (!password){
       return res.send({
         statuscode: 400,
         success: false,
         message: "password required",
         result: {},
       });
+    }
     if (!isStrongPassword(password)) {
       return res.send({
         statuscode: 400,
@@ -275,6 +288,7 @@ exports.signup = async (req, res) => {
         user.fullName = fullName;
         user.password = ene_password;
         user.number = number;
+        user.email = email;
         user.otp = { otpValue, otpExpiry };
         user.status = "Pending";
         await user.save();
@@ -296,16 +310,47 @@ exports.signup = async (req, res) => {
           result: { otpValue },
         });
       }
-      let message = "User already exists";
-      if (user.status === "Pending")
-        message = "OTP already sent. Please verify.";
-      if (user.status === "Blocked")
-        message = "Account blocked. Contact support.";
+      if (user.status === "Pending") {
+        // Generate OTP only here
+        const { otpValue, otpExpiry } = generateOTP();
+        const html = emailVerification(otpValue, fullName);
+        const sub = "Sign Up Verification";
+
+        user.fullName = fullName;
+        user.password = ene_password;
+        user.number = number;
+        user.email = email;
+        user.otp = { otpValue, otpExpiry };
+        user.status = "Pending";
+        await user.save();
+
+        const mailSend = await sendEmail(sub, email, html);
+        if (!mailSend) {
+          return res.send({
+            statusCode: 400,
+            success: false,
+            message: "OTP didn't send",
+            result: {},
+          });
+        }
+
+        return res.send({
+          statusCode: 200,
+          success: true,
+          message: "User re-registered. OTP sent",
+          result: { otpValue },
+        });
+      }
+      // let message = "User already exists";
+      // if (user.status === "Pending")
+      //   message = "OTP already sent. Please verify.";
+      // if (user.status === "Blocked")
+      //   message = "Account blocked. Contact support.";
 
       return res.send({
         statuscode: 400,
         success: false,
-        message,
+        message:"user already exist",
         result: {},
       });
     }
