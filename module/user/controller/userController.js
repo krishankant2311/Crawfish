@@ -253,7 +253,7 @@ exports.signup = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({$or:[{email:email},{number:number}] } );
     const ene_password = bcrypt.hashSync(password, 10);
 
     // ✅ User exists
@@ -303,7 +303,7 @@ exports.signup = async (req, res) => {
         message = "Account blocked. Contact support.";
 
       return res.send({
-        statuscode: 409,
+        statuscode: 400,
         success: false,
         message,
         result: {},
@@ -688,7 +688,7 @@ exports.verifyOTP = async (req, res) => {
 exports.resendOTP = async (req, res) => {
   try {
     let { email } = req.body;
-    email = email.toLowerCase();
+    email = email?.toLowerCase();
     if (!email) {
       return res.send({
         statusCode: 400,
@@ -929,7 +929,7 @@ exports.changePassword = async (req, res) => {
     const oldMatch = await bcrypt.compare(oldPassword, user.password);
     if (!oldMatch) {
       return res.send({
-        statuscode: 402,
+        statuscode: 400,
         success: false,
         message: "Invalid old password",
         result: {},
@@ -938,9 +938,9 @@ exports.changePassword = async (req, res) => {
     const issame = await bcrypt.compare(newPassword, user.password);
     if (issame) {
       return res.send({
-        statuscode: 402,
+        statuscode: 400,
         success: false,
-        message: "newpassword can not be same as old password",
+        message: "new password can not be same as old password",
         result: {},
       });
     }
@@ -1436,6 +1436,14 @@ exports.deleteUser = async (req, res) => {
   try {
     let token = req.token;
     let { userId } = req.params;
+    if(!userId){
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"required user id",
+        result:{}
+      })
+    }
     let admin = await Admin.findById({ _id: token._id, status: "Active" });
     if (!admin) {
       return res.send({
@@ -1550,3 +1558,64 @@ exports.handleStatus = async (req, res) => {
     });
   } catch (error) {}
 };
+exports.saveLocation =async(req, res) => {
+  const {userId} = req.params;
+  const token = req.token
+    const { latitude, longitude } = req.body;
+  
+    if (!latitude || !longitude) {
+      return res.status(400).json({ message: 'Latitude and Longitude are required' });
+    }
+  console.log("cordinates", latitude,longitude)
+    try {
+      const user = await User.findOne({_id:userId}) 
+      if(!user){
+        return res.send({
+          statusCode:404,
+          success:false,
+          message:"user not found",
+          result:{}
+        })
+      }
+      if(user.status === "Delete"){
+        return res.send({
+          statusCode:400,
+          success:false,
+          message:"user has been deleted",
+          result:{}
+        })
+      }
+      if(user.status === "Pending"){
+        return res.send({
+          statusCode:400,
+          success:false,
+          message:"unauthorise access",
+          result:{}
+        })
+      }
+      if(user.status === "Block"){
+        return res.send({
+          statusCode:400,
+          success:false,
+          message:"user has been blocked",
+          result:{}
+        })
+      }
+      user.userlocation.coordinates = [latitude,longitude]
+      await user.save()
+      return res.send({ 
+        statusCode:200,
+        success:true,
+        message: 'Location saved successfully',
+      result:{}
+     });
+    } catch (err) {
+      console.error(err);
+      return res.send({ 
+        statusCode:500,
+        message: 'Server error',
+       success:false,
+      result:{}});
+    }
+
+}

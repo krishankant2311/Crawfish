@@ -457,6 +457,14 @@ exports.adminLogout = async (req, res) => {
         result: {},
       });
     }
+    if(admin.token === ""){
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"admin already logout",
+        result:{}
+      })
+    }
     if (admin.status === "Delete" || admin.status === "Block") {
       return res.send({
         statusCode: 401,
