@@ -99,11 +99,17 @@ exports.signupRestaurant = async (req, res) => {
         message: "Required phone number",
       });
     }
+    if(phoneNumber.length !== 10){
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"Phone number must be 10 digits",
+        result:{}
+      })
+    }
 
     //check if email already exists
-    const restaurant = await Restaurant.findOne({
-      email: email,
-    });
+    const restaurant = await Restaurant.findOne({$or:[{email:email},{phoneNumber:phoneNumber}] } );
     const ene_password = bcrypt.hashSync(password, 10);
     // console.log("jgfejyewg"+restaurant)
     if (restaurant) {
@@ -112,9 +118,9 @@ exports.signupRestaurant = async (req, res) => {
         email=email || restaurant.email
         password = restaurant.password
         phoneNumber= phoneNumber || restaurant.phoneNumber
-        status = "Active"
+        restaurant.status = "Pending"
         const { otpValue, otpExpiry } = genrateOTP();
-    const resName = restaurant.name;
+    const resName = restaurant.restaurantName;
     const title = "Signup OTP";
     const body = emailVerification(otpValue, resName);
     restaurant.otp = {
@@ -126,7 +132,30 @@ exports.signupRestaurant = async (req, res) => {
     return res.send({
       statusCode:200,
       success:true,
-      message:"restaurant created please verify otp",
+      message:"restaurant re-created please verify otp",
+      result:{otpValue}
+    })
+      }
+      if(restaurant.status==="Pending"){
+        restaurantName=restaurantName || restaurant.restaurantName;
+        email=email || restaurant.email
+        password = restaurant.password
+        phoneNumber= phoneNumber || restaurant.phoneNumber
+        restaurant.status = "Pending"
+        const { otpValue, otpExpiry } = genrateOTP();
+    const resName = restaurant.restaurantName;
+    const title = "Signup OTP";
+    const body = emailVerification(otpValue, resName);
+    restaurant.otp = {
+      otpValue,
+      otpExpiry,
+    };
+    await sendEmail(title, restaurant.email, body);
+    await restaurant.save();
+    return res.send({
+      statusCode:200,
+      success:true,
+      message:"Please verify otp",
       result:{otpValue}
     })
       }
@@ -158,7 +187,7 @@ exports.signupRestaurant = async (req, res) => {
 
     //generate OTP
     const { otpValue, otpExpiry } = genrateOTP();
-    const resName = createNewRestaurant.name;
+    const resName = createNewRestaurant.restaurantName;
     const title = "Signup OTP";
     const body = emailVerification(otpValue, resName);
     createNewRestaurant.otp = {
@@ -1130,7 +1159,7 @@ exports.restaurantProfile = async (req, res) => {
     let token = req.token;
     let {
       restaurantName,
-      phoneNumber,
+      // phoneNumber,
       website,
       businessHour,
       description,
@@ -1146,14 +1175,14 @@ exports.restaurantProfile = async (req, res) => {
         result: {},
       });
     }
-    if (!phoneNumber) {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "Required phone number",
-        result: {},
-      });
-    }
+    // if (!phoneNumber) {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "Required phone number",
+    //     result: {},
+    //   });
+    // }
     if (!businessHour) {
       return res.send({
         statusCode: 400,
@@ -1204,7 +1233,7 @@ exports.restaurantProfile = async (req, res) => {
       });
     }
     restaurant.restaurantName = restaurantName;
-    restaurant.phoneNumber = phoneNumber;
+    // restaurant.phoneNumber = phoneNumber;
     restaurant.website = website;
     restaurant.businessHour = businessHour;
     restaurant.description = description;
@@ -1581,7 +1610,7 @@ exports.logout = async (req, res) => {
         statusCode: 200,
         success: true,
         message: "restaurant logout successfully",
-        result: { restaurant },
+        result: { },
       });
     }
   } catch (error) {

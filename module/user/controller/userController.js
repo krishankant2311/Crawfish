@@ -571,7 +571,7 @@ exports.login = async (req, res) => {
     return res.send({
       statusCode: 200,
       success: true,
-      message: "user login successfully",
+      message: "Login successfully",
       result: { token },
     });
   } catch (error) {
@@ -1051,7 +1051,7 @@ exports.logout = async (req, res) => {
       return res.send({
         statusCode: 200,
         success: true,
-        message: "user logout successfully",
+        message: "User logout successfully",
         result: {},
       });
     }

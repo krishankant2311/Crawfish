@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema(
       required: true,
       default: "",
     },
+    language:{
+      type:String,
+      enum:["Texas","Louisiana"]
+    },
 
     otp: {
       otpValue: {
