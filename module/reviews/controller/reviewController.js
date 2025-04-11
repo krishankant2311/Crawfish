@@ -34,7 +34,7 @@ exports.createReview = async (req, res) => {
         result: {},
       });
     }
-    if (typeof rating !== "number" || rating < 1 || rating > 5) {
+    if (rating < 1 || rating > 5) {
       return res.send({
         statusCode:400,
         success: false,

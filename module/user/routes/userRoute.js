@@ -24,6 +24,7 @@ route.post("/delete-user/:userId",verifyJWT,upload.none(),userController.deleteU
 route.post("/save-location/:userId",verifyJWT,upload.none(),userController.saveLocation)
 route.post("/update-userStatus/:userId",verifyJWT,upload.none(),userController.handleStatus)
 route.get("/get-profile/:userId",verifyJWT,upload.none(),userController.getprofile)
+route.get("/get-language",verifyJWT,upload.none(),userController.getCurrentlanguage)
 
 
 // const users = await User.find({status : "Active"}).sort({"createdAt" : -1}).skip(skip).limit(limit)

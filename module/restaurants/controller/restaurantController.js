@@ -1461,6 +1461,12 @@ exports.getMenu = async (req, res) => {
         result: { menu },
       });
     }
+    return res.send({
+      statusCode:400,
+      success:false,
+      message:"menu not found",
+      result:{}
+    })
   } catch (error) {
     return res.send({
       statuscode: 500,
@@ -1483,8 +1489,45 @@ exports.deleteMenu = async (req, res) => {
       });
     }
 
-    const admin = await Admin.findOne({ _id: token._id });
-    if (!admin) {
+    const admin = await Admin.findOne({ _id: token._id,status:"Active" });
+    // if (!admin) {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "unauthorise access",
+    //     result: {},
+    //   });
+    // }
+    // if (admin.status == "delete") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "user has been deleted",
+    //     result: {},
+    //   });
+    // }
+    // if (admin.status == "Block") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "user has blocked",
+    //     result: {},
+    //   });
+    // }
+    // if (admin.status == "Pending") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "Inactive",
+    //     result: {},
+    //   });
+    // }
+
+
+    const restaurant = await Restaurant.findOne({ _id: token._id, status:"Active"});
+
+    // console.log(restaurant,admin)
+    if (!(restaurant || admin)) {
       return res.send({
         statusCode: 400,
         success: false,
@@ -1492,48 +1535,14 @@ exports.deleteMenu = async (req, res) => {
         result: {},
       });
     }
-    if (admin.status == "delete") {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "user has been deleted",
-        result: {},
-      });
-    }
-    if (admin.status == "Block") {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "user has blocked",
-        result: {},
-      });
-    }
-    if (admin.status == "Pending") {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "Inactive",
-        result: {},
-      });
-    }
-
-    const restaurant = await Restaurant.findOne({ _id: resId });
-    if (!restaurant) {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "restaurant not found",
-        result: {},
-      });
-    }
-    if (restaurant.status == "Delete") {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "restaurant already deleted",
-        result: {},
-      });
-    }
+    // if (restaurant.status == "Delete") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "restaurant already deleted",
+    //     result: {},
+    //   });
+    // }
     if (restaurant.menu == "") {
       return res.send({
         statusCode: 400,

@@ -1664,3 +1664,123 @@ exports.saveLocation =async(req, res) => {
     }
 
 }
+
+exports.getCurrentlanguage = async (req, res) => {
+  try {
+    let token = req.token;
+    const user = await User.findOne({ _id: token._id });
+    if (!user) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "Unauthorized access",
+        result: {},
+      });
+    }
+    if (user.status == "Delete") {
+      return res.send({
+        statusCode: 403,
+        success: false,
+        message: "User account has been deleted",
+        result: {},
+      });
+    }
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: "Language get successfully",
+      result: {
+        name: user.fullName,
+        email: user.email,
+        language: user.language,
+      },
+    });
+  } catch (error) {
+    return res.send({
+      statusCode: 500,
+      success: false,
+      message: error.message + " Error in get current language api",
+      result: {},
+    });
+  }
+};
+exports.changeUserLanguage = async (req, res) => {
+  try {
+    let token = req.token;
+    let { language } = req.body;
+    if (!language) {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "Language required",
+        result: {},
+      });
+    }
+    // console.log("langghjh",language);
+    if (language !== "en" && language !== "hi") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: 'Invalid language. Please choose either "english" or "hindi" ',
+        result: {},
+      });
+    }
+    const user = await User.findOne({ _id: token._id });
+    if (!user) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "Unauthorized access",
+        result: {},
+      });
+    }
+    if (user.status == "Delete") {
+      return res.send({
+        statusCode: 403,
+        success: false,
+        message: "User account has been deleted",
+        result: {},
+      });
+    }
+    if (user.language == "en" && language == "en" ) {
+      return res.send({
+        statusCode: 400,
+        succes: false,
+        message: "language alrady english",
+        result: {},
+      });
+    }
+    if (user.language == "hi" && language == "hi") {
+      return res.send({
+        statusCode: 400,
+        succes: false,
+        message: "language alrady hindi",
+        result: {},
+      });
+    }
+    user.language = language;
+    await user.save();
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: "Language change successfully",
+      result: {
+        language: user.language,
+      },
+    });
+  } catch (error) {
+    console.log("Error!!", error);
+    return res.send({
+      statusCode: 500,
+      success: false,
+      message: error.message || "Internal server error",
+      result: {},
+    });
+  }
+};
+
+
+
+
+
+

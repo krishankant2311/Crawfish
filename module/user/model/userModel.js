@@ -24,7 +24,9 @@ const userSchema = new mongoose.Schema(
     },
     language:{
       type:String,
-      enum:["Texas","Louisiana"]
+      enum:["English","Spanish","Vietnamese","Chinese","Tagalog","Arabic","French","Korean","Russian","German","Haitian Creole"
+        ,"Portuguese","Cajun French","Bengali","Urdu","Punjabi","Polish","Malay","Isan","Japanese","Filipino","Ilocano","Cebuano","Khmer"],
+        default:"English"
     },
 
     otp: {
