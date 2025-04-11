@@ -2066,7 +2066,7 @@ exports.BlockedUser = async (req, res) => {
 exports.getprofilebyUser = async (req, res) => {
   try {
     let token = req.token;
-    let { userId } = token._id;
+    // let { userId } = token._id;
     // const admin = await Admin.findOne({ _id: token._id });
 
     // if (!admin) {
@@ -2095,7 +2095,9 @@ exports.getprofilebyUser = async (req, res) => {
     //   });
     // }
 
-    const user = await User.findOne({userId});
+    const user = await User.findOne({_id:token._id});
+
+    console.log(User)
     // console.log("sdfniu",user)
     // .select(
     //   "-otp -accessToken -resendOtpDetails -securityPinTryCount -securityPin -securityToken -discountCode -fcmToken -photo -referralCode -notificationTune"
