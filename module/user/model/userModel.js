@@ -54,11 +54,11 @@ const userSchema = new mongoose.Schema(
       enum: ["Active", "Delete", "Block", "Pending"],
       default: "Pending",
     },
-    language: {
-      type: String,
-      enum: ["Hindi", "English"],
-      default: "English",
-    },
+    // language: {
+    //   type: String,
+    //   enum: ["Hindi", "English"],
+    //   default: "English",
+    // },
     AppMode: {
       type: String,
       enum: ["Dark", "Light"],

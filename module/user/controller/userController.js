@@ -201,6 +201,7 @@ const isStrongPassword = (password, newPassword) => {
 //   }
 // };
 
+// Other country mobile validations : validator & phonelibjs
 exports.signup = async (req, res) => {
   try {
     let { email, fullName, number, password } = req.body;
@@ -231,7 +232,7 @@ exports.signup = async (req, res) => {
         message: "fullname required",
         result: {},
       });
-    if (!number){
+    if (!number) {
       return res.send({
         statuscode: 400,
         success: false,
@@ -239,16 +240,16 @@ exports.signup = async (req, res) => {
         result: {},
       });
     }
-    console.log(number.length)
-      if (number.length !== 10) {
-        return res.send({
-          statusCode: 400,
-          success: false,
-          message: "Mobile number must be 10 digits.",
-          result: {},
-        });
-      }
-    if (!password){
+    console.log(number.length);
+    if (number.length !== 10) {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "Mobile number must be 10 digits.",
+        result: {},
+      });
+    }
+    if (!password) {
       return res.send({
         statuscode: 400,
         success: false,
@@ -266,7 +267,9 @@ exports.signup = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({$or:[{email:email},{number:number}] } );
+    const user = await User.findOne({
+      $or: [{ email: email }, { number: number }],
+    });
     const ene_password = bcrypt.hashSync(password, 10);
 
     // ✅ User exists
@@ -341,6 +344,14 @@ exports.signup = async (req, res) => {
           result: { otpValue },
         });
       }
+      if (user.status === "Block") {
+        return res.send({
+          statusCode: 400,
+          success: false,
+          message: "User has been blocked",
+          result: {},
+        });
+      }
       // let message = "User already exists";
       // if (user.status === "Pending")
       //   message = "OTP already sent. Please verify.";
@@ -350,7 +361,7 @@ exports.signup = async (req, res) => {
       return res.send({
         statuscode: 400,
         success: false,
-        message:"user already exist",
+        message: "user already exist",
         result: {},
       });
     }
@@ -437,7 +448,7 @@ exports.verifysignOTP = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email, status: "Pending" });
     if (!user) {
       return res.send({
         statuscode: 400,
@@ -535,7 +546,7 @@ exports.login = async (req, res) => {
       return res.send({
         statusCode: 400,
         success: false,
-        message: " user is deleted",
+        message: " user has been deleted",
         result: {},
       });
     }
@@ -544,6 +555,14 @@ exports.login = async (req, res) => {
         statuscode: 400,
         success: false,
         message: "Please verify OTP",
+        result: {},
+      });
+    }
+    if (user.status === "Block") {
+      return res.send({
+        statuscode: 400,
+        success: false,
+        message: "user has been blocked",
         result: {},
       });
     }
@@ -604,7 +623,7 @@ exports.forgetPassword = async (req, res) => {
         result: {},
       });
     }
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email, status: "Active" });
     if (!user) {
       return res.send({
         statusCode: 400,
@@ -681,7 +700,7 @@ exports.verifyOTP = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email, status: "Active" });
     if (!user) {
       return res.send({
         statuscode: 400,
@@ -1046,7 +1065,7 @@ exports.logout = async (req, res) => {
       });
     }
     if (user) {
-      user.token = " ";
+      user.token = "";
       user.save();
       return res.send({
         statusCode: 200,
@@ -1481,13 +1500,13 @@ exports.deleteUser = async (req, res) => {
   try {
     let token = req.token;
     let { userId } = req.params;
-    if(!userId){
+    if (!userId) {
       return res.send({
-        statusCode:400,
-        success:false,
-        message:"required user id",
-        result:{}
-      })
+        statusCode: 400,
+        success: false,
+        message: "required user id",
+        result: {},
+      });
     }
     let admin = await Admin.findById({ _id: token._id, status: "Active" });
     if (!admin) {
@@ -1603,67 +1622,69 @@ exports.handleStatus = async (req, res) => {
     });
   } catch (error) {}
 };
-exports.saveLocation =async(req, res) => {
-  const {userId} = req.params;
-  const token = req.token
-    const { latitude, longitude } = req.body;
-  
-    if (!latitude || !longitude) {
-      return res.status(400).json({ message: 'Latitude and Longitude are required' });
-    }
-  console.log("cordinates", latitude,longitude)
-    try {
-      const user = await User.findOne({_id:userId}) 
-      if(!user){
-        return res.send({
-          statusCode:404,
-          success:false,
-          message:"user not found",
-          result:{}
-        })
-      }
-      if(user.status === "Delete"){
-        return res.send({
-          statusCode:400,
-          success:false,
-          message:"user has been deleted",
-          result:{}
-        })
-      }
-      if(user.status === "Pending"){
-        return res.send({
-          statusCode:400,
-          success:false,
-          message:"unauthorise access",
-          result:{}
-        })
-      }
-      if(user.status === "Block"){
-        return res.send({
-          statusCode:400,
-          success:false,
-          message:"user has been blocked",
-          result:{}
-        })
-      }
-      user.userlocation.coordinates = [latitude,longitude]
-      await user.save()
-      return res.send({ 
-        statusCode:200,
-        success:true,
-        message: 'Location saved successfully',
-      result:{}
-     });
-    } catch (err) {
-      console.error(err);
-      return res.send({ 
-        statusCode:500,
-        message: 'Server error',
-       success:false,
-      result:{}});
-    }
+exports.saveLocation = async (req, res) => {
+  const { userId } = req.params;
+  const token = req.token;
+  const { latitude, longitude } = req.body;
 
-}
+  if (!latitude || !longitude) {
+    return res
+      .status(400)
+      .json({ message: "Latitude and Longitude are required" });
+  }
+  console.log("cordinates", latitude, longitude);
+  try {
+    const user = await User.findOne({ _id: userId });
+    if (!user) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "user not found",
+        result: {},
+      });
+    }
+    if (user.status === "Delete") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "user has been deleted",
+        result: {},
+      });
+    }
+    if (user.status === "Pending") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "unauthorise access",
+        result: {},
+      });
+    }
+    if (user.status === "Block") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "user has been blocked",
+        result: {},
+      });
+    }
+    user.userlocation.coordinates = [latitude, longitude];
+    await user.save();
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: "Location saved successfully",
+      result: {},
+    });
+  } catch (err) {
+    console.error(err);
+    return res.send({
+      statusCode: 500,
+      message: "Server error",
+      success: false,
+      result: {},
+    });
+  }
+};
 
 exports.getCurrentlanguage = async (req, res) => {
   try {
@@ -1708,6 +1729,11 @@ exports.changeUserLanguage = async (req, res) => {
   try {
     let token = req.token;
     let { language } = req.body;
+    const VALID_LANGUAGES = [
+      "English", "Spanish", "Vietnamese", "Chinese", "Tagalog", "Arabic", "French", "Korean", "Russian",
+      "German", "Haitian Creole", "Portuguese", "Cajun French", "Bengali", "Urdu", "Punjabi", "Polish",
+      "Malay", "Isan", "Japanese", "Filipino", "Ilocano", "Cebuano", "Khmer"
+    ];
     if (!language) {
       return res.send({
         statusCode: 400,
@@ -1717,16 +1743,15 @@ exports.changeUserLanguage = async (req, res) => {
       });
     }
     // console.log("langghjh",language);
-    if (language !== "English" && language !== "Spanish" && language !== "Vietnamese" && language !== "Chinese" && language !== "Tagalog" && language !== "Arabic" && language !== "French" && language !== "Korean" && language !== "Russian"
-      && language !== "Haitian Creole" && language !== "Portuguese" && language !== "Cajun French" && language !== "Bengali" && language !== "Urdu" && language !== "Punjabi" && language !== "Polish" && language !== "Malay" && language !== "Isan" 
-      && language !== "Japanese" && language !== "Filipino" && language !== "Ilocano" && language !== "Cebuano" && language !== "Khmer" ) {
+    if (!VALID_LANGUAGES.includes(language)) {
       return res.send({
         statusCode: 400,
         success: false,
-        message: 'Invalid language. Please choose valid language ',
+        message: "Invalid language. Please choose valid language",
         result: {},
       });
     }
+
     const user = await User.findOne({ _id: token._id });
     if (!user) {
       return res.send({
@@ -1746,205 +1771,215 @@ exports.changeUserLanguage = async (req, res) => {
     }
     // "English","Spanish","Vietnamese","Chinese","Tagalog","Arabic","French","Korean","Russian","German","Haitian Creole"
     //     ,"Portuguese","Cajun French","Bengali","Urdu","Punjabi","Polish","Malay","Isan","Japanese","Filipino","Ilocano","Cebuano","Khmer"
-    if (user.language == "English" && language == "English" ) {
+    // if (user.language == "English" && language == "English") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady english",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Spanish" && language == "Spanish") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Spanish",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Vietnamese" && language == "Vietnamese") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Vietnamese",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Chinese" && language == "Chinese") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Chinese",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Tagalog" && language == "Tagalog") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Tagalog",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Arabic" && language == "Arabic") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Arabic",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "French" && language == "French") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady French",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Korean" && language == "Korean") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Korean",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Russian" && language == "Russian") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Russian",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "German" && language == "German") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady German",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Haitian Creole" && language == "Haitian Creole") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Haitian Creole",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Portuguese" && language == "Portuguese") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Portuguese",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Cajun French" && language == "Cajun French") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Cajun French",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Bengali" && language == "Bengali") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Bengali",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Urdu" && language == "Urdu") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Urdu",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Punjabi" && language == "Punjabi") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Punjabi",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Polish" && language == "Polish") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Polish",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Malay" && language == "Malay") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Malay",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Isan" && language == "Isan") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Isan",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Japanese" && language == "Japanese") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Japanese",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Filipino" && language == "Filipino") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Filipino",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Ilocano" && language == "Ilocano") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Ilocano",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Cebuano" && language == "Cebuano") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Cebuano",
+    //     result: {},
+    //   });
+    // }
+    // if (user.language == "Khmer" && language == "Khmer") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     succes: false,
+    //     message: "language alrady Khmer",
+    //     result: {},
+    //   });
+    // }
+
+    if (user.language === language) {
       return res.send({
         statusCode: 400,
-        succes: false,
-        message: "language alrady english",
+        success: false,
+        message: `Language already set to ${language}`,
         result: {},
       });
     }
-    if (user.language == "Spanish" && language == "Spanish") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Spanish",
-        result: {},
-      });
-    }
-    if (user.language == "Vietnamese" && language == "Vietnamese") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Vietnamese",
-        result: {},
-      });
-    }
-    if (user.language == "Chinese" && language == "Chinese") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Chinese",
-        result: {},
-      });
-    }
-    if (user.language == "Tagalog" && language == "Tagalog") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Tagalog",
-        result: {},
-      });
-    }
-    if (user.language == "Arabic" && language == "Arabic") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Arabic",
-        result: {},
-      });
-    }
-    if (user.language == "French" && language == "French") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady French",
-        result: {},
-      });
-    }
-    if (user.language == "Korean" && language == "Korean") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Korean",
-        result: {},
-      });
-    }
-    if (user.language == "Russian" && language == "Russian") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Russian",
-        result: {},
-      });
-    }
-    if (user.language == "German" && language == "German") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady German",
-        result: {},
-      });
-    }
-    if (user.language == "Haitian Creole" && language == "Haitian Creole") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Haitian Creole",
-        result: {},
-      });
-    }
-    if (user.language == "Portuguese" && language == "Portuguese") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Portuguese",
-        result: {},
-      });
-    }
-    if (user.language == "Cajun French" && language == "Cajun French") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Cajun French",
-        result: {},
-      });
-    }
-    if (user.language == "Bengali" && language == "Bengali") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Bengali",
-        result: {},
-      });
-    }
-    if (user.language == "Urdu" && language == "Urdu") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Urdu",
-        result: {},
-      });
-    }
-    if (user.language == "Punjabi" && language == "Punjabi") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Punjabi",
-        result: {},
-      });
-    }
-    if (user.language == "Polish" && language == "Polish") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Polish",
-        result: {},
-      });
-    }
-    if (user.language == "Malay" && language == "Malay") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Malay",
-        result: {},
-      });
-    }
-    if (user.language == "Isan" && language == "Isan") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Isan",
-        result: {},
-      });
-    }
-    if (user.language == "Japanese" && language == "Japanese") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Japanese",
-        result: {},
-      });
-    }
-    if (user.language == "Filipino" && language == "Filipino") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Filipino",
-        result: {},
-      });
-    }
-    if (user.language == "Ilocano" && language == "Ilocano") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Ilocano",
-        result: {},
-      });
-    }
-    if (user.language == "Cebuano" && language == "Cebuano") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Cebuano",
-        result: {},
-      });
-    }
-    if (user.language == "Khmer" && language == "Khmer") {
-      return res.send({
-        statusCode: 400,
-        succes: false,
-        message: "language alrady Khmer",
-        result: {},
-      });
-    }
- 
+
     user.language = language;
     await user.save();
+
     return res.send({
       statusCode: 200,
       success: true,
-      message: "Language change successfully",
+      message: "Language changed successfully",
       result: {
         language: user.language,
       },
@@ -1960,7 +1995,6 @@ exports.changeUserLanguage = async (req, res) => {
   }
 };
 
-
 exports.getUserDashboard = async (req, res) => {
   try {
     let token = req.token;
@@ -1974,7 +2008,7 @@ exports.getUserDashboard = async (req, res) => {
       });
     }
     let totalUsers = await User.countDocuments();
-    let activeUsers = await User.countDocuments({status:"Active"});
+    let activeUsers = await User.countDocuments({ status: "Active" });
     let newSignUp = await User.countDocuments({}).sort({ createdAt: -1 });
     let totalRestaurant = await Restaurant.countDocuments({});
     return res.send({
@@ -1996,7 +2030,7 @@ exports.getUserDashboard = async (req, res) => {
       result: {},
     });
   }
-}
+};
 
 exports.BlockedUser = async (req, res) => {
   try {
@@ -2061,7 +2095,7 @@ exports.BlockedUser = async (req, res) => {
       message: error.message + " ERROR in Block user API",
     });
   }
-}
+};
 
 exports.getprofilebyUser = async (req, res) => {
   try {
@@ -2095,9 +2129,9 @@ exports.getprofilebyUser = async (req, res) => {
     //   });
     // }
 
-    const user = await User.findOne({_id:token._id});
+    const user = await User.findOne({ _id: token._id });
 
-    console.log(User)
+    console.log(User);
     // console.log("sdfniu",user)
     // .select(
     //   "-otp -accessToken -resendOtpDetails -securityPinTryCount -securityPin -securityToken -discountCode -fcmToken -photo -referralCode -notificationTune"
@@ -2158,7 +2192,3 @@ exports.getprofilebyUser = async (req, res) => {
     });
   }
 };
-
-
-
-
