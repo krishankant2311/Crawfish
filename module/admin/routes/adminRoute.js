@@ -16,6 +16,7 @@ route.get('/get-subadmin/:_id',verifyJWT, upload.none(),adminController.getSubAd
 route.get('/get-all-subadmin',verifyJWT, upload.none(),adminController.getAllSubAdmin)
 route.post('/delete-SubAdmin/:adminId',verifyJWT, upload.none(),adminController.deleteSubAdmin)
 route.post('/edit-SubAdmin',verifyJWT, upload.none(),adminController.editSubAdmin)
+route.get('/get-dashboard-piechart',verifyJWT, upload.none(),adminController.getDashboardPiechart)
 
 
 

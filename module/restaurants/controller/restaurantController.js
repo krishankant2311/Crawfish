@@ -1681,6 +1681,45 @@ exports.getAllActiverestaurant = async (req, res) => {
   }
 };
 
+exports.getAllRestaurantbyAdmin = async (req, res) => {
+  try {
+    let token = req.token;
+    let { page = 1, limit = 10 } = req.query;
+    page = Number.parseInt(page);
+    limit = Number.parseInt(limit);
+    const skip = (page - 1) * limit;
+    // const user = await User.findOne({_id: token._id, status: "Active"})
+    const admin = await Admin.findOne({ _id: token._id, status: "Active" });
+    if (!admin) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "Unauthorized access",
+        result: {},
+      });
+    }
+    const allRestaurant = await Restaurant.find().skip(skip).limit(limit);
+    const totalRestaurant = await Restaurant.countDocuments();
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: "All Restaurant get successfully",
+      result: {
+        Restaurant: allRestaurant,
+        currentPage: page,
+        totalPage: Math.ceil(totalRestaurant / limit),
+        totalRecord: totalRestaurant,
+      },
+    });
+  } catch (error) {
+    return res.send({
+      statusCode: 500,
+      success: false,
+      message: error.message + " ERROR in get all restaurant api",
+    });
+  }
+};
+
 exports.getAllRestaurant = async(req,res) => {
   try {
     let token = req.token;
@@ -1794,71 +1833,291 @@ exports.topRatedRestaurant = async(req,res) => {
   }
 }
 
-exports.editRestaurantbyAdmin = async (req,res) => {
+// exports.editRestaurantbyAdmin = async (req,res) => {
+//   try {
+//     let token = req.token;
+//     const {resId} = req.params
+//     const {operationalHours, status, isVerified} = req.body;
+//     let admin = await Admin.findById({_id:token._id, status:"Active"});
+    
+//     if(!admin){
+//       return res.send({
+//         statusCode:404,
+//         success:false,
+//         message:"admin not found",
+//         result:{}
+//       })
+//     }if(admin.status === "Delete"){
+//       return res.send({
+//         statusCode:400,
+//         succes:false,
+//         message:"unauthorise access",
+//         result:{}
+//       })
+//     }
+
+//     const restaurant = await Restaurant.findById({_id:resId})
+//     if(!restaurant){
+//       return res.send({
+//         statusCode:404,
+//         success:false,
+//         message:"restaurant not found",
+//         result:{}
+//       })
+//     }
+//     if(restaurant.status === "Delete"){
+//       return res.send({
+//         statusCode:400,
+//         success:false,
+//         message:"restaurant has been deleted",
+//         result:{}
+//       })
+//     }
+//     if(restaurant.status === "Block"){
+//       return res.send({
+//         statusCode:400,
+//         success:false,
+//         message:"Restaurant Inactive",
+//         result:{}
+//       })
+//     }
+//     restaurant.operationalHours = operationalHours;
+//     restaurant.status = status;
+//     restaurant.isVerified = isVerified;
+
+//     restaurant.save();
+//     return res.send({
+//       statuscode:200,
+//       success:true,
+//       message:"restaurant updated successfully",
+//       result:{}
+//     })
+//   } catch (error) {
+//     return res.send({
+//       statuscode:500,
+//       success:false,
+//       message:"ERROR in edit restaurant by admin api " + error.message,
+//       result:{}
+//     })
+//   }
+// }
+
+exports.editRestaurantbyAdmin = async (req, res) => {
   try {
     let token = req.token;
-    const {resId} = req.params
-    const {operationalHours, status, isVerified} = req.body;
-    let admin = await Admin.findById({_id:token._id, status:"Active"});
-    
-    if(!admin){
+    const { resId } = req.params;
+    const { status, isVerified } = req.body;
+    let admin = await Admin.findById({ _id: token._id});
+    if (!admin) {
       return res.send({
-        statusCode:404,
-        success:false,
-        message:"admin not found",
-        result:{}
-      })
-    }if(admin.status === "Delete"){
-      return res.send({
-        statusCode:400,
-        succes:false,
-        message:"unauthorise access",
-        result:{}
-      })
+        statusCode: 404,
+        success: false,
+        message: "admin not found",
+        result: {},
+      });
     }
-
-    const restaurant = await Restaurant.findById({_id:resId})
-    if(!restaurant){
+    if (admin.status === "Delete") {
       return res.send({
-        statusCode:404,
-        success:false,
-        message:"restaurant not found",
-        result:{}
-      })
+        statusCode: 400,
+        succes: false,
+        message: "admin is deleted",
+        result: {},
+      });
     }
-    if(restaurant.status === "Delete"){
+    if (admin.status === "Block") {
       return res.send({
-        statusCode:400,
-        success:false,
-        message:"restaurant has been deleted",
-        result:{}
-      })
+        statusCode: 400,
+        succes: false,
+        message: "admin is blocked",
+        result: {},
+      });
     }
-    if(restaurant.status === "Block"){
+    const restaurant = await Restaurant.findById({ _id: resId });
+    if (!restaurant) {
       return res.send({
-        statusCode:400,
-        success:false,
-        message:"Restaurant Inactive",
-        result:{}
-      })
+        statusCode: 404,
+        success: false,
+        message: "restaurant not found",
+        result: {},
+      });
     }
-    restaurant.operationalHours = operationalHours;
+    // if (restaurant.status === "Delete") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "restaurant has been deleted",
+    //     result: {},
+    //   });
+    // }
+    // if (restaurant.status === "Block") {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "Restaurant Inactive",
+    //     result: {},
+    //   });
+    // }
+    // restaurant.operationalHours = operationalHours;
     restaurant.status = status;
     restaurant.isVerified = isVerified;
-
     restaurant.save();
     return res.send({
-      statuscode:200,
-      success:true,
-      message:"restaurant updated successfully",
-      result:{}
-    })
+      statuscode: 200,
+      success: true,
+      message: "restaurant updated successfully",
+      result: {},
+    });
   } catch (error) {
     return res.send({
-      statuscode:500,
-      success:false,
-      message:"ERROR in edit restaurant by admin api " + error.message,
-      result:{}
-    })
+      statuscode: 500,
+      success: false,
+      message: "ERROR in edit restaurant by admin api " + error.message,
+      result: {},
+    });
+  }
+};
+
+
+exports.BlockedRestaurant = async (req, res) => {
+  try {
+    let token = req.token;
+    let { resId } = req.params;
+    const admin = await Admin.findOne({ _id: token._id });
+    // const restaurant = await Restaurant.findOne({ _id: token._id });
+    // console.log("admin : " + admin,"restaurant :" + restaurant);
+    if (!admin) {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "admin not found",
+        result: {},
+      });
+    }
+    if (admin.status == "Delete") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "admin already deleted",
+        result: {},
+      });
+    }
+    if (admin.status == "Block") {
+      return res.send({
+        statuscode: 400,
+        success: false,
+        message: "admin inactive",
+        result: {},
+      });
+    }
+    const restaurant = await Restaurant.findOne({ _id: resId });
+    if (!restaurant) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "restaurant not found",
+        result: {},
+      });
+    }
+    if (restaurant.status == "Block") {
+      return res.send({
+        statuscode: 400,
+        success: false,
+        message: "Restaurant already Blocked",
+        result: {},
+      });
+    }
+    restaurant.status = "Block";
+    await restaurant.save();
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: "Restaurant Blocked successfully",
+      result: {},
+    });
+  } catch (error) {
+    return res.send({
+      statusCode: 500,
+      success: false,
+      message: error.message + " ERROR in Block restaurant API",
+    });
   }
 }
+
+
+exports.getRestaurantDashboard = async (req, res) => {
+  try {
+    const token = req.token;
+    const admin = await Admin.findById({ _id: token._id, status: "Active" });
+    if (!admin) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "admin not found",
+        result: {},
+      });
+    }
+    // Get range from query param (today | week | month)
+    const range = req.query.range || "month";
+    // Date filter logic
+    let dateFilter = {};
+    const now = new Date();
+    if (range === "today") {
+      const start = new Date(now.setHours(0, 0, 0, 0));
+      const end = new Date(now.setHours(23, 59, 59, 999));
+      dateFilter.createdAt = { $gte: start, $lte: end };
+    } else if (range === "week") {
+      const start = new Date(now);
+      start.setDate(start.getDate() - 7);
+      dateFilter.createdAt = { $gte: start };
+    } else if (range === "month") {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      dateFilter.createdAt = { $gte: start };
+    }else if (range === "custom") {
+      const startDate = new Date(req.query.startDate);
+      const endDate = new Date(req.query.endDate);
+      endDate.setHours(23, 59, 59, 999); // include full day
+      if (!isNaN(startDate) && !isNaN(endDate)) {
+        dateFilter.createdAt = { $gte: startDate, $lte: endDate };
+      }
+    }
+    // Filtered stats
+    const verified = await Restaurant.countDocuments({
+      isVerified: true,
+      ...dateFilter,
+    });
+    const unverified = await Restaurant.countDocuments({
+      isVerified: false,
+      ...dateFilter,
+    });
+    const totalRestaurant = await Restaurant.countDocuments(dateFilter);
+    // const countryList = await Restaurant.distinct("country", {
+    //   country: { $ne: "" },
+    //   ...dateFilter,
+    // });
+    // const totalCountries = countryList.length;
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: "restaurant dashboard fetch successfully",
+      result: {
+        range,
+        verified,
+        unverified,
+        totalRestaurant,
+        // totalCountries,
+        // countryList,
+      },
+    });
+  } catch (error) {
+    return res.send({
+      statusCode: 500,
+      success: false,
+      message: error.message + " ERROR in get restaurant dashboard api",
+      result: {},
+    });
+  }
+};
+
+
+
+

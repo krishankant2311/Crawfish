@@ -8,6 +8,8 @@ const genrateOTP = require("../../../helpers/genrateOTP");
 const sendEmail = require("../../../mail/mailSender");
 const emailVerification = require("../../../templates/emailVerification");
 const forgototpTemplate = require("../../../templates/forgotpasswordmail")
+const User = require("../../user/model/userModel")
+const Restaurant = require("../../restaurants/model/restaurantModel")
 
 const isEmailvalid = (email) => {
   return validator.isEmail(email);
@@ -907,6 +909,66 @@ exports.editSubAdmin = async (req, res) => {
   }
 }
 
+exports.getDashboardPiechart = async (req, res) => {
+  try {
+    const token = req.token;
+    const admin = await Admin.findById({ _id: token._id, status: "Active" });
+    if (!admin) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "admin not found",
+        result: {},
+      });
+    }
+    // Get range from query param (today | week | month)
+    const range = req.query.range || "month";
+    // Date filter logic
+    let dateFilter = {};
+    const now = new Date();
+    if (range === "week") {
+      const start = new Date(now);
+      start.setDate(start.getDate() - 7);
+      dateFilter.createdAt = { $gte: start };
+    } else if (range === "month") {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      dateFilter.createdAt = { $gte: start };
+    } else if (range === "custom") {
+      const startDate = new Date(req.query.startDate);
+      const endDate = new Date(req.query.endDate);
+      endDate.setHours(23, 59, 59, 999); // include full day
+      if (!isNaN(startDate) && !isNaN(endDate)) {
+        dateFilter.createdAt = { $gte: startDate, $lte: endDate };
+      }
+    }
+    // Filtered stats
+    const totalActiveUsers = await User.countDocuments({
+      status: "Active",
+      ...dateFilter,
+    });
+    const totalActiveRestaurant = await Restaurant.countDocuments({
+      status: "Active",
+      ...dateFilter,
+    });
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: " dashboard  pie chart data fetch successfully",
+      result: {
+        range,
+        totalActiveUsers,
+        totalActiveRestaurant
+      },
+    });
+  } catch (error) {
+    return res.send({
+      statusCode: 500,
+      success: false,
+      message: error.message + " ERROR in get dashboard pie chart api",
+      result: {},
+    });
+  }
+};
 
 
 

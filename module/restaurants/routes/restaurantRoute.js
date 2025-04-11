@@ -27,8 +27,16 @@ route.post('/delete-menu/:resId',verifyJWT,restaurantController.deleteMenu)
 route.post("/logout",verifyJWT,upload.none(),restaurantController.logout)
 route.post("/edit-restaurantByadmin/:resId",verifyJWT,upload.none(),restaurantController.editRestaurantbyAdmin)
 route.get('/getall-restaurant',verifyJWT,upload.none(),restaurantController.getAllActiverestaurant)
-route.get('/getall-restaurants',verifyJWT,upload.none(),restaurantController.getAllRestaurant)
+route.get('/getall-restaurantsbyAdmin',verifyJWT,upload.none(),restaurantController.getAllRestaurantbyAdmin)
 route.get("/top-rated-restaurant",verifyJWT,upload.none(),restaurantController.topRatedRestaurant)
+route.post("/block-restaurant/:resId",verifyJWT,upload.none(),restaurantController.BlockedRestaurant)
+route.get("/get-restaurant-dashboard",verifyJWT,upload.none(),restaurantController.getRestaurantDashboard)
+
+
+
+
+
+
 
 
 
