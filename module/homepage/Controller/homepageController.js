@@ -219,33 +219,112 @@ exports.getNearbyRestaurants = async (req, res) => {
 
 // const puppeteer = require('puppeteer');
 
+// const scrapeRestaurants = async (latitude, longitude) => {
+//   const browser = await puppeteer.launch({
+//     headless: true,
+//     args: ['--no-sandbox', '--disable-setuid-sandbox']
+//   });
+//   const page = await browser.newPage();
+//   await page.setUserAgent(
+//     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
+//   );
+//   const searchUrl = `https://www.google.com/maps/search/restaurants/@${latitude},${longitude},15z`;
+//   await page.goto(searchUrl, { waitUntil: 'networkidle2' });
+//   // Scroll to load more
+//   await autoScroll(page);
+//   const restaurants = await page.evaluate(() => {
+//     const data = [];
+//     const cards = document.querySelectorAll('.Nv2PK'); // Each restaurant card
+//     cards.forEach(card => {
+//       const name = card.querySelector('.qBF1Pd')?.innerText || null;
+//       const ratingText = card.querySelector('.MW4etd')?.innerText || null;
+//       const rating = ratingText ? parseFloat(ratingText) : null;
+//       // const address = card.querySelector('.rllt__details span')?.innerText || null;
+//       const image = card.querySelector('img')?.src || null;
+//       const lines = card.innerText.split('\n');
+//       let address = null;
+//       for (let i = 0; i < lines.length; i++) {
+//         const line = lines[i];
+//         // Match street/sector/market or 6-digit PIN or typical address
+//         if (
+//           /Street|Road|Sector|Block|Market|Nagar|Colony|Place|Chowk|Vihar/i.test(line) ||
+//           /\d{6}/.test(line)
+//         ) {
+//           address = line;
+//           break;
+//         }
+//       }
+//       if (name) {
+//         data.push({ name, rating, address, image });
+//       }
+//     });
+//     return data;
+//   });
+//   await browser.close();
+//   // Filter Logic
+//   const filtered = restaurants.filter(r => r.rating && r.rating >= 4.0);
+//   const topRated = [...filtered].sort((a, b) => b.rating - a.rating).slice(0, 5);
+//   const featured = restaurants.slice(0, 5);
+//   const nearby = restaurants.slice(0, 10);
+//   return { featured, topRated, nearby };
+// };
+// async function autoScroll(page) {
+//   await page.evaluate(async () => {
+//     await new Promise(resolve => {
+//       let totalHeight = 0;
+//       const distance = 100;
+//       const timer = setInterval(() => {
+//         const scrollHeight = document.body.scrollHeight;
+//         window.scrollBy(0, distance);
+//         totalHeight += distance;
+//         if (totalHeight >= scrollHeight) {
+//           clearInterval(timer);
+//           resolve();
+//         }
+//       }, 200);
+//     });
+//   });
+// }
+
+
+
+
+// const puppeteer = require('puppeteer');
+
+// const puppeteer = require('puppeteer');
+
 const scrapeRestaurants = async (latitude, longitude) => {
   const browser = await puppeteer.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
+
   const page = await browser.newPage();
   await page.setUserAgent(
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
   );
+
   const searchUrl = `https://www.google.com/maps/search/restaurants/@${latitude},${longitude},15z`;
   await page.goto(searchUrl, { waitUntil: 'networkidle2' });
-  // Scroll to load more
+
   await autoScroll(page);
+
+  // Manual delay instead of page.waitForTimeout
+  await new Promise(resolve => setTimeout(resolve, 2000));
+
   const restaurants = await page.evaluate(() => {
     const data = [];
-    const cards = document.querySelectorAll('.Nv2PK'); // Each restaurant card
+    const cards = document.querySelectorAll('.Nv2PK');
     cards.forEach(card => {
       const name = card.querySelector('.qBF1Pd')?.innerText || null;
       const ratingText = card.querySelector('.MW4etd')?.innerText || null;
       const rating = ratingText ? parseFloat(ratingText) : null;
-      // const address = card.querySelector('.rllt__details span')?.innerText || null;
       const image = card.querySelector('img')?.src || null;
+
       const lines = card.innerText.split('\n');
       let address = null;
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        // Match street/sector/market or 6-digit PIN or typical address
         if (
           /Street|Road|Sector|Block|Market|Nagar|Colony|Place|Chowk|Vihar/i.test(line) ||
           /\d{6}/.test(line)
@@ -254,30 +333,35 @@ const scrapeRestaurants = async (latitude, longitude) => {
           break;
         }
       }
+
       if (name) {
         data.push({ name, rating, address, image });
       }
     });
     return data;
   });
+
   await browser.close();
-  // Filter Logic
-  const filtered = restaurants.filter(r => r.rating && r.rating >= 4.0);
-  const topRated = [...filtered].sort((a, b) => b.rating - a.rating).slice(0, 5);
+
   const featured = restaurants.slice(0, 5);
+  const topRated = [...restaurants]
+    .filter(r => r.rating)
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 5);
   const nearby = restaurants.slice(0, 10);
+
   return { featured, topRated, nearby };
 };
+
 async function autoScroll(page) {
   await page.evaluate(async () => {
     await new Promise(resolve => {
       let totalHeight = 0;
-      const distance = 100;
+      const distance = 300;
       const timer = setInterval(() => {
-        const scrollHeight = document.body.scrollHeight;
         window.scrollBy(0, distance);
         totalHeight += distance;
-        if (totalHeight >= scrollHeight) {
+        if (totalHeight >= 3000) {
           clearInterval(timer);
           resolve();
         }
@@ -285,6 +369,12 @@ async function autoScroll(page) {
     });
   });
 }
+
+
+
+
+
+
 // module.exports = scrapeRestaurants;
 
 

@@ -2180,6 +2180,7 @@ exports.getprofilebyUser = async (req, res) => {
           email: user.email || "N/A",
           status: user.status || "N/A",
           profilePhoto: user.profilePhoto || "N/A",
+          number:user.number
         },
       },
     });

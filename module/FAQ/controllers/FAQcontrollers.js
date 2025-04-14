@@ -2,6 +2,7 @@ const FAQ = require("../model/FAQmodel");
 const Admin = require("../../admin/model/adminModel");
 const { verify } = require("jsonwebtoken");
 const { verifyJWT } = require("../../../middlewares/jwt");
+const User = require("../../user/model/userModel")
 
 exports.createFAQ = async (req, res) => {
   try {
@@ -414,6 +415,66 @@ exports.getAllFAQ = async (req, res) => {
     //     });
     //   }
     if (admin.status === "Delete") {
+      return res.send({
+        statusCode: 403,
+        success: false,
+        message: "Your account has been deleted",
+        result: {},
+      });
+    }
+    const allFAQ = await FAQ.find({ status: "Active" }).skip(skip).limit(limit);
+
+    const totalFAQ = await FAQ.countDocuments({ status: "Active" });
+
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: "All FAQ get successfully",
+      result: {
+        FAQ: allFAQ,
+        currentPage: page,
+        totalPage: Math.ceil(totalFAQ / limit),
+        totalRecord: totalFAQ,
+      },
+    });
+  } catch (error) {
+    console.log("Error!!", error);
+    return res.send({
+      statusCode: 500,
+      success: false,
+      message: error.message + "ERROR in get all faq api",
+      result: error,
+    });
+  }
+};
+
+exports.getAllFAQByUser = async (req, res) => {
+  try {
+    let token = req.token;
+    let { page = 1, limit = 10 } = req.query;
+    page = Number.parseInt(page);
+    limit = Number.parseInt(limit);
+    const skip = (page - 1) * limit;
+
+    const user = await User.findOne({ _id: token._id, status: "Active" });
+    if (!user) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "Unauthorized access",
+        result: {},
+      });
+    }
+    //   const user = await User.findOne({ _id: token._id, status: "Active" });
+    //   if (!(user || admin)) {
+    //     return res.send({
+    //       statusCode: 404,
+    //       success: false,
+    //       message: "Unauthorized access",
+    //       result: {},
+    //     });
+    //   }
+    if (user.status === "Delete") {
       return res.send({
         statusCode: 403,
         success: false,
