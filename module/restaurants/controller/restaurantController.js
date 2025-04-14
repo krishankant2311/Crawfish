@@ -1479,17 +1479,17 @@ exports.getMenu = async (req, res) => {
 exports.deleteMenu = async (req, res) => {
   try {
     let token = req.token;
-    let { resId } = req.params;
-    if (!resId) {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "address id required",
-        result: {},
-      });
-    }
+    // let { resId } = req.params;
+    // if (!resId) {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "address id required",
+    //     result: {},
+    //   });
+    // }
 
-    const admin = await Admin.findOne({ _id: token._id,status:"Active" });
+    // const admin = await Admin.findOne({ _id: token._id,status:"Active" });
     // if (!admin) {
     //   return res.send({
     //     statusCode: 400,
@@ -1524,25 +1524,25 @@ exports.deleteMenu = async (req, res) => {
     // }
 
 
-    const restaurant = await Restaurant.findOne({ _id: token._id, status:"Active"});
+    const restaurant = await Restaurant.findOne({ _id:token._id, status:"Active"});
 
     // console.log(restaurant,admin)
-    if (!(restaurant || admin)) {
+    if (!(restaurant )) {
       return res.send({
         statusCode: 400,
         success: false,
-        message: "unauthorise access",
+        message: "restaurant not found",
         result: {},
       });
     }
-    // if (restaurant.status == "Delete") {
-    //   return res.send({
-    //     statusCode: 400,
-    //     success: false,
-    //     message: "restaurant already deleted",
-    //     result: {},
-    //   });
-    // }
+    if (restaurant.status == "Delete") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "restaurant has been deleted",
+        result: {},
+      });
+    }
     if (restaurant.menu == "") {
       return res.send({
         statusCode: 400,

@@ -23,7 +23,7 @@ route.post('/change-password',verifyJWT,upload.none(),restaurantController.chang
 route.post('/restaurant-profile',verifyJWT,upload.none(),restaurantController.restaurantProfile)
 route.post('/upload-menu',verifyJWT,restaurantController.uploadMenu)
 route.get('/get-menu/:resId',verifyJWT,restaurantController.getMenu)
-route.post('/delete-menu/:resId',verifyJWT,restaurantController.deleteMenu)
+route.post('/delete-menu',verifyJWT,restaurantController.deleteMenu)
 route.post("/logout",verifyJWT,upload.none(),restaurantController.logout)
 route.post("/edit-restaurantByadmin/:resId",verifyJWT,upload.none(),restaurantController.editRestaurantbyAdmin)
 route.get('/getall-restaurant',verifyJWT,upload.none(),restaurantController.getAllActiverestaurant)
