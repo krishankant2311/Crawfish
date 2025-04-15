@@ -678,17 +678,12 @@ exports.sendOTPbyNumber = async (req,res) => {
     const user = await User.findOne({number:number})
     if(user){
       if(user.status === "Delete"){
-        const { otpValue, otpExpiry } = generateOTP();
-
-        user.otp = {
-          otpValue: otpValue,
-          otpExpiry: otpExpiry,
-        };
+        
         return res.send({
           statusCode:200,
-          message:"OTP send successfuly on your mobile number",
+          message:"user has been deleted",
           success:true,
-          result:{otpValue}
+          result:{}
         })
       }
       if(user.status === "Pending"){
