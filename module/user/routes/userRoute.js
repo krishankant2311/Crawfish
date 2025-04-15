@@ -30,6 +30,7 @@ route.post("/change-language",verifyJWT,upload.none(),userController.changeUserL
 route.get("/get-user-dashboard",verifyJWT,upload.none(),userController.getUserDashboard);
 route.post("/blocked-user/:userId",verifyJWT,upload.none(),userController.BlockedUser);
 route.post("/sendOtp-byNumber",upload.none(),userController.sendOTPbyNumber);
+route.post("/sendOtp-byNumber-for-fogottPassword",upload.none(),userController.sendOTPbyNumber);
 
 
 // const users = await User.find({status : "Active"}).sort({"createdAt" : -1}).skip(skip).limit(limit)

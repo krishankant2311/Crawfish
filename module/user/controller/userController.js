@@ -741,6 +741,74 @@ exports.sendOTPbyNumber = async (req,res) => {
     })
   }
 }
+exports.sendOTPbyNumberforForgotPassword = async (req,res) => {
+  try {
+    let {number} =req.body;
+    if(!number){
+      return res.send({
+        statuscode: 400,
+        success: false,
+        message: "Phone number required",
+        result: {},
+      });
+    }
+
+    const user = await User.findOne({number:number})
+    if(!user){
+      return res.send({
+        statusCode:404,
+        success:false,
+        message:"User not found",
+        result:{}
+      })
+    }
+      if(user.status === "Delete"){ 
+        return res.send({
+          statusCode:400,
+          message:"user has been deleted",
+          success:false,
+          result:{}
+        })
+      }
+      if(user.status === "Pending"){
+        return res.send({
+          statusCode:200,
+          message:"unauthorise access",
+          success:false,
+          result:{}
+        })
+      }
+      if(user.status === "Block"){
+        return res.send({
+          statusCode:400,
+          success:false,
+          message:"Blocked user",
+          result:{}
+        })
+      }
+      const { otpValue, otpExpiry } = generateOTP();
+
+        user.otp = {
+          otpValue: otpValue,
+          otpExpiry: otpExpiry,
+        };
+        return res.send({
+          statusCode:200,
+          message:"OTP send successfuly on your mobile number",
+          success:true,
+          result:{otpValue}
+        })
+    
+   
+  } catch (error) {
+    return res.send({
+      statusCode:500,
+      success:false,
+      message:error.message + "ERROR in send otp by number",
+      result:{}
+    })
+  }
+}
 exports.verifyOTP = async (req, res) => {
   try {
     let { email, otp } = req.body;
