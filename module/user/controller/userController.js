@@ -662,6 +662,85 @@ exports.forgetPassword = async (req, res) => {
     });
   }
 };
+
+exports.sendOTPbyNumber = async (req,res) => {
+  try {
+    let {number} =req.body;
+    if(!number){
+      return res.send({
+        statuscode: 400,
+        success: false,
+        message: "Phone number required",
+        result: {},
+      });
+    }
+
+    const user = await User.findOne({number:number})
+    if(user){
+      if(user.status === "Delete"){
+        const { otpValue, otpExpiry } = generateOTP();
+
+        user.otp = {
+          otpValue: otpValue,
+          otpExpiry: otpExpiry,
+        };
+        return res.send({
+          statusCode:200,
+          message:"OTP send successfuly on your mobile number",
+          success:true,
+          result:{otpValue}
+        })
+      }
+      if(user.status === "Pending"){
+        const { otpValue, otpExpiry } = generateOTP();
+
+        user.otp = {
+          otpValue: otpValue,
+          otpExpiry: otpExpiry,
+        };
+        return res.send({
+          statusCode:200,
+          message:"OTP send successfuly on your mobile number",
+          success:true,
+          result:{otpValue}
+        })
+      }
+      if(user.status === "Block"){
+        return res.send({
+          statusCode:400,
+          success:false,
+          message:"Blocked user",
+          result:{}
+        })
+      }
+      const { otpValue, otpExpiry } = generateOTP();
+
+        user.otp = {
+          otpValue: otpValue,
+          otpExpiry: otpExpiry,
+        };
+        return res.send({
+          statusCode:200,
+          message:"OTP send successfuly on your mobile number",
+          success:true,
+          result:{otpValue}
+        })
+    }
+    return res.send({
+      statusCode:404,
+      success:false,
+      message:"user not found",
+      result:{}
+    })
+  } catch (error) {
+    return res.send({
+      statusCode:500,
+      success:false,
+      message:error.message + "ERROR in send otp by number",
+      result:{}
+    })
+  }
+}
 exports.verifyOTP = async (req, res) => {
   try {
     let { email, otp } = req.body;

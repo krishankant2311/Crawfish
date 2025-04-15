@@ -29,6 +29,7 @@ route.get("/get-language",verifyJWT,upload.none(),userController.getCurrentlangu
 route.post("/change-language",verifyJWT,upload.none(),userController.changeUserLanguage)
 route.get("/get-user-dashboard",verifyJWT,upload.none(),userController.getUserDashboard);
 route.post("/blocked-user/:userId",verifyJWT,upload.none(),userController.BlockedUser);
+route.post("/sendOtp-byNumber",upload.none(),userController.sendOTPbyNumber);
 
 
 // const users = await User.find({status : "Active"}).sort({"createdAt" : -1}).skip(skip).limit(limit)
