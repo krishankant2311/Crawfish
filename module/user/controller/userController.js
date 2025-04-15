@@ -2335,3 +2335,68 @@ exports.getprofilebyUser = async (req, res) => {
     });
   }
 };
+
+exports.appMode = async(req,res) => {
+  try {
+    let token = req.token;
+  let {AppMode} = req.body;
+    if(!AppMode){
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"Required AppMode",
+        result:{}     
+      })
+    }
+
+    const user = await User.findOne({_id:token._id})
+    if(!user){
+      return res.send({
+        statusCode:404,
+        success:false,
+        message:"User not found",
+        result:{}
+      })
+    }
+    if(user.status==="Delete"){
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"User has been deleted",
+        result:{}
+      })
+    }
+    if(user.status==="Pending"){
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"Unauthorise user",
+        result:{}
+      })
+    }
+    if(user.status==="Block"){
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"User has been Blocked",
+        result:{}
+      })
+    }
+
+    user.AppMode =AppMode;
+    await user.save();
+    return res.send({
+      statusCode:200,
+      success:true,
+      message:"AppMode change successfully",
+      result:{}
+    })
+  } catch (error) {
+    return res.send({
+      statusCode:500,
+      success:false,
+      message:error.message + "ERROR in app mode api",
+      result:{}
+    })
+  }
+}
