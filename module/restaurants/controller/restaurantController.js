@@ -2118,6 +2118,84 @@ exports.getRestaurantDashboard = async (req, res) => {
   }
 };
 
+// const Restaurant = require("../models/Restaurant");
+const scrapeGoogleRestaurants = require("../../../scrapping/scrappingGoogleMap"); // You’ll create this
+
+exports.getNearbyRestaurants = async (req, res) => {
+  const { lat, lng } = req.query;
+
+  if (!lat || !lng) return res.status(400).json({ message: "lat and lng required" });
+
+  const coords = [parseFloat(lng), parseFloat(lat)];
+  const oneDayAgo = new Date(Date.now() - 1000 * 60 * 60 * 24);
+
+  console.log("COORDS", coords, oneDayAgo);
+
+  // // Check existing scraped data
+  // const existingRestaurants = await Restaurant.find({
+  //   location: {
+  //     $nearSphere: {
+  //       $geometry: { type: "Point", coordinates: coords },
+  //       $maxDistance: 3000, // 3 km radius
+  //     },
+  //   },
+  //   isScraped: true,
+  //   updatedAt: { $gte: oneDayAgo },
+  // });
+
+  const existingRestaurants = await Restaurant.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: "Point",
+          coordinates: coords, // Ensure coords is [longitude, latitude]
+        },
+        distanceField: "distance",
+        maxDistance: 3000, // 3 km radius
+        spherical: true,
+        query: {
+          isScraped: true,
+          updatedAt: { $gte: oneDayAgo },
+        },
+      },
+    },
+    // You can add more stages like $sort, $limit, etc., if needed
+  ]);
+  
+  
+  console.log("Existing Restaurants",existingRestaurants)
+
+  if (existingRestaurants.length) {
+    return res.json(existingRestaurants);
+  }
 
 
+  // Scrape new data
+  const scrapedData = await scrapeGoogleRestaurants(lat, lng);
+
+  const restaurantsToSave = scrapedData.map((r) => ({
+    ...r,
+    email: `scraped_${Math.random().toString(36).substring(7)}@placeholder.com`,
+    password: "scraped_data_only",
+    phoneNumber: "0000000000",
+    address: r.fullAddress || "",
+    status: "Active",
+    isScraped: true,
+    isVerified: false,
+    location: {
+      type: "Point",
+      coordinates: [parseFloat(lng), parseFloat(lat)],
+    },
+  }));
+
+  // for (const r of restaurantsToSave) {
+  //   await Restaurant.updateOne(
+  //     { placeId: r.placeId },
+  //     { $set: r },
+  //     { upsert: true }
+  //   );
+  // }
+
+  res.json(restaurantsToSave);
+};
 

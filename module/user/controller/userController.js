@@ -13,6 +13,7 @@ const Admin = require("../../admin/model/adminModel");
 // const numberValidator = require("libphonenumber.js")
 const socketIo = require("socket.io");
 const Restaurant = require("../../restaurants/model/restaurantModel");
+const Search = require("../../search/model/searchModel");
 const isValidEmail = (email) => {
   return validator.isEmail(email);
 };
@@ -240,15 +241,15 @@ exports.signup = async (req, res) => {
         result: {},
       });
     }
-    console.log(number.length);
-    if (number.length !== 10) {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "Mobile number must be 10 digits.",
-        result: {},
-      });
-    }
+    // console.log(number.length);
+    // if (number.length !== 10) {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "Mobile number must be 10 digits.",
+    //     result: {},
+    //   });
+    
     if (!password) {
       return res.send({
         statuscode: 400,
@@ -269,7 +270,9 @@ exports.signup = async (req, res) => {
 
     const user = await User.findOne({
       $or: [{ email: email }, { number: number }],
+      status: { $ne: "Delete" }, // 🟡 Ignore 'Delete' status users
     });
+    
     const ene_password = bcrypt.hashSync(password, 10);
 
     // ✅ User exists
@@ -282,37 +285,40 @@ exports.signup = async (req, res) => {
       //     result:{}
       //   })
       // }
-      if (user.status === "Delete") {
-        // Generate OTP only here
-        const { otpValue, otpExpiry } = generateOTP();
-        const html = emailVerification(otpValue, fullName);
-        const sub = "Sign Up Verification";
+      // if (user.status === "Delete") {
+      //   // Generate OTP only here
+      //   const { otpValue, otpExpiry } = generateOTP();
+      //   const html = emailVerification(otpValue, fullName);
+      //   const sub = "Sign Up Verification";
 
-        user.fullName = fullName;
-        user.password = ene_password;
-        user.number = number;
-        user.email = email;
-        user.otp = { otpValue, otpExpiry };
-        user.status = "Pending";
-        await user.save();
+      //   const newUser = new User({
+      //     email,
+      //     fullName,
+      //     password: ene_password,
+      //     number,
+      //     otp: { otpValue, otpExpiry },
+      //     status: "Pending",
+      //   })
 
-        const mailSend = await sendEmail(sub, email, html);
-        if (!mailSend) {
-          return res.send({
-            statusCode: 400,
-            success: false,
-            message: "OTP didn't send",
-            result: {},
-          });
-        }
+      //   await newUser.save();
 
-        return res.send({
-          statusCode: 200,
-          success: true,
-          message: "User re-registered. OTP sent",
-          result: { otpValue },
-        });
-      }
+      //   const mailSend = await sendEmail(sub, email, html);
+      //   if (!mailSend) {
+      //     return res.send({
+      //       statusCode: 400,
+      //       success: false,
+      //       message: "OTP didn't send",
+      //       result: {},
+      //     });
+      //   }
+
+      //   return res.send({
+      //     statusCode: 200,
+      //     success: true,
+      //     message: "User registered. OTP sent",
+      //     result: { otpValue },
+      //   });
+      // }
       if (user.status === "Pending") {
         // Generate OTP only here
         const { otpValue, otpExpiry } = generateOTP();
@@ -340,7 +346,7 @@ exports.signup = async (req, res) => {
         return res.send({
           statusCode: 200,
           success: true,
-          message: "User re-registered. OTP sent",
+          message: "User registered. OTP sent",
           result: { otpValue },
         });
       }
@@ -358,12 +364,14 @@ exports.signup = async (req, res) => {
       // if (user.status === "Blocked")
       //   message = "Account blocked. Contact support.";
 
-      return res.send({
-        statuscode: 400,
-        success: false,
-        message: "user already exist",
-        result: {},
-      });
+      if(user.status === "Active"){
+        return res.send({
+          statuscode: 400,
+          success: false,
+          message: "user already exist",
+          result: {},
+        });
+      }
     }
 
     // ✅ New User – now generate OTP
@@ -398,6 +406,7 @@ exports.signup = async (req, res) => {
       message: "User created and OTP sent successfully",
       result: { otpValue },
     });
+  
   } catch (error) {
     return res.send({
       statuscode: 500,
@@ -406,7 +415,8 @@ exports.signup = async (req, res) => {
       result: {},
     });
   }
-};
+}
+
 
 exports.verifysignOTP = async (req, res) => {
   try {
@@ -1218,7 +1228,7 @@ exports.logout = async (req, res) => {
     }
   } catch (error) {
     return res.send({
-      statuscode: 500,
+      statusCode: 500,
       success: false,
       message: error.message + "Error in user logout API",
       result: {},
@@ -1641,25 +1651,25 @@ exports.userStatus = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     let token = req.token;
-    let { userId } = req.params;
-    if (!userId) {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "required user id",
-        result: {},
-      });
-    }
-    let admin = await Admin.findById({ _id: token._id, status: "Active" });
-    if (!admin) {
-      return res.send({
-        statusCode: 404,
-        success: false,
-        message: "Admin not found",
-        result: {},
-      });
-    }
-    let user = await User.findOne({ _id: userId });
+    // let { userId } = req.params;
+    // if (!userId) {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "required user id",
+    //     result: {},
+    //   });
+    // }
+    // let admin = await Admin.findById({ _id: token._id, status: "Active" });
+    // if (!admin) {
+    //   return res.send({
+    //     statusCode: 404,
+    //     success: false,
+    //     message: "Admin not found",
+    //     result: {},
+    //   });
+    // }
+    let user = await User.findOne({ _id: token._id });
     if (!user) {
       return res.send({
         statusCode: 404,
@@ -1676,8 +1686,29 @@ exports.deleteUser = async (req, res) => {
         result: {},
       });
     }
+    if(user.status === "Pending"){
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"unauthorise access",
+        result:{}
+      })
+    }
+    if(user.status === "Block"){
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"User has beeen Blocked",
+        result:{}
+      })
+    }
+  //  const recent =  await Search.findOneAndUpdate({_id:token._id},{$set:{status:"Delete"}})
+  //  const recent =  await Search.findOneAndUpdate({userId:token._id},{$set:{status:"Delete"}})
+
+  // console.log("recent ", recent)
     user.status = "Delete";
     user.accessToken = "";
+
     await user.save();
     return res.send({
       statusCode: 200,
@@ -1687,6 +1718,8 @@ exports.deleteUser = async (req, res) => {
         name: user.fullName,
         email: user.email,
         status: user.status,
+        // statuss:recent.status
+        recentSearches:recent
       },
     });
   } catch (error) {
@@ -2273,7 +2306,7 @@ exports.getprofilebyUser = async (req, res) => {
 
     const user = await User.findOne({ _id: token._id });
 
-    console.log(User);
+    // console.log(User);
     // console.log("sdfniu",user)
     // .select(
     //   "-otp -accessToken -resendOtpDetails -securityPinTryCount -securityPin -securityToken -discountCode -fcmToken -photo -referralCode -notificationTune"

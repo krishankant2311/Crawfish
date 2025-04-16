@@ -10,7 +10,7 @@ const database = require("./config/database");
 const path = require("path")
 const bodyParser = require("body-parser");
 const cors = require('cors');
-
+const startDeleteOldUsersJob = require('././././crone/croneJob')
 const faqRoute = require('./module/FAQ/routes/FAQroute')
 const adminRoutes = require("./module/admin/routes/adminRoute");
 const userRouter = require('./module/user/routes/userRoute')
@@ -34,6 +34,7 @@ app.use(bodyParser.json());
 
 
 database.connect();
+startDeleteOldUsersJob();
 app.use(cors());
 app.use(require("cors")());
 

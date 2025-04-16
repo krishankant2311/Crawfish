@@ -3,6 +3,10 @@ const mongoose = require("mongoose");
 // const { restaurantProfile } = require("../controller/restaurantController");
 
 const restaurantSchema = new mongoose.Schema({
+  placeId:{
+    type:String,
+    default:""
+  },
   restaurantName: {
     type: String,
     required: true,
@@ -65,6 +69,10 @@ const restaurantSchema = new mongoose.Schema({
     type: String,
     // required: true,
   },
+  isScraped: {
+    type: Boolean,
+    default: false,
+  },
   status: {
     type: String,
     enum: ["Active", "Delete", "Block", "Pending"],
@@ -80,9 +88,7 @@ const restaurantSchema = new mongoose.Schema({
   },
   location: {
     type: {
-      type: String,
-      enum: ["Point"],
-      default: "Point",
+      type : String
     },
     coordinates: {
       type: [Number],
