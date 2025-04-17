@@ -485,6 +485,12 @@ exports.verifysignOTP = async (req, res) => {
     }
     user.status = "Active";
     user.otp = { otpValue: "", otpExpiry: "" };
+    const token = await generateJWT({
+      _id: user._id,
+      email: user.email,
+    });
+
+    user.token = token;
     const saveUser = await user.save();
     if (saveUser) {
       return res.send({
