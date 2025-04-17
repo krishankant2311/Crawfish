@@ -497,7 +497,7 @@ exports.verifysignOTP = async (req, res) => {
         statuscode: 200,
         success: true,
         message: "otp verify successfully",
-        result: {},
+        result: {token},
       });
     }
   } catch (error) {
