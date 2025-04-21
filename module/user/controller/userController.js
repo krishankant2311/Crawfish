@@ -405,7 +405,7 @@ exports.signup = async (req, res) => {
     }
 
     return res.send({
-      statusCode : true,
+      statusCode : 200,
       message: "User created and OTP sent successfully",
       result: { otpValue },
     });
