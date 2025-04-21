@@ -405,14 +405,13 @@ exports.signup = async (req, res) => {
     }
 
     return res.send({
-      statuscode: 200,
-      success: true,
+      statusCode : true,
       message: "User created and OTP sent successfully",
       result: { otpValue },
     });
   } catch (error) {
     return res.send({
-      statuscode: 500,
+      statusCode: 500,
       success: false,
       message: error.message + " Error in signup API",
       result: {},
@@ -1418,7 +1417,7 @@ exports.getAllRecentUser = async (req, res) => {
   } catch (error) {
     console.log("Error!!", error);
     return res.send({
-      statuscode: 500,
+      statusCode: 500,
       succes: false,
       message: error.message + " ERROR in get all active user api",
       return: error,
@@ -2258,7 +2257,7 @@ exports.BlockedUser = async (req, res) => {
     }
     if (admin.status == "Block") {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "admin inactive",
         result: {},
@@ -2275,7 +2274,7 @@ exports.BlockedUser = async (req, res) => {
     }
     if (user.status == "Block") {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "user already Blocked",
         result: {},

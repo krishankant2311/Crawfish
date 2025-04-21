@@ -58,7 +58,7 @@ exports.searchRestaurant = async (req, res) => {
 
     // await search.save();
     return res.send({
-      statuscode: 200,
+      statusCode: 200,
       success: true,
       message: "restaurant search successfully",
       result: { restaurant },
