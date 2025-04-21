@@ -210,6 +210,8 @@ exports.signup = async (req, res) => {
     fullName = fullName?.trim();
     password = password?.trim();
     number = number?.trim();
+    const profilePhoto = `https://avatar.iran.liara.run/username?username=${fullName}`;
+
     // number = Number.parseInt(number);
 
     if (!email)
@@ -249,7 +251,7 @@ exports.signup = async (req, res) => {
     //     message: "Mobile number must be 10 digits.",
     //     result: {},
     //   });
-    
+
     if (!password) {
       return res.send({
         statuscode: 400,
@@ -272,7 +274,7 @@ exports.signup = async (req, res) => {
       $or: [{ email: email }, { number: number }],
       status: { $ne: "Delete" }, // 🟡 Ignore 'Delete' status users
     });
-    
+
     const ene_password = bcrypt.hashSync(password, 10);
 
     // ✅ User exists
@@ -330,6 +332,7 @@ exports.signup = async (req, res) => {
         user.number = number;
         user.email = email;
         user.otp = { otpValue, otpExpiry };
+        user.profilePhoto = profilePhoto
         user.status = "Pending";
         await user.save();
 
@@ -364,7 +367,7 @@ exports.signup = async (req, res) => {
       // if (user.status === "Blocked")
       //   message = "Account blocked. Contact support.";
 
-      if(user.status === "Active"){
+      if (user.status === "Active") {
         return res.send({
           statuscode: 400,
           success: false,
@@ -384,6 +387,7 @@ exports.signup = async (req, res) => {
       fullName,
       password: ene_password,
       number,
+      profilePhoto,
       otp: { otpValue, otpExpiry },
       status: "Pending",
     });
@@ -406,7 +410,6 @@ exports.signup = async (req, res) => {
       message: "User created and OTP sent successfully",
       result: { otpValue },
     });
-  
   } catch (error) {
     return res.send({
       statuscode: 500,
@@ -415,8 +418,7 @@ exports.signup = async (req, res) => {
       result: {},
     });
   }
-}
-
+};
 
 exports.verifysignOTP = async (req, res) => {
   try {
@@ -497,7 +499,7 @@ exports.verifysignOTP = async (req, res) => {
         statuscode: 200,
         success: true,
         message: "otp verify successfully",
-        result: {token},
+        result: { token },
       });
     }
   } catch (error) {
@@ -679,10 +681,10 @@ exports.forgetPassword = async (req, res) => {
   }
 };
 
-exports.sendOTPbyNumber = async (req,res) => {
+exports.sendOTPbyNumber = async (req, res) => {
   try {
-    let {number} =req.body;
-    if(!number){
+    let { number } = req.body;
+    if (!number) {
       return res.send({
         statuscode: 400,
         success: false,
@@ -691,18 +693,17 @@ exports.sendOTPbyNumber = async (req,res) => {
       });
     }
 
-    const user = await User.findOne({number:number})
-    if(user){
-      if(user.status === "Delete"){
-        
+    const user = await User.findOne({ number: number });
+    if (user) {
+      if (user.status === "Delete") {
         return res.send({
-          statusCode:200,
-          message:"user has been deleted",
-          success:true,
-          result:{}
-        })
+          statusCode: 200,
+          message: "user has been deleted",
+          success: true,
+          result: {},
+        });
       }
-      if(user.status === "Pending"){
+      if (user.status === "Pending") {
         const { otpValue, otpExpiry } = generateOTP();
 
         user.otp = {
@@ -710,52 +711,52 @@ exports.sendOTPbyNumber = async (req,res) => {
           otpExpiry: otpExpiry,
         };
         return res.send({
-          statusCode:200,
-          message:"OTP send successfuly on your mobile number",
-          success:true,
-          result:{otpValue}
-        })
+          statusCode: 200,
+          message: "OTP send successfuly on your mobile number",
+          success: true,
+          result: { otpValue },
+        });
       }
-      if(user.status === "Block"){
+      if (user.status === "Block") {
         return res.send({
-          statusCode:400,
-          success:false,
-          message:"Blocked user",
-          result:{}
-        })
+          statusCode: 400,
+          success: false,
+          message: "Blocked user",
+          result: {},
+        });
       }
       const { otpValue, otpExpiry } = generateOTP();
 
-        user.otp = {
-          otpValue: otpValue,
-          otpExpiry: otpExpiry,
-        };
-        return res.send({
-          statusCode:200,
-          message:"OTP send successfuly on your mobile number",
-          success:true,
-          result:{otpValue}
-        })
+      user.otp = {
+        otpValue: otpValue,
+        otpExpiry: otpExpiry,
+      };
+      return res.send({
+        statusCode: 200,
+        message: "OTP send successfuly on your mobile number",
+        success: true,
+        result: { otpValue },
+      });
     }
     return res.send({
-      statusCode:404,
-      success:false,
-      message:"user not found",
-      result:{}
-    })
+      statusCode: 404,
+      success: false,
+      message: "user not found",
+      result: {},
+    });
   } catch (error) {
     return res.send({
-      statusCode:500,
-      success:false,
-      message:error.message + "ERROR in send otp by number",
-      result:{}
-    })
+      statusCode: 500,
+      success: false,
+      message: error.message + "ERROR in send otp by number",
+      result: {},
+    });
   }
-}
-exports.sendOTPbyNumberforForgotPassword = async (req,res) => {
+};
+exports.sendOTPbyNumberforForgotPassword = async (req, res) => {
   try {
-    let {number} =req.body;
-    if(!number){
+    let { number } = req.body;
+    if (!number) {
       return res.send({
         statuscode: 400,
         success: false,
@@ -764,62 +765,60 @@ exports.sendOTPbyNumberforForgotPassword = async (req,res) => {
       });
     }
 
-    const user = await User.findOne({number:number})
-    if(!user){
+    const user = await User.findOne({ number: number });
+    if (!user) {
       return res.send({
-        statusCode:404,
-        success:false,
-        message:"User not found",
-        result:{}
-      })
+        statusCode: 404,
+        success: false,
+        message: "User not found",
+        result: {},
+      });
     }
-      if(user.status === "Delete"){ 
-        return res.send({
-          statusCode:400,
-          message:"user has been deleted",
-          success:false,
-          result:{}
-        })
-      }
-      if(user.status === "Pending"){
-        return res.send({
-          statusCode:200,
-          message:"unauthorise access",
-          success:false,
-          result:{}
-        })
-      }
-      if(user.status === "Block"){
-        return res.send({
-          statusCode:400,
-          success:false,
-          message:"Blocked user",
-          result:{}
-        })
-      }
-      const { otpValue, otpExpiry } = generateOTP();
+    if (user.status === "Delete") {
+      return res.send({
+        statusCode: 400,
+        message: "user has been deleted",
+        success: false,
+        result: {},
+      });
+    }
+    if (user.status === "Pending") {
+      return res.send({
+        statusCode: 200,
+        message: "unauthorise access",
+        success: false,
+        result: {},
+      });
+    }
+    if (user.status === "Block") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "Blocked user",
+        result: {},
+      });
+    }
+    const { otpValue, otpExpiry } = generateOTP();
 
-        user.otp = {
-          otpValue: otpValue,
-          otpExpiry: otpExpiry,
-        };
-        return res.send({
-          statusCode:200,
-          message:"OTP send successfuly on your mobile number",
-          success:true,
-          result:{otpValue}
-        })
-    
-   
+    user.otp = {
+      otpValue: otpValue,
+      otpExpiry: otpExpiry,
+    };
+    return res.send({
+      statusCode: 200,
+      message: "OTP send successfuly on your mobile number",
+      success: true,
+      result: { otpValue },
+    });
   } catch (error) {
     return res.send({
-      statusCode:500,
-      success:false,
-      message:error.message + "ERROR in send otp by number",
-      result:{}
-    })
+      statusCode: 500,
+      success: false,
+      message: error.message + "ERROR in send otp by number",
+      result: {},
+    });
   }
-}
+};
 exports.verifyOTP = async (req, res) => {
   try {
     let { email, otp } = req.body;
@@ -1692,26 +1691,26 @@ exports.deleteUser = async (req, res) => {
         result: {},
       });
     }
-    if(user.status === "Pending"){
+    if (user.status === "Pending") {
       return res.send({
-        statusCode:400,
-        success:false,
-        message:"unauthorise access",
-        result:{}
-      })
+        statusCode: 400,
+        success: false,
+        message: "unauthorise access",
+        result: {},
+      });
     }
-    if(user.status === "Block"){
+    if (user.status === "Block") {
       return res.send({
-        statusCode:400,
-        success:false,
-        message:"User has beeen Blocked",
-        result:{}
-      })
+        statusCode: 400,
+        success: false,
+        message: "User has beeen Blocked",
+        result: {},
+      });
     }
-  //  const recent =  await Search.findOneAndUpdate({_id:token._id},{$set:{status:"Delete"}})
-  //  const recent =  await Search.findOneAndUpdate({userId:token._id},{$set:{status:"Delete"}})
+    //  const recent =  await Search.findOneAndUpdate({_id:token._id},{$set:{status:"Delete"}})
+    //  const recent =  await Search.findOneAndUpdate({userId:token._id},{$set:{status:"Delete"}})
 
-  // console.log("recent ", recent)
+    // console.log("recent ", recent)
     user.status = "Delete";
     user.accessToken = "";
 
@@ -1725,7 +1724,7 @@ exports.deleteUser = async (req, res) => {
         email: user.email,
         status: user.status,
         // statuss:recent.status
-        recentSearches:recent
+        recentSearches: recent,
       },
     });
   } catch (error) {
@@ -1911,9 +1910,30 @@ exports.changeUserLanguage = async (req, res) => {
     let token = req.token;
     let { language } = req.body;
     const VALID_LANGUAGES = [
-      "English", "Spanish", "Vietnamese", "Chinese", "Tagalog", "Arabic", "French", "Korean", "Russian",
-      "German", "Haitian Creole", "Portuguese", "Cajun French", "Bengali", "Urdu", "Punjabi", "Polish",
-      "Malay", "Isan", "Japanese", "Filipino", "Ilocano", "Cebuano", "Khmer"
+      "English",
+      "Spanish",
+      "Vietnamese",
+      "Chinese",
+      "Tagalog",
+      "Arabic",
+      "French",
+      "Korean",
+      "Russian",
+      "German",
+      "Haitian Creole",
+      "Portuguese",
+      "Cajun French",
+      "Bengali",
+      "Urdu",
+      "Punjabi",
+      "Polish",
+      "Malay",
+      "Isan",
+      "Japanese",
+      "Filipino",
+      "Ilocano",
+      "Cebuano",
+      "Khmer",
     ];
     if (!language) {
       return res.send({
@@ -2361,7 +2381,7 @@ exports.getprofilebyUser = async (req, res) => {
           email: user.email || "N/A",
           status: user.status || "N/A",
           profilePhoto: user.profilePhoto || "N/A",
-          number:user.number
+          number: user.number,
         },
       },
     });
@@ -2375,67 +2395,67 @@ exports.getprofilebyUser = async (req, res) => {
   }
 };
 
-exports.appMode = async(req,res) => {
+exports.appMode = async (req, res) => {
   try {
     let token = req.token;
-  let {AppMode} = req.body;
-    if(!AppMode){
+    let { AppMode } = req.body;
+    if (!AppMode) {
       return res.send({
-        statusCode:400,
-        success:false,
-        message:"Required AppMode",
-        result:{}     
-      })
+        statusCode: 400,
+        success: false,
+        message: "Required AppMode",
+        result: {},
+      });
     }
 
-    const user = await User.findOne({_id:token._id})
-    if(!user){
+    const user = await User.findOne({ _id: token._id });
+    if (!user) {
       return res.send({
-        statusCode:404,
-        success:false,
-        message:"User not found",
-        result:{}
-      })
+        statusCode: 404,
+        success: false,
+        message: "User not found",
+        result: {},
+      });
     }
-    if(user.status==="Delete"){
+    if (user.status === "Delete") {
       return res.send({
-        statusCode:400,
-        success:false,
-        message:"User has been deleted",
-        result:{}
-      })
+        statusCode: 400,
+        success: false,
+        message: "User has been deleted",
+        result: {},
+      });
     }
-    if(user.status==="Pending"){
+    if (user.status === "Pending") {
       return res.send({
-        statusCode:400,
-        success:false,
-        message:"Unauthorise user",
-        result:{}
-      })
+        statusCode: 400,
+        success: false,
+        message: "Unauthorise user",
+        result: {},
+      });
     }
-    if(user.status==="Block"){
+    if (user.status === "Block") {
       return res.send({
-        statusCode:400,
-        success:false,
-        message:"User has been Blocked",
-        result:{}
-      })
+        statusCode: 400,
+        success: false,
+        message: "User has been Blocked",
+        result: {},
+      });
     }
 
-    user.AppMode =AppMode;
+    user.AppMode = AppMode;
     await user.save();
     return res.send({
-      statusCode:200,
-      success:true,
-      message:"AppMode change successfully",
-      result:{}
-    })
+      statusCode: 200,
+      success: true,
+      message: "AppMode change successfully",
+      result: {},
+    });
   } catch (error) {
     return res.send({
-      statusCode:500,
-      success:false,
-      message:error.message + "ERROR in app mode api",
-      result:{}
-    })
+      statusCode: 500,
+      success: false,
+      message: error.message + "ERROR in app mode api",
+      result: {},
+    });
   }
-}
+};

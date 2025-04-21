@@ -88,7 +88,8 @@ const restaurantSchema = new mongoose.Schema({
   },
   location: {
     type: {
-      type : String
+      type : String,
+      default : "Point"
     },
     coordinates: {
       type: [Number],

@@ -99,43 +99,25 @@ exports.signupRestaurant = async (req, res) => {
         message: "Required phone number",
       });
     }
-    if(phoneNumber.length !== 10){
-      return res.send({
-        statusCode:400,
-        success:false,
-        message:"Phone number must be 10 digits",
-        result:{}
-      })
-    }
+    // if(phoneNumber.length !== 10){
+    //   return res.send({
+    //     statusCode:400,
+    //     success:false,
+    //     message:"Phone number must be 10 digits",
+    //     result:{}
+    //   })
+    // }
 
     //check if email already exists
-    const restaurant = await Restaurant.findOne({$or:[{email:email},{phoneNumber:phoneNumber}] } );
+    const restaurant = await Restaurant.findOne({
+      $or: [{ email: email }, { phoneNumber: phoneNumber }],
+      status: { $ne: "Delete" }, // 🟡 Ignore 'Delete' status restaurant
+    });
     const ene_password = bcrypt.hashSync(password, 10);
     // console.log("jgfejyewg"+restaurant)
     if (restaurant) {
-      if(restaurant.status==="Delete"){
-        restaurantName=restaurantName || restaurant.restaurantName;
-        email=email || restaurant.email
-        password = restaurant.password
-        phoneNumber= phoneNumber || restaurant.phoneNumber
-        restaurant.status = "Pending"
-        const { otpValue, otpExpiry } = genrateOTP();
-    const resName = restaurant.restaurantName;
-    const title = "Signup OTP";
-    const body = emailVerification(otpValue, resName);
-    restaurant.otp = {
-      otpValue,
-      otpExpiry,
-    };
-    await sendEmail(title, restaurant.email, body);
-    await restaurant.save();
-    return res.send({
-      statusCode:200,
-      success:true,
-      message:"restaurant re-created please verify otp",
-      result:{otpValue}
-    })
-      }
+      
+      
       if(restaurant.status==="Pending"){
         restaurantName=restaurantName || restaurant.restaurantName;
         email=email || restaurant.email
@@ -155,7 +137,7 @@ exports.signupRestaurant = async (req, res) => {
     return res.send({
       statusCode:200,
       success:true,
-      message:"Please verify otp",
+      message:"Restaurant created successfully",
       result:{otpValue}
     })
       }
@@ -173,7 +155,7 @@ exports.signupRestaurant = async (req, res) => {
         message:"restaurant already exist",
         result:{}
       })
-
+    
 
     }
 
@@ -183,6 +165,11 @@ exports.signupRestaurant = async (req, res) => {
       email,
       password: ene_password,
       phoneNumber,
+      location : {
+        type : "Point",
+        coordinates: [ 0, 0 ]
+      },
+      status:"Pending"
     });
 
     //generate OTP
@@ -2121,81 +2108,221 @@ exports.getRestaurantDashboard = async (req, res) => {
 // const Restaurant = require("../models/Restaurant");
 const scrapeGoogleRestaurants = require("../../../scrapping/scrappingGoogleMap"); // You’ll create this
 
+// exports.getNearbyRestaurants = async (req, res) => {
+//   await Restaurant.syncIndexes(); // or ensureIndexes()
+//   console.log('Indexes created');
+//   const { lat, lng } = req.query;
+
+//   if (!lat || !lng) return res.status(400).json({ message: "lat and lng required" });
+
+//   const coords = [parseFloat(lng), parseFloat(lat)];
+//   const oneDayAgo = new Date(Date.now() - 1000 * 60 * 60 * 24);
+
+//   console.log("COORDS", coords, oneDayAgo);
+
+//   // Check existing scraped data
+//   const existingRestaurants = await Restaurant.find({
+//     location: {
+//       $nearSphere: {
+//         $geometry: { type: "Point", coordinates: coords },
+//         $maxDistance: 3000, // 3 km radius
+//       },
+//     },
+//     isScraped: true,
+//     updatedAt: { $gte: oneDayAgo },
+//   });
+
+//   // const existingRestaurants = await Restaurant.aggregate([
+//   //   {
+//   //     $geoNear: {
+//   //       near: {
+//   //         type: "Point",
+//   //         coordinates: coords, // Ensure coords is [longitude, latitude]
+//   //       },
+//   //       distanceField: "distance",
+//   //       maxDistance: 3000, // 3 km radius
+//   //       spherical: true,
+//   //       query: {
+//   //         isScraped: true,
+//   //         updatedAt: { $gte: oneDayAgo },
+//   //       },
+//   //     },
+//   //   },
+//   //   // You can add more stages like $sort, $limit, etc., if needed
+//   // ]);
+  
+  
+//   console.log("Existing Restaurants",existingRestaurants)
+
+//   if (existingRestaurants.length) {
+//     return res.json(existingRestaurants);
+//   }
+
+
+//   // Scrape new data
+//   const scrapedData = await scrapeGoogleRestaurants(lat, lng);
+
+//   const restaurantsToSave = scrapedData.map((r) => ({
+//     ...r,
+//     email: `scraped_${Math.random().toString(36).substring(7)}@placeholder.com`,
+//     password: "scraped_data_only",
+//     phoneNumber: "0000000000",
+//     address: r.fullAddress || "",
+//     status: "Active",
+//     isScraped: true,
+//     isVerified: false,
+//     location: {
+//       type: "Point",
+//       coordinates: [parseFloat(lng), parseFloat(lat)],
+//     },
+//   }));
+
+//   for (const r of restaurantsToSave) {
+//     await Restaurant.updateOne(
+//       { placeId: r.placeId },
+//       { $set: r },
+//       { upsert: true }
+//     );
+//   }
+
+//   res.json(restaurantsToSave);
+// };
+
+// const scrapeGoogleRestaurants = require("../../scrapping/scrappingGoogleMap"); // adjust the path as needed
+// const Restaurant = require("../../models/Restaurant"); // adjust according to your folder structure
+
+// exports.getNearbyRestaurants = async (req, res) => {
+//   try {
+//     await Restaurant.syncIndexes(); // ensure indexes
+//     console.log("Indexes created");
+
+//     const { lat, lng } = req.query;
+//     if (!lat || !lng) {
+//       return res.status(400).json({ message: "lat and lng required" });
+//     }
+
+//     const coords = [parseFloat(lng), parseFloat(lat)];
+//     const oneDayAgo = new Date(Date.now() - 1000 * 60 * 60 * 24);
+//     console.log("COORDS", coords, oneDayAgo);
+
+//     const existingRestaurants = await Restaurant.find({
+//       location: {
+//         $nearSphere: {
+//           $geometry: { type: "Point", coordinates: coords },
+//           $maxDistance: 3000,
+//         },
+//       },
+//       isScraped: true,
+//       updatedAt: { $gte: oneDayAgo },
+//     });
+
+//     console.log("Existing Restaurants", existingRestaurants.length);
+
+//     if (existingRestaurants.length) {
+//       return res.json(existingRestaurants);
+//     }
+
+//     // 👇 Scrape new data
+//     const scrapedData = await scrapeGoogleRestaurants(lat, lng);
+
+//     const restaurantsToSave = scrapedData.map((r) => ({
+//       ...r,
+//       email: `scraped_${Math.random().toString(36).substring(7)}@placeholder.com`,
+//       password: "scraped_data_only",
+//       phoneNumber: "0000000000",
+//       address: r.address || "",
+//       status: "Active",
+//       isScraped: true,
+//       isVerified: false,
+//       location: {
+//         type: "Point",
+//         coordinates: [parseFloat(lng), parseFloat(lat)],
+//       },
+//     }));
+
+//     // 👇 Upsert all restaurants
+//     for (const r of restaurantsToSave) {
+//       await Restaurant.updateOne(
+//         { placeId: r.placeId },
+//         { $set: r },
+//         { upsert: true }
+//       );
+//     }
+
+//     res.json(restaurantsToSave);
+//   } catch (err) {
+//     console.error("Error in getNearbyRestaurants:", err.message);
+//     res.status(500).json({ message: "Something went wrong", error: err.message });
+//   }
+// };
+
+
+// const scrapeGoogleRestaurants = require('./path-to-your-scrape-function');
+// const Restaurant = require('../models/Restaurant'); // Adjust the path if needed
+
 exports.getNearbyRestaurants = async (req, res) => {
-  const { lat, lng } = req.query;
+  try {
+    await Restaurant.syncIndexes(); // Ensure indexes
+    console.log("Indexes created");
 
-  if (!lat || !lng) return res.status(400).json({ message: "lat and lng required" });
+    const { lat, lng } = req.query;
+    if (!lat || !lng) {
+      return res.status(400).json({ message: "lat and lng required" });
+    }
 
-  const coords = [parseFloat(lng), parseFloat(lat)];
-  const oneDayAgo = new Date(Date.now() - 1000 * 60 * 60 * 24);
+    const coords = [parseFloat(lng), parseFloat(lat)];
+    const oneDayAgo = new Date(Date.now() - 1000 * 60 * 60 * 24);
 
-  console.log("COORDS", coords, oneDayAgo);
-
-  // // Check existing scraped data
-  // const existingRestaurants = await Restaurant.find({
-  //   location: {
-  //     $nearSphere: {
-  //       $geometry: { type: "Point", coordinates: coords },
-  //       $maxDistance: 3000, // 3 km radius
-  //     },
-  //   },
-  //   isScraped: true,
-  //   updatedAt: { $gte: oneDayAgo },
-  // });
-
-  const existingRestaurants = await Restaurant.aggregate([
-    {
-      $geoNear: {
-        near: {
-          type: "Point",
-          coordinates: coords, // Ensure coords is [longitude, latitude]
-        },
-        distanceField: "distance",
-        maxDistance: 3000, // 3 km radius
-        spherical: true,
-        query: {
-          isScraped: true,
-          updatedAt: { $gte: oneDayAgo },
+    // 🔍 Check for recently scraped restaurants nearby
+    const existingRestaurants = await Restaurant.find({
+      location: {
+        $nearSphere: {
+          $geometry: { type: "Point", coordinates: coords },
+          $maxDistance: 3000,
         },
       },
-    },
-    // You can add more stages like $sort, $limit, etc., if needed
-  ]);
-  
-  
-  console.log("Existing Restaurants",existingRestaurants)
+      isScraped: true,
+      updatedAt: { $gte: oneDayAgo },
+    });
 
-  if (existingRestaurants.length) {
-    return res.json(existingRestaurants);
+    console.log("Existing Restaurants", existingRestaurants.length);
+
+    if (existingRestaurants.length) {
+      return res.json(existingRestaurants);
+    }
+
+    // 🚀 Scrape from Google if no fresh data
+    const scrapedData = await scrapeGoogleRestaurants(lat, lng);
+
+    console.log(scrapedData)
+
+    const restaurantsToSave = scrapedData.map((r) => ({
+      ...r,
+      email: `scraped_${Math.random().toString(36).substring(7)}@placeholder.com`,
+      password: "scraped_data_only",
+      phoneNumber: "0000000000",
+      address: r.address || "",
+      status: "Active",
+      isScraped: true,
+      isVerified: false,
+      location: {
+        type: "Point",
+        coordinates: [parseFloat(lng), parseFloat(lat)],
+      },
+    }));
+
+    // 💾 Save or update in DB
+    for (const r of restaurantsToSave) {
+      await Restaurant.updateOne(
+        { placeId: r.placeId },
+        { $set: r },
+        { upsert: true }
+      );
+    }
+
+    res.json(restaurantsToSave);
+  } catch (err) {
+    console.error("Error in getNearbyRestaurants:", err.message);
+    res.status(500).json({ message: "Something went wrong", error: err.message });
   }
-
-
-  // Scrape new data
-  const scrapedData = await scrapeGoogleRestaurants(lat, lng);
-
-  const restaurantsToSave = scrapedData.map((r) => ({
-    ...r,
-    email: `scraped_${Math.random().toString(36).substring(7)}@placeholder.com`,
-    password: "scraped_data_only",
-    phoneNumber: "0000000000",
-    address: r.fullAddress || "",
-    status: "Active",
-    isScraped: true,
-    isVerified: false,
-    location: {
-      type: "Point",
-      coordinates: [parseFloat(lng), parseFloat(lat)],
-    },
-  }));
-
-  // for (const r of restaurantsToSave) {
-  //   await Restaurant.updateOne(
-  //     { placeId: r.placeId },
-  //     { $set: r },
-  //     { upsert: true }
-  //   );
-  // }
-
-  res.json(restaurantsToSave);
 };
-

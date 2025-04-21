@@ -305,3 +305,46 @@ exports.getAllAddress = async (req, res) => {
     });
   }
 };
+
+
+exports.getAllAddressbyUser = async (req, res) => {
+  try {
+    let token = req.token;
+    let { page = 1, limit = 10 } = req.query;
+    page = Number.parseInt(page);
+    limit = Number.parseInt(limit);
+    const skip = (page - 1) * limit;
+    const user = await User.findOne({ _id: token._id, status: "Active" });
+    if (!user) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "Unauthorized access",
+        result: {},
+      });
+    }
+    const allAddress = await Address.find({ userId: token._id})
+      .skip(skip)
+      .limit(limit);
+    const totalAddress = await Address.countDocuments({ userId: token._id});
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: "All Address get successfully",
+      result: {
+        Address: allAddress,
+        currentPage: page,
+        totalPage: Math.ceil(totalAddress / limit),
+        totalRecord: totalAddress,
+      },
+    });
+  } catch (error) {
+    console.log("Error!!", error);
+    return res.send({
+      statusCode: 500,
+      success: false,
+      message: error.message + "ERROR in get all address API",
+      result: error,
+    });
+  }
+};

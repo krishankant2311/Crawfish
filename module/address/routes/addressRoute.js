@@ -10,5 +10,5 @@ route.post("/create-address",upload.none(),verifyJWT,addressController.createCom
 route.post("/edit-address/:AddressId",upload.none(),verifyJWT,addressController.editAdress)
 route.post("/delete-address/:AddressId",upload.none(),verifyJWT,addressController.deleteAddress)
 route.get("/getall-address",verifyJWT,upload.none(),addressController.getAllAddress)
-
+route.get("/getall-address-byUser",verifyJWT,upload.none(),addressController.getAllAddressbyUser)
 module.exports = route;
