@@ -6,7 +6,7 @@ const { generateJWT } = require("../../../middlewares/jwt");
 const genrateOTP = require("../../../helpers/genrateOTP");
 const sendEmail = require("../../../mail/mailSender");
 const emailVerification = require("../../../templates/emailVerification");
-const address = require("../../address/model/addressModel")
+const address = require("../../address/model/addressModel");
 // const restaurantModel = require('../model/restaurantModel');
 const bcrypt = require("bcryptjs");
 const Admin = require("../../admin/model/adminModel");
@@ -116,47 +116,43 @@ exports.signupRestaurant = async (req, res) => {
     const ene_password = bcrypt.hashSync(password, 10);
     // console.log("jgfejyewg"+restaurant)
     if (restaurant) {
-      
-      
-      if(restaurant.status==="Pending"){
-        restaurantName=restaurantName || restaurant.restaurantName;
-        email=email || restaurant.email
-        password = restaurant.password
-        phoneNumber= phoneNumber || restaurant.phoneNumber
-        restaurant.status = "Pending"
+      if (restaurant.status === "Pending") {
+        restaurantName = restaurantName || restaurant.restaurantName;
+        email = email || restaurant.email;
+        password = restaurant.password;
+        phoneNumber = phoneNumber || restaurant.phoneNumber;
+        restaurant.status = "Pending";
         const { otpValue, otpExpiry } = genrateOTP();
-    const resName = restaurant.restaurantName;
-    const title = "Signup OTP";
-    const body = emailVerification(otpValue, resName);
-    restaurant.otp = {
-      otpValue,
-      otpExpiry,
-    };
-    await sendEmail(title, restaurant.email, body);
-    await restaurant.save();
-    return res.send({
-      statusCode:200,
-      success:true,
-      message:"Restaurant created successfully",
-      result:{otpValue}
-    })
-      }
-      if(restaurant.status === " Block"){
+        const resName = restaurant.restaurantName;
+        const title = "Signup OTP";
+        const body = emailVerification(otpValue, resName);
+        restaurant.otp = {
+          otpValue,
+          otpExpiry,
+        };
+        await sendEmail(title, restaurant.email, body);
+        await restaurant.save();
         return res.send({
-          statusCode:400,
-          success:false,
-          message:"restaurant has been blocked",
-          result:{}
-        })
+          statusCode: 200,
+          success: true,
+          message: "Restaurant created successfully",
+          result: { otpValue },
+        });
+      }
+      if (restaurant.status === " Block") {
+        return res.send({
+          statusCode: 400,
+          success: false,
+          message: "restaurant has been blocked",
+          result: {},
+        });
       }
       return res.send({
-        statusCode:400,
-        success:false,
-        message:"restaurant already exist",
-        result:{}
-      })
-    
-
+        statusCode: 400,
+        success: false,
+        message: "restaurant already exist",
+        result: {},
+      });
     }
 
     // const ene_password = bcrypt.hashSync(password, 10);
@@ -165,11 +161,11 @@ exports.signupRestaurant = async (req, res) => {
       email,
       password: ene_password,
       phoneNumber,
-      location : {
-        type : "Point",
-        coordinates: [ 0, 0 ]
+      location: {
+        type: "Point",
+        coordinates: [0, 0],
       },
-      status:"Pending"
+      status: "Pending",
     });
 
     //generate OTP
@@ -265,13 +261,18 @@ exports.signupRestaurantVerifyOtp = async (req, res) => {
     }
     restaurant.status = "Active";
     restaurant.otp = { otpValue: "", otpExpiry: "" };
+    const token = await generateJWT({
+      _id: restaurant._id,
+      email: restaurant.email,
+    });
+
     const saveUser = await restaurant.save();
     if (saveUser) {
       return res.send({
         statuscode: 200,
         success: true,
         message: "otp verify successfully",
-        result: {},
+        result: {token},
       });
     }
   } catch (error) {
@@ -482,7 +483,7 @@ exports.deleteRestaurant = async (req, res) => {
     // const restaurant = await Restaurant.findOne({ _id: token._id });
     // console.log("admin : " + admin,"restaurant :" + restaurant);
 
-    if (!admin ) {
+    if (!admin) {
       return res.send({
         statusCode: 400,
         success: false,
@@ -506,15 +507,14 @@ exports.deleteRestaurant = async (req, res) => {
         result: {},
       });
     }
-    const restaurant = await Restaurant.findOne({_id:resId})
-    if(!restaurant){
+    const restaurant = await Restaurant.findOne({ _id: resId });
+    if (!restaurant) {
       return res.send({
-        statusCode:404,
-        success:false,
-        message:"restaurant not found",
-        result:{}
-        
-      })
+        statusCode: 404,
+        success: false,
+        message: "restaurant not found",
+        result: {},
+      });
     }
     if (restaurant.status == "Delete") {
       return res.send({
@@ -561,7 +561,9 @@ exports.deleteRestaurant = async (req, res) => {
 exports.getRestaurant = async (req, res) => {
   try {
     let token = req.token;
-    const restaurant = await Restaurant.findOne({ _id: token._id }).select("-token -otp -password -securityToken");
+    const restaurant = await Restaurant.findOne({ _id: token._id }).select(
+      "-token -otp -password -securityToken"
+    );
     if (!restaurant) {
       return res.send({
         statusCode: 400,
@@ -1449,11 +1451,11 @@ exports.getMenu = async (req, res) => {
       });
     }
     return res.send({
-      statusCode:400,
-      success:false,
-      message:"menu not found",
-      result:{}
-    })
+      statusCode: 400,
+      success: false,
+      message: "menu not found",
+      result: {},
+    });
   } catch (error) {
     return res.send({
       statuscode: 500,
@@ -1510,11 +1512,13 @@ exports.deleteMenu = async (req, res) => {
     //   });
     // }
 
-
-    const restaurant = await Restaurant.findOne({ _id:token._id, status:"Active"});
+    const restaurant = await Restaurant.findOne({
+      _id: token._id,
+      status: "Active",
+    });
 
     // console.log(restaurant,admin)
-    if (!(restaurant )) {
+    if (!restaurant) {
       return res.send({
         statusCode: 400,
         success: false,
@@ -1606,7 +1610,7 @@ exports.logout = async (req, res) => {
         statusCode: 200,
         success: true,
         message: "restaurant logout successfully",
-        result: { },
+        result: {},
       });
     }
   } catch (error) {
@@ -1627,7 +1631,7 @@ exports.getAllActiverestaurant = async (req, res) => {
     limit = Number.parseInt(limit);
     const skip = (page - 1) * limit;
 
-    const user = await User.findOne({_id: token._id, status: "Active"})
+    const user = await User.findOne({ _id: token._id, status: "Active" });
     const admin = await Admin.findOne({ _id: token._id, status: "Active" });
     if (!(admin || user)) {
       return res.send({
@@ -1638,7 +1642,8 @@ exports.getAllActiverestaurant = async (req, res) => {
       });
     }
 
-    const allRestaurant = await Restaurant.find({ status: "Active" }).select("-otp -securityToken -password -token -phoneNumber ")
+    const allRestaurant = await Restaurant.find({ status: "Active" })
+      .select("-otp -securityToken -password -token -phoneNumber ")
       .skip(skip)
       .limit(limit);
 
@@ -1707,7 +1712,7 @@ exports.getAllRestaurantbyAdmin = async (req, res) => {
   }
 };
 
-exports.getAllRestaurant = async(req,res) => {
+exports.getAllRestaurant = async (req, res) => {
   try {
     let token = req.token;
     let { page = 1, limit = 10 } = req.query;
@@ -1715,7 +1720,7 @@ exports.getAllRestaurant = async(req,res) => {
     limit = Number.parseInt(limit);
     const skip = (page - 1) * limit;
 
-    const user = await User.findOne({_id: token._id, status: "Active"})
+    const user = await User.findOne({ _id: token._id, status: "Active" });
     const admin = await Admin.findOne({ _id: token._id, status: "Active" });
     if (!(admin || user)) {
       return res.send({
@@ -1726,7 +1731,8 @@ exports.getAllRestaurant = async(req,res) => {
       });
     }
 
-    const allRestaurant = await Restaurant.find({ status: "Active" }).select("-otp -password -phoneNumber -token -securityToken " )
+    const allRestaurant = await Restaurant.find({ status: "Active" })
+      .select("-otp -password -phoneNumber -token -securityToken ")
       .skip(skip)
       .limit(limit);
 
@@ -1745,80 +1751,79 @@ exports.getAllRestaurant = async(req,res) => {
         totalRecord: totalRestaurant,
       },
     });
-
   } catch (error) {
     return res.send({
-      statusCode:500,
-      success:false,
-      message:error.message + " ERROR in get all restaurant api"
-
-    })
+      statusCode: 500,
+      success: false,
+      message: error.message + " ERROR in get all restaurant api",
+    });
   }
-}
-exports.topRatedRestaurant = async(req,res) => {
+};
+exports.topRatedRestaurant = async (req, res) => {
   try {
-    let token  = req.token ; 
-    const user = await User.findOne({_id:token._id})
-    if(!user){
+    let token = req.token;
+    const user = await User.findOne({ _id: token._id });
+    if (!user) {
       return res.send({
-        statusCode:404,
-        success:false,
-        message:"user not found",
-        result:{}
-      })
+        statusCode: 404,
+        success: false,
+        message: "user not found",
+        result: {},
+      });
     }
-    if(user.status === "Delete"){
+    if (user.status === "Delete") {
       return res.send({
         statusCode,
-        success:false,
-        message:"user has been deleted",
-        result:{}
-      })
+        success: false,
+        message: "user has been deleted",
+        result: {},
+      });
     }
-    if(user.status === "Block"){
+    if (user.status === "Block") {
       return res.send({
-        statuscode:400,
-        success:false,
-        message:"unauthorise access",
-        result:{}
-      })
+        statuscode: 400,
+        success: false,
+        message: "unauthorise access",
+        result: {},
+      });
     }
-    if(user.status==="Pending"){
+    if (user.status === "Pending") {
       return res.send({
-        statusCode:400,
-        success:false,
-        message:"unauthorise access",
-        result:{}
-      })
+        statusCode: 400,
+        success: false,
+        message: "unauthorise access",
+        result: {},
+      });
     }
-    const restaurant = await Restaurant.find({status:"Active"}).sort({rating:-1}).limit(10).select("-password  -token -securityToken -phoneNumber -otp ")
-    if(!restaurant){
+    const restaurant = await Restaurant.find({ status: "Active" })
+      .sort({ rating: -1 })
+      .limit(10)
+      .select("-password  -token -securityToken -phoneNumber -otp ");
+    if (!restaurant) {
       return res.send({
-        statusCode:404,
-        success:false,
-        message:"Restaurant not found",
-        result:{}
-      })
+        statusCode: 404,
+        success: false,
+        message: "Restaurant not found",
+        result: {},
+      });
     }
     // console.log(restaurant);
 
-
-    
     return res.send({
-      statusCode:200,
-      success:true,
-      message:"top rated restaurant fetch successfully",
-      result:{restaurant}}
-  )
+      statusCode: 200,
+      success: true,
+      message: "top rated restaurant fetch successfully",
+      result: { restaurant },
+    });
   } catch (error) {
     return res.send({
-      statusCode:500,
-      success:false,
-      message:error.message + " ERROR in top rates restaurant",
-      result:{}
-    })
+      statusCode: 500,
+      success: false,
+      message: error.message + " ERROR in top rates restaurant",
+      result: {},
+    });
   }
-}
+};
 
 // exports.editRestaurantbyAdmin = async (req,res) => {
 //   try {
@@ -1826,7 +1831,7 @@ exports.topRatedRestaurant = async(req,res) => {
 //     const {resId} = req.params
 //     const {operationalHours, status, isVerified} = req.body;
 //     let admin = await Admin.findById({_id:token._id, status:"Active"});
-    
+
 //     if(!admin){
 //       return res.send({
 //         statusCode:404,
@@ -1894,7 +1899,7 @@ exports.editRestaurantbyAdmin = async (req, res) => {
     let token = req.token;
     const { resId } = req.params;
     const { status, isVerified } = req.body;
-    let admin = await Admin.findById({ _id: token._id});
+    let admin = await Admin.findById({ _id: token._id });
     if (!admin) {
       return res.send({
         statusCode: 404,
@@ -1964,7 +1969,6 @@ exports.editRestaurantbyAdmin = async (req, res) => {
   }
 };
 
-
 exports.BlockedRestaurant = async (req, res) => {
   try {
     let token = req.token;
@@ -2028,8 +2032,7 @@ exports.BlockedRestaurant = async (req, res) => {
       message: error.message + " ERROR in Block restaurant API",
     });
   }
-}
-
+};
 
 exports.getRestaurantDashboard = async (req, res) => {
   try {
@@ -2059,7 +2062,7 @@ exports.getRestaurantDashboard = async (req, res) => {
     } else if (range === "month") {
       const start = new Date(now.getFullYear(), now.getMonth(), 1);
       dateFilter.createdAt = { $gte: start };
-    }else if (range === "custom") {
+    } else if (range === "custom") {
       const startDate = new Date(req.query.startDate);
       const endDate = new Date(req.query.endDate);
       endDate.setHours(23, 59, 59, 999); // include full day
@@ -2150,14 +2153,12 @@ const scrapeGoogleRestaurants = require("../../../scrapping/scrappingGoogleMap")
 //   //   },
 //   //   // You can add more stages like $sort, $limit, etc., if needed
 //   // ]);
-  
-  
+
 //   console.log("Existing Restaurants",existingRestaurants)
 
 //   if (existingRestaurants.length) {
 //     return res.json(existingRestaurants);
 //   }
-
 
 //   // Scrape new data
 //   const scrapedData = await scrapeGoogleRestaurants(lat, lng);
@@ -2256,7 +2257,6 @@ const scrapeGoogleRestaurants = require("../../../scrapping/scrappingGoogleMap")
 //   }
 // };
 
-
 // const scrapeGoogleRestaurants = require('./path-to-your-scrape-function');
 // const Restaurant = require('../models/Restaurant'); // Adjust the path if needed
 
@@ -2294,11 +2294,13 @@ exports.getNearbyRestaurants = async (req, res) => {
     // 🚀 Scrape from Google if no fresh data
     const scrapedData = await scrapeGoogleRestaurants(lat, lng);
 
-    console.log(scrapedData)
+    console.log(scrapedData);
 
     const restaurantsToSave = scrapedData.map((r) => ({
       ...r,
-      email: `scraped_${Math.random().toString(36).substring(7)}@placeholder.com`,
+      email: `scraped_${Math.random()
+        .toString(36)
+        .substring(7)}@placeholder.com`,
       password: "scraped_data_only",
       phoneNumber: "0000000000",
       address: r.address || "",
@@ -2323,6 +2325,8 @@ exports.getNearbyRestaurants = async (req, res) => {
     res.json(restaurantsToSave);
   } catch (err) {
     console.error("Error in getNearbyRestaurants:", err.message);
-    res.status(500).json({ message: "Something went wrong", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Something went wrong", error: err.message });
   }
 };

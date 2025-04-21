@@ -458,6 +458,8 @@ exports.verifysignOTP = async (req, res) => {
         result: {},
       });
     }
+    // console.log("date",Date.now())
+    // console.log("jbuunsvns",user.otp.otpExpiry);
 
     const user = await User.findOne({ email, status: "Pending" });
     if (!user) {
@@ -476,6 +478,7 @@ exports.verifysignOTP = async (req, res) => {
         result: {},
       });
     }
+    // console.log("jbuunsvns",user.otp.otpExpiry);
     if (Date.now() > user.otp.otpExpiry) {
       return res.send({
         statuscode: 400,
@@ -484,6 +487,9 @@ exports.verifysignOTP = async (req, res) => {
         result: {},
       });
     }
+    // const otpExpiry = user.otp.otpExpiry;
+    // console.log("date",Date.now())
+    // console.log("jbuunsvns",user.otp.otpExpiry);
     user.status = "Active";
     user.otp = { otpValue: "", otpExpiry: "" };
     const token = await generateJWT({
@@ -541,14 +547,14 @@ exports.login = async (req, res) => {
         result: {},
       });
     }
-    if (!isStrongPassword(password)) {
-      return res.send({
-        statusCode: 404,
-        success: false,
-        message: "please enter a strong password",
-        result: {},
-      });
-    }
+    // if (!isStrongPassword(password)) {
+    //   return res.send({
+    //     statusCode: 404,
+    //     success: false,
+    //     message: "please enter a strong password",
+    //     result: {},
+    //   });
+    // }
 
     const user = await User.findOne({ email });
     if (!user) {

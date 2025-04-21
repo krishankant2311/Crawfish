@@ -14,8 +14,22 @@ function startDeleteOldUsersJob() {
     console.log(`Deleted ${result.deletedCount} old users`);
   });
 }
+const Restaurant = require('../module/restaurants/model/restaurantModel');
 
-module.exports = startDeleteOldUsersJob;
+function startDeleteOldRestaurantJob() {
+  cron.schedule('0 0 * * *', async () => {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 30);
+
+    const result = await Restaurant.deleteMany({
+      status: 'delete',
+      updatedAt: { $lte: cutoffDate }
+    });
+
+    console.log(`Deleted ${result.deletedCount} old users`);
+  });
+}
+module.exports = startDeleteOldUsersJob,startDeleteOldRestaurantJob;
 
 
 
