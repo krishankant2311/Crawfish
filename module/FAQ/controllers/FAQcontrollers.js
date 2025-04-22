@@ -247,7 +247,7 @@ exports.getFAQ = async (req, res) => {
   try {
     let token = req.token;
     let faqId = req.params.id;
-    console.log(faqId);
+    // console.log(faqId);
     if (!faqId) {
       return res.send({
         statusCode: 400,

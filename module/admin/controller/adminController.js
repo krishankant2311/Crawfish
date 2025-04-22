@@ -52,13 +52,13 @@ exports.loginAdmin = async (req, res) => {
         message: "Invalid email",
       });
     }
-    if (!isPasswordValid(password)) {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "Password should be strong",
-      });
-    }
+    // if (!isPasswordValid(password)) {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "Password should be strong",
+    //   });
+    // }
 
     let admin = await Admin.findOne({
       email,

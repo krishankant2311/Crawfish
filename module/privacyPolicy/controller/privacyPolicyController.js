@@ -67,8 +67,8 @@ exports.createPrivacyPolicy = async (req, res) => {
 exports.getPrivacyPolicy = async (req, res) => {
     try {
         let token = req.token;
-        let admin = await  Admin.findOne({_id: token._id});
-        let user = await User.findOne({_id: token._id});
+        let admin = await  Admin.findOne({_id: token._id, status:"Active"});
+        let user = await User.findOne({_id: token._id, status:"Active"});
         if (!admin &&!user) {
             return res.send({
                 statusCode: 404,
