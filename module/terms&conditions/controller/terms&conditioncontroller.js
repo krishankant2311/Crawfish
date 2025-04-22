@@ -50,7 +50,7 @@ exports.createTermsAndCondition = async (req, res) => {
     }
     if (admin.status === "Pending") {
       return res.send({
-        statuscode: 401,
+        statusCode: 401,
         success: false,
         message: "Inactive admin",
         result: {},
@@ -74,7 +74,7 @@ exports.createTermsAndCondition = async (req, res) => {
     });
     await createNewTermsConditions.save();
     return res.send({
-      statuscode: 200,
+      statusCode: 200,
       success: true,
       message: "terms and conditon created successfully",
       result: {},

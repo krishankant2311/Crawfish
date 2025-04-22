@@ -90,7 +90,7 @@ exports.addfavourite = async(req,res) => {
     });
     await newfavourite.save();
     return res.send({
-      statuscode: 200,
+      statusCode: 200,
       success: true,
       message: "fav add successfully",
       result: {},
@@ -269,7 +269,7 @@ exports.deleteFavouriteRestaurant = async(req,res) => {
     favourite.isFavourite = "false"
     await favourite.save()
     return res.send({
-        statuscode:200,
+        statusCode:200,
         success:true,
         message:"restaurant delete successfully",
         result:{}

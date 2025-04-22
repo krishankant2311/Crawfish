@@ -190,7 +190,7 @@ exports.signupRestaurant = async (req, res) => {
     });
   } catch (error) {
     return res.json({
-      statuscode: 500,
+      statusCode: 500,
       success: false,
       message: error.message + "error in signup restaurant API. ",
     });
@@ -227,7 +227,7 @@ exports.signupRestaurantVerifyOtp = async (req, res) => {
     }
     if (otp.length !== 4) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "otp must be 4 digits",
         result: {},
@@ -237,7 +237,7 @@ exports.signupRestaurantVerifyOtp = async (req, res) => {
     const restaurant = await Restaurant.findOne({ email });
     if (!restaurant) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "restaurant not found",
         result: {},
@@ -245,7 +245,7 @@ exports.signupRestaurantVerifyOtp = async (req, res) => {
     }
     if (otp !== restaurant.otp.otpValue) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "invalid otp",
         result: {},
@@ -253,7 +253,7 @@ exports.signupRestaurantVerifyOtp = async (req, res) => {
     }
     if (Date.now() > restaurant.otp.otpExpiry) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "otp has expired",
         result: {},
@@ -269,7 +269,7 @@ exports.signupRestaurantVerifyOtp = async (req, res) => {
     const saveUser = await restaurant.save();
     if (saveUser) {
       return res.send({
-        statuscode: 200,
+        statusCode: 200,
         success: true,
         message: "otp verify successfully",
         result: {token},
@@ -277,7 +277,7 @@ exports.signupRestaurantVerifyOtp = async (req, res) => {
     }
   } catch (error) {
     return res.send({
-      statuscode: 400,
+      statusCode: 400,
       success: false,
       message: error.message + " ERROR in restaurant signup verify OTP",
       result: {},
@@ -333,7 +333,7 @@ exports.loginRestaurant = async (req, res) => {
     }
     if (restaurant.status === "Pending") {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "Inactive Restaurant",
         result: {},
@@ -381,7 +381,7 @@ exports.editRestaurant = async (req, res) => {
     restaurantName = restaurantName?.trim();
     if (!restaurantName) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "restaurantName required",
         result: {},
@@ -389,7 +389,7 @@ exports.editRestaurant = async (req, res) => {
     }
     if (!email) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "email required",
         result: {},
@@ -501,7 +501,7 @@ exports.deleteRestaurant = async (req, res) => {
     }
     if (admin.status == "Block") {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "admin inactive",
         result: {},
@@ -534,7 +534,7 @@ exports.deleteRestaurant = async (req, res) => {
     }
     if (restaurant.status == "Block") {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "Restaurant inactive",
         result: {},
@@ -609,7 +609,7 @@ exports.forgetPassword = async (req, res) => {
     email = email?.toLowerCase()?.trim();
     if (!email) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "Email required",
         result: {},
@@ -617,7 +617,7 @@ exports.forgetPassword = async (req, res) => {
     }
     // if (!isValidEmail(email)) {
     //   return res.send({
-    //     statuscode: 400,
+    //     statusCode: 400,
     //     success: false,
     //     message: "please enter a valid emaail",
     //     result: {},
@@ -647,7 +647,7 @@ exports.forgetPassword = async (req, res) => {
 
     await restaurant.save();
     return res.send({
-      statuscode: 200,
+      statusCode: 200,
       success: true,
       message: "otp send successfully",
       result: { otpValue },
@@ -707,7 +707,7 @@ exports.resendOTP = async (req, res) => {
 
     await restaurant.save();
     return res.send({
-      statuscode: 200,
+      statusCode: 200,
       success: true,
       message: "otp Resend successfully",
       result: { otpValue },
@@ -778,7 +778,7 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
     }
     if (restaurant.status === "Pending") {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "Inactive restaurant",
         result: {},
@@ -884,7 +884,7 @@ exports.updateForgotPassword = async (req, res) => {
     }
     if (!securityToken) {
       return res.send({
-        statuscode: 404,
+        statusCode: 404,
         success: false,
         message: "required security token",
         result: {},
@@ -1024,7 +1024,7 @@ exports.personalDetails = async (req, res) => {
     }
     await restaurant.save();
     return res.send({
-      statuscode: 200,
+      statusCode: 200,
       success: true,
       message: "Personal details add successfully",
       result: {},
@@ -1135,7 +1135,7 @@ exports.changePassword = async (req, res) => {
     });
   } catch (error) {
     return res.send({
-      statuscode: 500,
+      statusCode: 500,
       success: false,
       message: error.message + " ERROR in change password api of restaurant",
       result: {},
@@ -1215,7 +1215,7 @@ exports.restaurantProfile = async (req, res) => {
     }
     if (restaurant.status === "Pending" || restaurant.status === "Block") {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "Inactive restaurant",
         result: {},
@@ -1444,7 +1444,7 @@ exports.getMenu = async (req, res) => {
 
     if (menu) {
       return res.send({
-        statuscode: 200,
+        statusCode: 200,
         success: true,
         message: "menu get successfully",
         result: { menu },
@@ -1458,7 +1458,7 @@ exports.getMenu = async (req, res) => {
     });
   } catch (error) {
     return res.send({
-      statuscode: 500,
+      statusCode: 500,
       success: false,
       message: error.message + " ERROR in get menu api",
       result: {},
@@ -1615,7 +1615,7 @@ exports.logout = async (req, res) => {
     }
   } catch (error) {
     return res.send({
-      statuscode: 500,
+      statusCode: 500,
       success: false,
       message: error.message + "Error in user logout API",
       result: {},
@@ -1781,7 +1781,7 @@ exports.topRatedRestaurant = async (req, res) => {
     }
     if (user.status === "Block") {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "unauthorise access",
         result: {},
@@ -1879,14 +1879,14 @@ exports.topRatedRestaurant = async (req, res) => {
 
 //     restaurant.save();
 //     return res.send({
-//       statuscode:200,
+//       statusCode:200,
 //       success:true,
 //       message:"restaurant updated successfully",
 //       result:{}
 //     })
 //   } catch (error) {
 //     return res.send({
-//       statuscode:500,
+//       statusCode:500,
 //       success:false,
 //       message:"ERROR in edit restaurant by admin api " + error.message,
 //       result:{}
@@ -1954,14 +1954,14 @@ exports.editRestaurantbyAdmin = async (req, res) => {
     restaurant.isVerified = isVerified;
     restaurant.save();
     return res.send({
-      statuscode: 200,
+      statusCode: 200,
       success: true,
       message: "restaurant updated successfully",
       result: {},
     });
   } catch (error) {
     return res.send({
-      statuscode: 500,
+      statusCode: 500,
       success: false,
       message: "ERROR in edit restaurant by admin api " + error.message,
       result: {},
@@ -1994,7 +1994,7 @@ exports.BlockedRestaurant = async (req, res) => {
     }
     if (admin.status == "Block") {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "admin inactive",
         result: {},
@@ -2011,7 +2011,7 @@ exports.BlockedRestaurant = async (req, res) => {
     }
     if (restaurant.status == "Block") {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "Restaurant already Blocked",
         result: {},

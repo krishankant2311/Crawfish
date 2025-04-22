@@ -242,7 +242,7 @@ exports.deletesearch = async (req, res) => {
     }
     if (search.status === "Delete") {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success:false,
         message: "Search has been already deleted",
         result: {},

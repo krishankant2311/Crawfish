@@ -7,7 +7,7 @@ const verifyJWT = async (req, res, next) => {
     const incomingToken = req.headers.token;
     if (!incomingToken) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         succes: false,
         message: "Token not Found",
         result: {},
@@ -17,7 +17,7 @@ const verifyJWT = async (req, res, next) => {
     const decodeToken = await jwt.verify(incomingToken, process.env.JWT_SECRET_KEY);
     if (!decodeToken) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         succes: false,
         message: "invalid Token",
         result: {},

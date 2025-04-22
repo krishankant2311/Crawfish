@@ -153,7 +153,7 @@ exports.adminForgotPassword = async (req, res) => {
     }
     await admin.save();
     return res.send({
-      statuscode: 200,
+      statusCode: 200,
       success: true,
       message: "otp send successfully",
       result: { otpValue },
@@ -347,7 +347,7 @@ exports.changepassword = async (req, res) => {
     const admin = await Admin.findOne({ _id: _id });
     if (!admin) {
       return res.send({
-        statuscode: 404,
+        statusCode: 404,
         success: false,
         message: "Admin not found",
         result: {},
@@ -355,7 +355,7 @@ exports.changepassword = async (req, res) => {
     }
     if (admin.status === "Delete") {
       return res.send({
-        statuscode: 401,
+        statusCode: 401,
         success: false,
         message: "unauthorise access",
         result: {},
@@ -363,7 +363,7 @@ exports.changepassword = async (req, res) => {
     }
     if (!oldPassword) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "Required old password",
         result: {},
@@ -371,7 +371,7 @@ exports.changepassword = async (req, res) => {
     }
     if (!newPassword) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "Required new password",
         result: {},

@@ -221,7 +221,7 @@ const Restaurant = [
 //       filter.verified = filteredRestaurants.verified;
 //       await filter.save();
 //       return res.send({
-//         statuscode: 200,
+//         statusCode: 200,
 //         success: false,
 //         message: "filtered restaurant fetch successfully",
 //         result: { filteredRestaurants },

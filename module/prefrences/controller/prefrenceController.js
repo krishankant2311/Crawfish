@@ -184,7 +184,7 @@ exports.updatePreferences = async (req, res) => {
     });
   } catch (error) {
     return res.send({
-      statuscode: 500,
+      statusCode: 500,
       succes: false,
       message: error.message + " ERROR in update preference api",
       result: {},

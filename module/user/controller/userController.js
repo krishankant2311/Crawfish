@@ -38,7 +38,7 @@ const isStrongPassword = (password, newPassword) => {
 //     number = Number.parseInt(number);
 //     if (!email) {
 //       return res.send({
-//         statuscode: 400,
+//         statusCode: 400,
 //         success: false,
 //         message: "email required",
 //         result: {},
@@ -46,7 +46,7 @@ const isStrongPassword = (password, newPassword) => {
 //     }
 //     if (!isValidEmail(email)) {
 //       return res.send({
-//         statuscode: 400,
+//         statusCode: 400,
 //         success: false,
 //         message: "invalid email",
 //         result: {},
@@ -54,7 +54,7 @@ const isStrongPassword = (password, newPassword) => {
 //     }
 //     if (!fullName) {
 //       return res.send({
-//         statuscode: 400,
+//         statusCode: 400,
 //         success: false,
 //         message: "fullname required",
 //         result: {},
@@ -62,7 +62,7 @@ const isStrongPassword = (password, newPassword) => {
 //     }
 //     if (!number) {
 //       return res.send({
-//         statuscode: 400,
+//         statusCode: 400,
 //         success: false,
 //         message: "Mo. number required",
 //         result: {},
@@ -70,7 +70,7 @@ const isStrongPassword = (password, newPassword) => {
 //     }
 //     if (!password) {
 //       return res.send({
-//         statuscode: 400,
+//         statusCode: 400,
 //         success: false,
 //         message: "password required",
 //         result: {},
@@ -78,7 +78,7 @@ const isStrongPassword = (password, newPassword) => {
 //     }
 //     if (!isStrongPassword(password)) {
 //       return res.send({
-//         statuscode: 400,
+//         statusCode: 400,
 //         success: false,
 //         message:
 //           "password should be 8 digits and must contain atleast 1 capital letter and 1 symbol",
@@ -136,7 +136,7 @@ const isStrongPassword = (password, newPassword) => {
 //       }
 
 //       return res.send({
-//         statuscode: 404,
+//         statusCode: 404,
 //         success: false,
 //         message: "user already exist",
 //         result: { otpValue },
@@ -187,14 +187,14 @@ const isStrongPassword = (password, newPassword) => {
 
 //     await createNewUser.save();
 //     return res.send({
-//       statuscode: 200,
+//       statusCode: 200,
 //       success: true,
 //       message: "user created and otp send successfully",
 //       result: {otpValue},
 //     });
 //   } catch (error) {
 //     return res.send({
-//       statuscode: 500,
+//       statusCode: 500,
 //       success: false,
 //       message: error.message + " Error in user signuo API ",
 //       result: {},
@@ -216,28 +216,28 @@ exports.signup = async (req, res) => {
 
     if (!email)
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "email required",
         result: {},
       });
     if (!isValidEmail(email))
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "invalid email",
         result: {},
       });
     if (!fullName)
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "fullname required",
         result: {},
       });
     if (!number) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "Mo. number required",
         result: {},
@@ -254,7 +254,7 @@ exports.signup = async (req, res) => {
 
     if (!password) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "password required",
         result: {},
@@ -262,7 +262,7 @@ exports.signup = async (req, res) => {
     }
     if (!isStrongPassword(password)) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message:
           "password should be 8 digits and must contain atleast 1 capital letter and 1 symbol",
@@ -369,7 +369,7 @@ exports.signup = async (req, res) => {
 
       if (user.status === "Active") {
         return res.send({
-          statuscode: 400,
+          statusCode: 400,
           success: false,
           message: "user already exist",
           result: {},
@@ -443,7 +443,7 @@ exports.verifysignOTP = async (req, res) => {
 
     if (!otp) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "required otp",
         result: {},
@@ -452,7 +452,7 @@ exports.verifysignOTP = async (req, res) => {
 
     if (otp.length !== 4) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "otp must be 4 digits",
         result: {},
@@ -464,7 +464,7 @@ exports.verifysignOTP = async (req, res) => {
     const user = await User.findOne({ email, status: "Pending" });
     if (!user) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "user not found",
         result: {},
@@ -472,7 +472,7 @@ exports.verifysignOTP = async (req, res) => {
     }
     if (otp !== user.otp.otpValue) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "invalid otp",
         result: {},
@@ -481,7 +481,7 @@ exports.verifysignOTP = async (req, res) => {
     // console.log("jbuunsvns",user.otp.otpExpiry);
     if (Date.now() > user.otp.otpExpiry) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "otp has expired",
         result: {},
@@ -501,7 +501,7 @@ exports.verifysignOTP = async (req, res) => {
     const saveUser = await user.save();
     if (saveUser) {
       return res.send({
-        statuscode: 200,
+        statusCode: 200,
         success: true,
         message: "otp verify successfully",
         result: { token },
@@ -559,7 +559,7 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "user not found",
         result: {},
@@ -575,7 +575,7 @@ exports.login = async (req, res) => {
     }
     if (user.status === "Pending") {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "Please verify OTP",
         result: {},
@@ -583,7 +583,7 @@ exports.login = async (req, res) => {
     }
     if (user.status === "Block") {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "user has been blocked",
         result: {},
@@ -618,7 +618,7 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     return res.send({
-      statuscode: 500,
+      statusCode: 500,
       success: false,
       message: error.message + "Error in user login API",
       result: {},
@@ -632,7 +632,7 @@ exports.forgetPassword = async (req, res) => {
     email = email?.toLowerCase()?.trim();
     if (!email) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "Email required",
         result: {},
@@ -640,7 +640,7 @@ exports.forgetPassword = async (req, res) => {
     }
     if (!isValidEmail(email)) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "please enter a valid emaail",
         result: {},
@@ -671,7 +671,7 @@ exports.forgetPassword = async (req, res) => {
 
     await user.save();
     return res.send({
-      statuscode: 200,
+      statusCode: 200,
       success: true,
       message: "otp send successfully",
       result: { otpValue },
@@ -691,7 +691,7 @@ exports.sendOTPbyNumber = async (req, res) => {
     let { number } = req.body;
     if (!number) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "Phone number required",
         result: {},
@@ -763,7 +763,7 @@ exports.sendOTPbyNumberforForgotPassword = async (req, res) => {
     let { number } = req.body;
     if (!number) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "Phone number required",
         result: {},
@@ -847,7 +847,7 @@ exports.verifyOTP = async (req, res) => {
     }
     if (!otp) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "required otp",
         result: {},
@@ -855,7 +855,7 @@ exports.verifyOTP = async (req, res) => {
     }
     if (otp.length !== 4) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "otp must be 4 digits",
         result: {},
@@ -865,7 +865,7 @@ exports.verifyOTP = async (req, res) => {
     const user = await User.findOne({ email, status: "Active" });
     if (!user) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "user not found",
         result: {},
@@ -873,7 +873,7 @@ exports.verifyOTP = async (req, res) => {
     }
     if (otp !== user.otp.otpValue) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "invalid otp",
         result: {},
@@ -881,7 +881,7 @@ exports.verifyOTP = async (req, res) => {
     }
     if (Date.now() > user.otp.otpExpiry) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "otp has expired",
         result: {},
@@ -897,14 +897,14 @@ exports.verifyOTP = async (req, res) => {
 
     await user.save();
     return res.send({
-      statuscode: 200,
+      statusCode: 200,
       success: true,
       message: "otp verify successfully",
       result: { securityToken },
     });
   } catch (error) {
     return res.send({
-      statuscode: 500,
+      statusCode: 500,
       success: false,
       message: error.message + "internal server error",
       result: {},
@@ -970,7 +970,7 @@ exports.resendOTP = async (req, res) => {
 
     await user.save();
     return res.send({
-      statuscode: 200,
+      statusCode: 200,
       success: true,
       message: "otp Resend successfully",
       result: { otpValue },
@@ -993,7 +993,7 @@ exports.updateForgotPassword = async (req, res) => {
     confirmPassword = confirmPassword?.trim();
     if (!email) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "email required",
         result: {},
@@ -1001,7 +1001,7 @@ exports.updateForgotPassword = async (req, res) => {
     }
     if (!isValidEmail(email)) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "please enter a valid email",
         result: {},
@@ -1009,7 +1009,7 @@ exports.updateForgotPassword = async (req, res) => {
     }
     if (!newPassword) {
       return res.send({
-        statuscode: 404,
+        statusCode: 404,
         success: false,
         message: "please enter newPassword",
         result: {},
@@ -1017,7 +1017,7 @@ exports.updateForgotPassword = async (req, res) => {
     }
     if (!isStrongPassword(newPassword)) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "please enter a strong password",
         result: {},
@@ -1025,7 +1025,7 @@ exports.updateForgotPassword = async (req, res) => {
     }
     if (!confirmPassword) {
       return res.send({
-        statuscode: 404,
+        statusCode: 404,
         success: false,
         message: "required confirmPassword",
         result: {},
@@ -1033,7 +1033,7 @@ exports.updateForgotPassword = async (req, res) => {
     }
     if (!securityToken) {
       return res.send({
-        statuscode: 404,
+        statusCode: 404,
         success: false,
         message: "required security token",
         result: {},
@@ -1041,7 +1041,7 @@ exports.updateForgotPassword = async (req, res) => {
     }
     if (newPassword !== confirmPassword) {
       return res.send({
-        statuscode: 404,
+        statusCode: 404,
         success: false,
         message: "confirmPassword must be same as newPassword",
         result: {},
@@ -1118,7 +1118,7 @@ exports.changePassword = async (req, res) => {
     }
     if (!confirmPassword) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "required confirmPassword",
         result: {},
@@ -1145,7 +1145,7 @@ exports.changePassword = async (req, res) => {
     const user = await User.findOne({ _id: token._id });
     if (!user) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "user not found",
         result: {},
@@ -1155,7 +1155,7 @@ exports.changePassword = async (req, res) => {
     const oldMatch = await bcrypt.compare(oldPassword, user.password);
     if (!oldMatch) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "Invalid old password",
         result: {},
@@ -1164,7 +1164,7 @@ exports.changePassword = async (req, res) => {
     const issame = await bcrypt.compare(newPassword, user.password);
     if (issame) {
       return res.send({
-        statuscode: 400,
+        statusCode: 400,
         success: false,
         message: "new password can not be same as old password",
         result: {},
@@ -1177,7 +1177,7 @@ exports.changePassword = async (req, res) => {
     const saveUser = await user.save();
     if (saveUser) {
       return res.send({
-        statuscode: 200,
+        statusCode: 200,
         success: true,
         message: "password change successfully",
         result: {},
@@ -1185,7 +1185,7 @@ exports.changePassword = async (req, res) => {
     }
   } catch (error) {
     return res.send({
-      statuscode: 500,
+      statusCode: 500,
       success: false,
       message: error.message + "Error in change password api",
       result: {},
@@ -1300,7 +1300,7 @@ exports.getAllUser = async (req, res) => {
   } catch (error) {
     console.log("Error!!", error);
     return res.send({
-      statuscode: 500,
+      statusCode: 500,
       succes: false,
       message: error.message + " ERROR in get all user api",
       return: { error },
@@ -1361,7 +1361,7 @@ exports.getAllActiveUser = async (req, res) => {
   } catch (error) {
     console.log("Error!!", error);
     return res.send({
-      statuscode: 500,
+      statusCode: 500,
       succes: false,
       message: error.message + " ERROR in get all active user api",
       return: error,
