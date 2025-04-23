@@ -549,11 +549,11 @@ exports.getAllReviewbyRestaurant = async (req, res) => {
         result: {},
       });
     }
-    const allReview = await Review.find({restaurantId:token._id}).skip(skip).limit(limit)
+    const allReview = await Review.find({restaurantId:token._id, status:"Active"}).skip(skip).limit(limit)
     // .populate('user','fullName profilePhoto')
     // .sort({ createdAt: -1 }) // optional: latest first
     // .lean();;
-    const totalReview = await Review.countDocuments({restaurantId:token._id});
+    const totalReview = await Review.countDocuments({restaurantId:token._id,status:"Active"});
     return res.send({
       statusCode: 200,
       success: true,
