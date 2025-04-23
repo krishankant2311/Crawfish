@@ -11,11 +11,11 @@ const addressSchema = new mongoose.Schema(
             require:true,
             default:""
         },
-        floorNumber :{
-            type:String,
-            require:true,
-            default:""
-        },
+        type: {
+            type: String,
+            enum: ["Home", "Work","Office","Other"],
+            default: "Home",
+          },
         // howToReach : {
         //     type:String,
         //     default:""

@@ -6,7 +6,7 @@ const Admin = require("../../admin/model/adminModel");
 exports.createCompleteAddress = async (req, res) => {
   try {
     let token = req.token;
-    let { completeAddress, floorNumber } = req.body;
+    let { completeAddress, type } = req.body;
     if (!completeAddress) {
       return res.send({
         statusCode: 400,
@@ -15,11 +15,11 @@ exports.createCompleteAddress = async (req, res) => {
         result: {},
       });
     }
-    if (!floorNumber) {
+    if (!type) {
       return res.send({
         statusCode: 400,
         success: false,
-        message: "floor number required",
+        message: "Adress type required",
         result: {},
       });
     }
@@ -60,7 +60,7 @@ exports.createCompleteAddress = async (req, res) => {
     createNewCompleteAddress = new Address({
       userId:user._id,
       completeAddress,
-      floorNumber,
+      type,
       // howToReach,
     });
 
@@ -86,7 +86,7 @@ exports.editAdress = async (req, res) => {
   try {
     let token = req.token;
     let { AddressId } = req.params;
-    let { completeAddress, floorNumber, howToReach } = req.body;
+    let { completeAddress, type } = req.body;
     if (!AddressId) {
       return res.send({
         statusCode: 400,
@@ -103,11 +103,11 @@ exports.editAdress = async (req, res) => {
         result: {},
       });
     }
-    if (!floorNumber) {
+    if (!type) {
       return res.send({
         statusCode: 400,
         success: false,
-        message: "floor number required",
+        message: "address type required",
         result: {},
       });
     }
@@ -156,8 +156,8 @@ exports.editAdress = async (req, res) => {
       });
     }
     address.completeAddress = completeAddress;
-    address.floorNumber = floorNumber;
-    address.howToReach = howToReach;
+    address.type = type;
+    // address.howToReach = howToReach;
 
     await address.save();
 
