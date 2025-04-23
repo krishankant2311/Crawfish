@@ -684,7 +684,7 @@ exports.resendOTP = async (req, res) => {
     }
     if (
       restaurant.otp.otpExpiry &&
-      currentTime < restaurant.otp.otpExpiry - 5 * 60 * 1000 + 30 * 1000
+      Date.now() < restaurant.otp.otpExpiry - 5 * 60 * 1000 + 30 * 1000
     ) {
       return res.send({
         success: false,
