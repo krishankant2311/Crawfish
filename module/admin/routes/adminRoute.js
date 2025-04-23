@@ -8,7 +8,7 @@ route.post('/admin-login', upload.none(),adminController.loginAdmin);
 route.post('/admin-forgotPassword', upload.none(),adminController.adminForgotPassword)
 route.post('/admin-verifyOtp', upload.none(),adminController.verifyOtp)
 route.post('/admin-changeForgot-password', upload.none(),adminController.changeForgotPassword)
-route.post('/admin-changePassword',upload.none(),verifyJWT,adminController.changepassword)
+route.post('/admin-changePassword',verifyJWT,upload.none(),adminController.changepassword)
 route.post('/admin-logout',verifyJWT, upload.none(),adminController.adminLogout)
 route.post('/admin-editProfile',verifyJWT, upload.none(),adminController.editAdminProfile)
 route.post('/add-subadmin',verifyJWT, upload.none(),adminController.addSubAdmin)

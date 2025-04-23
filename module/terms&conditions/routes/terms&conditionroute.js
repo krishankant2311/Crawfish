@@ -6,7 +6,7 @@ const termsConditionsController = require("../controller/terms&conditioncontroll
 
 
 
-route.post("/create-termsConditions",upload.none(),verifyJWT,termsConditionsController.createTermsAndCondition)
+route.post("/create-termsConditions",verifyJWT,upload.none(),termsConditionsController.createTermsAndCondition)
 route.get("/get-termsConditions",verifyJWT,termsConditionsController.getTermsAndCondition)
 
 

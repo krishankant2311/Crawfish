@@ -10,8 +10,8 @@ const {verifyJWT} = require("../../../middlewares/jwt")
 route.post("/signup-restaurant",upload.none(),restaurantController.signupRestaurant)
 route.post("/signup-restaurant-verify-otp",upload.none(),restaurantController.signupRestaurantVerifyOtp)
 route.post("/login-restaurant",upload.none(),restaurantController.loginRestaurant)
-route.post('/edit-restaurant',upload.none(),verifyJWT,restaurantController.editRestaurant)
-route.post('/delete-restaurant/:resId',upload.none(),verifyJWT,restaurantController.deleteRestaurant)
+route.post('/edit-restaurant',verifyJWT,upload.none(),restaurantController.editRestaurant)
+route.post('/delete-restaurant/:resId',verifyJWT,upload.none(),restaurantController.deleteRestaurant)
 
 route.get('/get-restaurant',verifyJWT,restaurantController.getRestaurant)
 route.post('/forgot-password-restaurant',upload.none(),restaurantController.forgetPassword)
@@ -32,10 +32,6 @@ route.get("/top-rated-restaurant",verifyJWT,upload.none(),restaurantController.t
 route.post("/block-restaurant/:resId",verifyJWT,upload.none(),restaurantController.BlockedRestaurant)
 route.get("/get-restaurant-dashboard",verifyJWT,upload.none(),restaurantController.getRestaurantDashboard)
 route.get("/get-nearby-restaurant",upload.none(),restaurantController.getNearbyRestaurants)
-
-
-
-
 
 
 

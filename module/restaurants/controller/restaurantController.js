@@ -2334,3 +2334,43 @@ exports.getNearbyRestaurants = async (req, res) => {
       .json({ message: "Something went wrong", error: err.message });
   }
 };
+
+
+// exports.getAllRestaurantbyRestaurant = async (req, res) => {
+//   try {
+//     let token = req.token;
+//     let { page = 1, limit = 10 } = req.query;
+//     page = Number.parseInt(page);
+//     limit = Number.parseInt(limit);
+//     const skip = (page - 1) * limit;
+//     // const user = await User.findOne({_id: token._id, status: "Active"})
+//     const restaurant = await Restaurant.findOne({ _id: token._id, status: "Active" });
+//     if (!restaurant) {
+//       return res.send({
+//         statusCode: 404,
+//         success: false,
+//         message: "Unauthorized access",
+//         result: {},
+//       });
+//     }
+//     const allRestaurant = await Restaurant.find().skip(skip).limit(limit);
+//     const totalRestaurant = await Restaurant.countDocuments();
+//     return res.send({
+//       statusCode: 200,
+//       success: true,
+//       message: "All Restaurant get successfully",
+//       result: {
+//         Restaurant: allRestaurant,
+//         currentPage: page,
+//         totalPage: Math.ceil(totalRestaurant / limit),
+//         totalRecord: totalRestaurant,
+//       },
+//     });
+//   } catch (error) {
+//     return res.send({
+//       statusCode: 500,
+//       success: false,
+//       message: error.message + " ERROR in get all restaurant api",
+//     });
+//   }
+// };

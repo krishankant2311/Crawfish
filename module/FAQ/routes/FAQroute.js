@@ -10,7 +10,7 @@ route.post("/edit-faq",verifyJWT,upload.none(),faqController.editFAQ)
 route.get("/get-faq/:id",verifyJWT,upload.none(),faqController.getFAQ)
 route.get("/get-all-faq",verifyJWT,upload.none(),faqController.getAllFAQ)
 route.get("/get-all-faq-byUser",verifyJWT,upload.none(),faqController.getAllFAQByUser)
-route.post("/delete-faq",verifyJWT,upload.none(),verifyJWT,faqController.deleteFAQ)
+route.post("/delete-faq",verifyJWT,upload.none(),faqController.deleteFAQ)
 
 
 module.exports = route

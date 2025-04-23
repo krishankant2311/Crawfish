@@ -524,3 +524,51 @@ exports.getreviewbyAdmin = async (req, res) => {
     });
   }
 };
+exports.getAllReviewbyAdmin = async (req, res) => {
+  try {
+    let token = req.token;
+    let { page = 1, limit = 10 } = req.query;
+    page = Number.parseInt(page);
+    limit = Number.parseInt(limit);
+    const skip = (page - 1) * limit;
+    const admin = await Admin.findOne({ _id: token._id, status: "Active" });
+    // if (!admin) {
+    //   return res.send({
+    //     statusCode: 404,
+    //     success: false,
+    //     message: "Unauthorized access",
+    //     result: {},
+    //   });
+    // }
+    // const user = await User.findOne({ _id: token._id, status: "Active" });
+    if (! admin) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "Unauthorized access",
+        result: {},
+      });
+    }
+    const allReview = await Review.find().skip(skip).limit(limit);
+    const totalReview = await Review.countDocuments();
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: "All Review get successfully",
+      result: {
+        Review: allReview,
+        currentPage: page,
+        totalPage: Math.ceil(totalReview / limit),
+        totalRecord: totalReview,
+      },
+    });
+  } catch (error) {
+    console.log("Error!!", error);
+    return res.send({
+      statusCode: 500,
+      success: false,
+      message: error.message + "ERROR in get all review by admin",
+      result: error,
+    });
+  }
+};
