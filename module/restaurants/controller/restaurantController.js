@@ -941,8 +941,8 @@ exports.updateForgotPassword = async (req, res) => {
     restaurant.securityToken = "";
     restaurant.save();
     return res.send({
-      statusCode: 400,
-      success: false,
+      statusCode: 200,
+      success: true,
       message: "password reset successfully",
       result: {},
     });
@@ -1001,7 +1001,7 @@ exports.personalDetails = async (req, res) => {
         statusCode: 400,
         success: false,
         message: "Restaurant not found",
-        result: { restaurant },
+        result: {  },
       });
     }
     if (
@@ -1031,7 +1031,7 @@ exports.personalDetails = async (req, res) => {
     });
   } catch (error) {
     return res.send({
-      statusCode: 400,
+      statusCode: 500,
       success: false,
       message: error.message,
       result: {},

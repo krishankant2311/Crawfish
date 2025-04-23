@@ -29,6 +29,7 @@ const privacyPolicyRouter = require("./module/privacyPolicy/route/privacyPolicyR
 const scrapingRouter = require("./scrapping/scrappingGoogleMap")
 const homepageRouter = require("./module/homepage/routes/homepageRoute")
 const notificationRouter = require("./module/notification/routes/notificationRoute")
+const supportRouter = require("./module/support/route/supportRoute")
 dotenv.config()
 
 app.use(bodyParser.json());
@@ -78,6 +79,7 @@ app.use("/api/privacyPolicy",privacyPolicyRouter)
 app.use("/api/scrapping",scrapingRouter)
 app.use("/api/homepage",homepageRouter)
 app.use("/api/notification",notificationRouter)
+app.use("/api/support",supportRouter)
 
 
 server.listen(PORT, ()=>{

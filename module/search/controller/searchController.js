@@ -103,7 +103,7 @@ exports.getRecentSearches = async (req, res) => {
       });
     }
 
-    const recentSearches = await Search.find({ userId:token._id })
+    const recentSearches = await Search.findOne({ userId:token._id })
       .sort({ createdAt: -1 })
       .limit(10);
 

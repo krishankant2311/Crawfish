@@ -78,7 +78,7 @@ exports.createReview = async (req, res) => {
         result: {},
       });
     }
-    const restaurant = await Restaurant.findById({_id:restaurantId})
+    const restaurant = await Restaurant.findById({restaurantId})
     if(!restaurant){
       return res.send({
         statusCode:404,
