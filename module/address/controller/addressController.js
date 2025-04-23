@@ -323,7 +323,7 @@ exports.getAllAddressbyUser = async (req, res) => {
         result: {},
       });
     }
-    const allAddress = await Address.find({ userId: token._id, status:"Acrive"})
+    const allAddress = await Address.find({ userId: token._id, status:"Active"})
       .skip(skip)
       .limit(limit);
     const totalAddress = await Address.countDocuments({ userId: token._id , status:"Active"});
