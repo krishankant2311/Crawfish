@@ -20,7 +20,7 @@ route.post('/update-forgot-password-restaurant',upload.none(),restaurantControll
 route.post('/resend-otp-restaurant',upload.none(),restaurantController.resendOTP)
 route.post('/personal-details-restaurant',verifyJWT,upload.single('restaurantLogo'),restaurantController.personalDetails)
 route.post('/change-password',verifyJWT,upload.none(),restaurantController.changePassword)
-route.post('/restaurant-profile',verifyJWT,upload.none(),restaurantController.restaurantProfile)
+route.post('/restaurant-profile',verifyJWT,upload.single('restaurantLogo'),restaurantController.restaurantProfile)
 route.post('/upload-menu',verifyJWT,restaurantController.uploadMenu)
 route.get('/get-menu/:resId',verifyJWT,restaurantController.getMenu)
 route.post('/delete-menu',verifyJWT,restaurantController.deleteMenu)

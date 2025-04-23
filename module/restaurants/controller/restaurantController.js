@@ -1146,15 +1146,18 @@ exports.changePassword = async (req, res) => {
 exports.restaurantProfile = async (req, res) => {
   try {
     let token = req.token;
+
     let {
       restaurantName,
       // phoneNumber,
       website,
       businessHour,
       description,
-      restaurantMenu,
-      logo,
+      
+      // restaurantLogo,
     } = req.body;
+    let restaurantLogo = req.file ? req.file.path : null;
+
 
     if (!restaurantName) {
       return res.send({
@@ -1227,15 +1230,16 @@ exports.restaurantProfile = async (req, res) => {
     restaurant.businessHour = businessHour;
     restaurant.description = description;
     // restaurant.restaurantProfile = restaurantProfile;
-    restaurant.logo = logo;
-
+    if (restaurantLogo) {
+      restaurant.restaurantLogo = restaurantLogo;
     await restaurant.save();
     return res.send({
       statusCode: 200,
-      success: false,
+      success: true,
       message: "restaurant profile updated",
       result: {},
     });
+  }
   } catch (error) {
     return res.send({
       statusCode: 500,
