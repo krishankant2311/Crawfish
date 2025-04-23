@@ -819,8 +819,8 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
 
     await restaurant.save();
     return res.send({
-      statusCode: 400,
-      success: false,
+      statusCode: 200,
+      success: true,
       message: "otp verify successfully",
       result: { securityToken },
     });
