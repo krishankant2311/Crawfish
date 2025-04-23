@@ -2,17 +2,25 @@ const mongoose = require("mongoose")
 
 const supportSchema =new mongoose.Schema({
 
+    userId : { 
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"User"
+    },
+    restaurantId: {
+        type :mongoose.Schema.Types.ObjectId,
+        ref:"Restaurant"
+    },
     title:{
         type:String,
         default:""
     },
-    Description:{
+    description:{
         type:String,
         default:""
     },
     status:{
         type:String,
-        enum:["Solved","pending"],
+        enum:["Solved","Pending"],
         default:"Pending"
     },
 })
