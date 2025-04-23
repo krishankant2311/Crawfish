@@ -162,7 +162,7 @@ exports.editAdress = async (req, res) => {
     await address.save();
 
     return res.send({
-      statusCode: 400,
+      statusCode: 200,
       success: true,
       message: "address updated successfully",
       result: { address },

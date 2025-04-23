@@ -32,6 +32,7 @@ route.get("/top-rated-restaurant",verifyJWT,upload.none(),restaurantController.t
 route.post("/block-restaurant/:resId",verifyJWT,upload.none(),restaurantController.BlockedRestaurant)
 route.get("/get-restaurant-dashboard",verifyJWT,upload.none(),restaurantController.getRestaurantDashboard)
 route.get("/get-nearby-restaurant",upload.none(),restaurantController.getNearbyRestaurants)
+route.get("/get-nearmeAndToprated-restaurant",verifyJWT,upload.none(),restaurantController.NearmeAndTopratedrestaurant)
 
 
 

@@ -2337,6 +2337,7 @@ exports.getNearbyRestaurants = async (req, res) => {
 
 
 // exports.getAllRestaurantbyRestaurant = async (req, res) => {
+
 //   try {
 //     let token = req.token;
 //     let { page = 1, limit = 10 } = req.query;
@@ -2374,3 +2375,52 @@ exports.getNearbyRestaurants = async (req, res) => {
 //     });
 //   }
 // };
+
+exports.NearmeAndTopratedrestaurant = async(req,res) => {
+  try {
+    let token = req.token;
+    // let {lat,lng} = req.boby;
+
+    const user = await User.findOne({_id:token._id, status:"Active"})
+    if(!user){
+      return res.send({
+        statusCode:404,
+        success:false,
+        message:"user not found",
+        result:{}
+      })
+    }
+
+    const nearMeRestaurants = await Restaurant.find({status:"Active"}).limit(6).select("-token -password -phoneNumber")
+    if(!nearMeRestaurants){
+      return res.send({
+        statusCode:404,
+        success:false,
+        message:"nearme restaurant not found",
+        result:{}
+      })
+    }
+    const topRated = await Restaurant.find({status:"Active"}).limit(5).select("-token -password -phoneNumber")
+    if(!topRated){
+      return res.send({
+        statusCode:404,
+        success:false,
+        message:"top rated restaurant not found",
+        result:{}
+      })
+    }
+    return res.send({
+      statusCode:200,
+      success:true,
+      message:"restaurants fetch successfully",
+      result:{nearMeRestaurants,topRated}
+    })
+  } catch (error) {
+    return res.send({
+      statusCode:500,
+      success:false,
+      message:error.message + " ERROR in nearme and top rated restaurant api",
+      result:{}
+    })
+  }
+}

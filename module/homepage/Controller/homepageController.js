@@ -59,13 +59,13 @@ exports.homepage = async (req, res) => {
     // Fetch Featured Restaurants
     const featuredRestaurant = await Restaurant.find({ status: "Active" })
       .limit(5)
-      .select("location restaurantName rating");
+      // .select("location restaurantName rating");
 
     // Fetch Top Rated Restaurants
     const topRatedRestaurant = await Restaurant.find({ status: "Active" })
       .sort({ rating: -1 })
       .limit(4)
-      .select("restaurantName rating restaurantLogo");
+      // .select("restaurantName rating restaurantLogo");
 
     // Fetch Near Me Restaurants using Web Scraping
     // const nearMeRestaurants = await scrapNearbyRestaurants(
