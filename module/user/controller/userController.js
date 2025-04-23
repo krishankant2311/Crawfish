@@ -205,12 +205,12 @@ const isStrongPassword = (password, newPassword) => {
 // Other country mobile validations : validator & phonelibjs
 exports.signup = async (req, res) => {
   try {
-    let { email, fullName, number, password } = req.body;
+    let { email, fullName, number, password} = req.body;
     email = email?.toLowerCase()?.trim();
     fullName = fullName?.trim();
     password = password?.trim();
     number = number?.trim();
-    const profilePhoto = `https://avatar.iran.liara.run/username?username=${fullName}`;
+    let profilePhoto = `https://avatar.iran.liara.run/username?username=${fullName}`;
 
     // number = Number.parseInt(number);
 
@@ -332,7 +332,7 @@ exports.signup = async (req, res) => {
         user.number = number;
         user.email = email;
         user.otp = { otpValue, otpExpiry };
-        user.profilePhoto = profilePhoto
+        user.profilePhoto = profilePhoto;
         user.status = "Pending";
         await user.save();
 
@@ -1435,7 +1435,7 @@ exports.updateUserProfile = async (req, res) => {
   try {
     let token = req.token;
     let { fullName, number } = req.body;
-    let profilePhoto = req.file ? req.file.path : null;
+    let profilePhoto = req.file ? req.file.path : "";
     fullName = fullName = fullName?.trim();
     // email = email?.toLowerCase()?.trim();
     if (!fullName) {
@@ -1486,7 +1486,9 @@ exports.updateUserProfile = async (req, res) => {
     // user.number = number;
     if (profilePhoto) {
       user.profilePhoto = profilePhoto;
+    
     }
+
     await user.save();
     return res.send({
       statusCode: 202,
@@ -2464,3 +2466,122 @@ exports.appMode = async (req, res) => {
     });
   }
 };
+
+exports.deleteUserByAdmin = async(req,res) => {
+  try {
+    let token = req.token;
+    let {userId} = req.params;
+    // let { userId } = req.params;
+    // if (!userId) {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "required user id",
+    //     result: {},
+    //   });
+    // }
+    // let admin = await Admin.findById({ _id: token._id, status: "Active" });
+    // if (!admin) {
+    //   return res.send({
+    //     statusCode: 404,
+    //     success: false,
+    //     message: "Admin not found",
+    //     result: {},
+    //   });
+    // }
+    let admin = await Admin.findOne({ _id: token._id });
+    if (!admin) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "admin not found",
+        result: {},
+      });
+    }
+    if (admin && admin.status === "Delete") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "admin has already deleted",
+        result: {},
+      });
+    }
+    if (admin.status === "Pending") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "unauthorise access",
+        result: {},
+      });
+    }
+    if (admin.status === "Block") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "admin has beeen Blocked",
+        result: {},
+      });
+    }
+    //  const recent =  await Search.findOneAndUpdate({_id:token._id},{$set:{status:"Delete"}})
+    //  const recent =  await Search.findOneAndUpdate({userId:token._id},{$set:{status:"Delete"}})
+
+    // console.log("recent ", recent)
+    let user = await User.findOne({ _id: userId });
+    if (!user) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "user not found",
+        result: {},
+      });
+    }
+    if (user && user.status === "Delete") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "user has already deleted",
+        result: {},
+      });
+    }
+    if (user.status === "Pending") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "unauthorise access",
+        result: {},
+      });
+    }
+    if (user.status === "Block") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "User has beeen Blocked",
+        result: {},
+      });
+    }
+    user.status = "Delete";
+    user.accessToken = "";
+
+    await user.save();
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: "user deleted successfully",
+      result: {
+        name: user.fullName,
+        email: user.email,
+        status: user.status,
+        // statuss:recent.status
+        // recentSearches: recent,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      statusCode: 500,
+      success: false,
+      message: "Error in delet  user API by admin " + error.message,
+      result: {},
+    });
+  }
+}
