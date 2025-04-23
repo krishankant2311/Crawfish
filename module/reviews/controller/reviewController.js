@@ -7,7 +7,7 @@ const Restaurant = require("../../restaurants/model/restaurantModel");
 exports.createReview = async (req, res) => {
   try {
     let token = req.token;
-    let userId = token._id;
+    // let userId = token._id;
     let {restaurantId} = req.params
     let { rating, content,userName,userEmail } = req.body;
     // if(!userId){
@@ -52,7 +52,7 @@ exports.createReview = async (req, res) => {
     }
     
 
-    const user = await User.findOne({ _id: userId });
+    const user = await User.findOne({ _id: token._id });
 
     if (!user) {
       return res.send({
@@ -78,7 +78,7 @@ exports.createReview = async (req, res) => {
         result: {},
       });
     }
-    const restaurant = await Restaurant.findById({restaurantId})
+    const restaurant = await Restaurant.findById(restaurantId)
     if(!restaurant){
       return res.send({
         statusCode:404,
@@ -113,7 +113,7 @@ exports.createReview = async (req, res) => {
     }
     
     const createNewReview = new Review({
-      userId: userId,
+      userId: token._id,
       userEmail:user.email,
       userName:user.fullName,
       rating,
@@ -524,14 +524,14 @@ exports.getreviewbyAdmin = async (req, res) => {
     });
   }
 };
-exports.getAllReviewbyAdmin = async (req, res) => {
+exports.getAllReviewbyRestaurant = async (req, res) => {
   try {
     let token = req.token;
     let { page = 1, limit = 10 } = req.query;
     page = Number.parseInt(page);
     limit = Number.parseInt(limit);
     const skip = (page - 1) * limit;
-    const admin = await Admin.findOne({ _id: token._id, status: "Active" });
+    const restaurant = await Restaurant.findOne({ _id: token._id, status: "Active" });
     // if (!admin) {
     //   return res.send({
     //     statusCode: 404,
@@ -541,7 +541,7 @@ exports.getAllReviewbyAdmin = async (req, res) => {
     //   });
     // }
     // const user = await User.findOne({ _id: token._id, status: "Active" });
-    if (! admin) {
+    if (!restaurant) {
       return res.send({
         statusCode: 404,
         success: false,
@@ -549,8 +549,11 @@ exports.getAllReviewbyAdmin = async (req, res) => {
         result: {},
       });
     }
-    const allReview = await Review.find().skip(skip).limit(limit);
-    const totalReview = await Review.countDocuments();
+    const allReview = await Review.find({restaurantId:token._id}).skip(skip).limit(limit)
+    // .populate('user','fullName profilePhoto')
+    // .sort({ createdAt: -1 }) // optional: latest first
+    // .lean();;
+    const totalReview = await Review.countDocuments({restaurantId:token._id});
     return res.send({
       statusCode: 200,
       success: true,
@@ -567,7 +570,7 @@ exports.getAllReviewbyAdmin = async (req, res) => {
     return res.send({
       statusCode: 500,
       success: false,
-      message: error.message + "ERROR in get all review by admin",
+      message: error.message + "ERROR in get all review by restaurant",
       result: error,
     });
   }
