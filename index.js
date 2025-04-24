@@ -40,6 +40,9 @@ startDeleteOldUsersJob();
 startDeleteOldRestaurantJob();
 app.use(cors());
 app.use(require("cors")());
+app.use(cors({
+  origin: '*', // Allows all origins to access the images
+}));
 
 app.use(express.json());
 app.use(bodyParser.json())
