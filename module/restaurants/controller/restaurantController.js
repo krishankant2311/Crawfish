@@ -2424,3 +2424,54 @@ exports.NearmeAndTopratedrestaurant = async(req,res) => {
     })
   }
 }
+
+exports.getRestaurantbyUser = async (req, res) => {
+  try {
+    let token = req.token;
+    let {resId} = req.params;
+    let user = await User.findOne({_id: token._id});
+    if (!user) {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "unauthorise access",
+        result: {},
+      });
+    }
+    const restaurant = await Restaurant.findOne({ _id: resId , status :"Active" }).select("-token -password -otp -securityToken ");
+    if (!restaurant) {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "restaurant not found",
+        result: {},
+      });
+    }
+    return res.send({
+      statusCode: 400,
+      success: false,
+      message: "restaurant get successfully",
+      result: {restaurant},
+    });
+  } catch (error) {
+    console.log("Error in get restaurant by user");
+    return res.send({
+      statusCode: 500,
+      success: false,
+      message: error.message + " ERROR in get restaurant by user",
+      result: {},
+    });
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
