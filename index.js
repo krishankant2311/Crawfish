@@ -40,7 +40,7 @@ database.connect();
 startDeleteOldUsersJob();
 startDeleteOldRestaurantJob();
 app.use(cors());
-app.use(require("cors")());
+// app.use(require("cors")());
 app.use(cors({
   origin: '*', // Allows all origins to access the images
 }));
