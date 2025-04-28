@@ -2448,8 +2448,8 @@ exports.getRestaurantbyUser = async (req, res) => {
       });
     }
     return res.send({
-      statusCode: 400,
-      success: false,
+      statusCode: 200,
+      success: true,
       message: "restaurant get successfully",
       result: {restaurant},
     });
