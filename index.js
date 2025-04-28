@@ -30,6 +30,7 @@ const scrapingRouter = require("./scrapping/scrappingGoogleMap")
 const homepageRouter = require("./module/homepage/routes/homepageRoute")
 const notificationRouter = require("./module/notification/routes/notificationRoute")
 const supportRouter = require("./module/support/route/supportRoute")
+const restAddressRouter= require("./module/restaurantAddress/routes/restaurantAddressRoute")
 dotenv.config()
 
 app.use(bodyParser.json());
@@ -83,6 +84,7 @@ app.use("/api/scrapping",scrapingRouter)
 app.use("/api/homepage",homepageRouter)
 app.use("/api/notification",notificationRouter)
 app.use("/api/support",supportRouter)
+app.use("/api/restAddress",restAddressRouter)
 
 
 server.listen(PORT, ()=>{
