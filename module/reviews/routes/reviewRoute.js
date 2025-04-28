@@ -9,6 +9,7 @@ route.post("/create-review/:restaurantId",verifyJWT,upload.none(),reviewControll
 route.post("/edit-review/:reviewId",verifyJWT,upload.none(),reviewController.editReview)
 route.get("/get-review/:restaurantId",verifyJWT,reviewController.getallreviewbyuser)
 route.post("/delete-review/:reviewId",verifyJWT,upload.none(),reviewController.deleteReview)
+route.post("/publish-review/:reviewId",verifyJWT,upload.none(),reviewController.updateRestaurantstatus)
 // route.get("/get-all-review",verifyJWT,reviewController.getAllReview)
 route.get("/get-review-byAdmin/:reviewId",verifyJWT,reviewController.getreviewbyAdmin)
 route.get("/get-all-review-byAdmin",verifyJWT,reviewController.getAllReviewbyAdmin)

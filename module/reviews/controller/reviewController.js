@@ -233,6 +233,10 @@ exports.getallreviewbyuser = async (req, res) => {
   try {
     let token = req.token;
     let userId = token._id;
+    // let { page = 1, limit = 10 } = req.query; 
+    // page = Number.parseInt(page)
+    // limit =Number.parseInt(limit) 
+    // let skip = (page - 1)*limit
     let {restaurantId} = req.params;
 
     if (!restaurantId) {
@@ -575,3 +579,70 @@ exports.getAllReviewbyRestaurant = async (req, res) => {
     });
   }
 };
+
+exports.updateRestaurantstatus = async(req,res) => {
+  try {
+    let token = req.token;
+    let status = req.body;
+    let {reviewId} = req.params;
+
+    if(!status){
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"status is required",
+        result:{}
+      })
+    }
+    const restaurant = await Restaurant.findOne({_id:token._id, status:"Active"})
+    if(!restaurant){
+      return res.send({
+        statusCode:404,
+        success:false,
+        message:"restaurant not found",
+        result:{}
+      })
+    }
+
+    const review = await Review.findOne({_id:reviewId, status:"Pending"})
+    if(!review){
+      return res.send({
+        statusCode:404,
+        success:false,
+        message:"review not found",
+        result:{}
+      })
+    }
+    if(review.status === "Active"){
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"Review already published",
+        result:{}
+      })
+    }
+    if(review.status === "Delete"){
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"review has been deleted",
+        result:{review}
+      })
+    }
+    review.status = "Active";
+    review.save()
+    return res.send({
+      statusCode:200,
+      success:false,
+      message:"review published successfully",
+      result:{review}
+    })
+  } catch (error) {
+    return res.send({
+      statusCode:500,
+      success:false,
+      message:error.message + " ERROR in update restaurant status",
+      result:{}
+    })
+  }
+}
