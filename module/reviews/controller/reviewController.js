@@ -282,12 +282,12 @@ exports.getallreviewbyuser = async (req, res) => {
         result: {},
       });
     }
-    
+    const countReview = await Review.countDocuments({restaurantId:restaurantId, status:"Active"})
       return res.send({
         statusCode: 200,
         success: true,
         message: "review find successfully",
-        result: { review },
+        result: { review, countReview },
       });
     
   } catch (error) {

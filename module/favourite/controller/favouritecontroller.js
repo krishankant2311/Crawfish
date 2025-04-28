@@ -275,7 +275,7 @@ exports.deleteFavouriteRestaurant = async (req, res) => {
       statusCode: 200,
       success: true,
       message: "restaurant delete successfully",
-      result: {},
+      result: {favourite},
     });
   } catch (error) {
     return res.send({

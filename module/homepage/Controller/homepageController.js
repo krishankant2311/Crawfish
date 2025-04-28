@@ -619,3 +619,4 @@ exports.getFilteredRestaurants = async (req, res) => {
     });
   }
 };
+
