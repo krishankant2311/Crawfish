@@ -229,17 +229,17 @@ exports.editReview = async (req, res) => {
   }
 };
 
-exports.getreview = async (req, res) => {
+exports.getallreviewbyuser = async (req, res) => {
   try {
     let token = req.token;
     let userId = token._id;
-    let {reviewId} = req.params;
+    let {restaurantId} = req.params;
 
-    if (!userId) {
+    if (!restaurantId) {
       return res.send({
         statusCode: 400,
         success: false,
-        message: "userId required",
+        message: "restaurantId required",
         result: {},
       });
     }
@@ -261,7 +261,7 @@ exports.getreview = async (req, res) => {
         result: {},
       });
     }
-    const review = await Review.findOne({ _id:reviewId });
+    const review = await Review.find({ restaurantId:restaurantId });
     if (!review) {
       return res.send({
         statusCode: 404,
@@ -376,57 +376,57 @@ try {
 }
 }
 
-exports.getAllReview = async (req, res) => {
-  try {
-    let token = req.token;
-    let { page = 1, limit = 10 } = req.query;
-    page = Number.parseInt(page);
-    limit = Number.parseInt(limit);
-    const skip = (page - 1) * limit;
+// exports.getAllReviewbyUser = async (req, res) => {
+//   try {
+//     let token = req.token;
+//     let { page = 1, limit = 10 } = req.query;
+//     page = Number.parseInt(page);
+//     limit = Number.parseInt(limit);
+//     const skip = (page - 1) * limit;
 
-    // const admin = await Admin.findOne({ _id: token._id, status: "Active" });
-    // if (!admin) {
-    //   return res.send({
-    //     statusCode: 404,
-    //     success: false,
-    //     message: "Unauthorized access",
-    //     result: {},
-    //   });
-    // }
-    const user = await User.findOne({ _id: token._id, status: "Active" });
-    if (!user) {
-      return res.send({
-        statusCode: 404,
-        success: false,
-        message: "Unauthorized access",
-        result: {},
-      });
-    }
-    const allReview = await Review.find({ status: "Active" }).skip(skip).limit(limit);
+//     // const admin = await Admin.findOne({ _id: token._id, status: "Active" });
+//     // if (!admin) {
+//     //   return res.send({
+//     //     statusCode: 404,
+//     //     success: false,
+//     //     message: "Unauthorized access",
+//     //     result: {},
+//     //   });
+//     // }
+//     const user = await User.findOne({ _id: token._id, status: "Active" });
+//     if (!user) {
+//       return res.send({
+//         statusCode: 404,
+//         success: false,
+//         message: "Unauthorized access",
+//         result: {},
+//       });
+//     }
+//     const allReview = await Review.find({ status: "Active" }).skip(skip).limit(limit);
 
-    const totalReview = await Review.countDocuments({ status: "Active" });
+//     const totalReview = await Review.countDocuments({ status: "Active" });
 
-    return res.send({
-      statusCode: 200,
-      success: true,
-      message: "All Review get successfully",
-      result: {
-        Review: allReview,
-        currentPage: page,
-        totalPage: Math.ceil(totalReview / limit),
-        totalRecord: totalReview,
-      },
-    });
-  } catch (error) {
-    console.log("Error!!", error);
-    return res.send({
-      statusCode: 500,
-      success: false,
-      message: error.message || "Internal seerver error",
-      result: error,
-    });
-  }
-};
+//     return res.send({
+//       statusCode: 200,
+//       success: true,
+//       message: "All Review get successfully",
+//       result: {
+//         Review: allReview,
+//         currentPage: page,
+//         totalPage: Math.ceil(totalReview / limit),
+//         totalRecord: totalReview,
+//       },
+//     });
+//   } catch (error) {
+//     console.log("Error!!", error);
+//     return res.send({
+//       statusCode: 500,
+//       success: false,
+//       message: error.message || "Internal seerver error",
+//       result: error,
+//     });
+//   }
+// };
 
 exports.getAllReviewbyAdmin = async (req, res) => {
   try {

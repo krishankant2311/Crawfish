@@ -344,7 +344,11 @@ exports.getfavouriteRestaurant = async (req, res) => {
         result: {},
       });
     }
-    const favourite = await Favourite.findOne({ restaurantId: resId });
+    const favourite = await Favourite.findOne({ restaurantId:resId, status:"Active" }).populate({
+        path:"restaurantId",
+        match:{status:"Active"},
+        select :("-token -password -securityToken -otp -phoneNumber")
+    });
     if (!favourite) {
       return res.send({
         statusCode: 404,
@@ -367,5 +371,12 @@ exports.getfavouriteRestaurant = async (req, res) => {
       message: "restaurant find successfully",
       result: { favourite },
     });
-  } catch (error) {}
+  } catch (error) {
+    return res.send({
+        statusCode:500,
+        success:false,
+        message:error.message + " ERROR in get favourite restaurant api",
+        result:{}
+    })
+  }
 };
