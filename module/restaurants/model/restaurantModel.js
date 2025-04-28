@@ -98,7 +98,7 @@ const restaurantSchema = new mongoose.Schema({
   },
   menu: {
     type: String,
-    // required: true,
+    default:"",
   },
   rating: {
     type: Number,
