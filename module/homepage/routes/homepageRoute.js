@@ -3,12 +3,11 @@ const express = require("express");
 const route = express.Router()
 
 // const verifyJWT = require("../../../middlewares/jwt")
-const {homepage,getNearbyRestaurants,homepageData} = require("../../homepage/Controller/homepageController")
+const {homepageData,getFilteredRestaurants} = require("../../homepage/Controller/homepageController")
+const {verifyJWT} = require("../../../middlewares/jwt");
+const upload = require("../../../middlewares/multer");
 
-const {verifyJWT} = require("../../../middlewares/jwt")
 
-route.get("/homepage-details",verifyJWT, homepage)
-route.get("/get-nearby-restaurant", getNearbyRestaurants)
-route.get('/homepage-data',homepageData)
-
+route.get('/homepage-data', upload.none() , homepageData)
+route.get('/get-filtered-restaurants', upload.none() , getFilteredRestaurants)
 module.exports = route;
