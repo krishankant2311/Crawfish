@@ -165,7 +165,7 @@ exports.getAllFavouriteRestaurant = async (req, res) => {
     //     result: {},
     //   });
     // }
-    const favourite = await Favourite.find({ userId: token._id }).populate({
+    const favourite = await Favourite.find({ userId: token._id, isFavourite:true}).populate({
         path: "restaurantId",
         match: { status: "Active" },
         select: ("-token -otp -phoneNumber -password -securityToken"),
@@ -250,7 +250,7 @@ exports.deleteFavouriteRestaurant = async (req, res) => {
         result: {},
       });
     }
-    const favourite = await Favourite.findOne({ restaurantId: resId });
+    const favourite = await Favourite.findOne({ restaurantId:resId});
     if (!favourite) {
       return res.send({
         statusCode: 404,
