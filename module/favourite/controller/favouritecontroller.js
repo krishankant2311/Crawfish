@@ -1,6 +1,7 @@
 const User = require("../../user/model/userModel");
 const Restaurant = require("../../restaurants/model/restaurantModel");
 const Favourite = require("../../favourite/model/favouritemodel");
+
 exports.addfavourite = async (req, res) => {
   try {
     let token = req.token;
@@ -74,7 +75,9 @@ exports.addfavourite = async (req, res) => {
       }
       if (favourite.status === "Inactive") {
         favourite.status = "Active";
-        favourite.isFavourite = "true";
+        favourite.isFavourite = true;
+        restaurant.isFavourite = true;
+        await restaurant.save();
         await favourite.save();
         return res.send({
           statusCode: 200,
@@ -89,6 +92,8 @@ exports.addfavourite = async (req, res) => {
       restaurantId: resId,
       isFavourite: true,
     });
+    restaurant.isFavourite = true;
+    await restaurant.save();
     await newfavourite.save();
     return res.send({
       statusCode: 200,
@@ -165,23 +170,26 @@ exports.getAllFavouriteRestaurant = async (req, res) => {
     //     result: {},
     //   });
     // }
-    const favourite = await Favourite.find({ userId: token._id, isFavourite:true}).populate({
-        path: "restaurantId",
-        match: { status: "Active" },
-        select: ("-token -otp -phoneNumber -password -securityToken"),
+    const favourite = await Favourite.find({
+      userId: token._id,
+      isFavourite: true,
+    }).populate({
+      path: "restaurantId",
+      match: { status: "Active" },
+      select: "-token -otp -phoneNumber -password -securityToken",
+    });
+    if (!favourite || favourite.length === 0) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "No favourite restaurants found",
+        result: {},
       });
-      if (!favourite || favourite.length === 0) {
-        return res.send({
-          statusCode: 404,
-          success: false,
-          message: "No favourite restaurants found",
-          result: {},
-        });
-      }
+    }
     return res.send({
       statusCode: 200,
       success: true,
-      message:  "Favourite restaurants fetched successfully",
+      message: "Favourite restaurants fetched successfully",
       result: { favourite },
     });
   } catch (error) {
@@ -250,7 +258,7 @@ exports.deleteFavouriteRestaurant = async (req, res) => {
         result: {},
       });
     }
-    const favourite = await Favourite.findOne({ restaurantId:resId});
+    const favourite = await Favourite.findOne({ restaurantId: resId });
     if (!favourite) {
       return res.send({
         statusCode: 404,
@@ -269,13 +277,15 @@ exports.deleteFavouriteRestaurant = async (req, res) => {
     }
 
     favourite.status = "Inactive";
-    favourite.isFavourite = "false";
+    favourite.isFavourite = false;
+    restaurant.isFavourite = false;
+    await restaurant.save();
     await favourite.save();
     return res.send({
       statusCode: 200,
       success: true,
       message: "restaurant delete successfully",
-      result: {favourite},
+      result: { favourite },
     });
   } catch (error) {
     return res.send({
@@ -344,10 +354,13 @@ exports.getfavouriteRestaurant = async (req, res) => {
         result: {},
       });
     }
-    const favourite = await Favourite.findOne({ restaurantId:resId, status:"Active" }).populate({
-        path:"restaurantId",
-        match:{status:"Active"},
-        select :("-token -password -securityToken -otp -phoneNumber")
+    const favourite = await Favourite.findOne({
+      restaurantId: resId,
+      status: "Active",
+    }).populate({
+      path: "restaurantId",
+      match: { status: "Active" },
+      select: "-token -password -securityToken -otp -phoneNumber",
     });
     if (!favourite) {
       return res.send({
@@ -373,10 +386,10 @@ exports.getfavouriteRestaurant = async (req, res) => {
     });
   } catch (error) {
     return res.send({
-        statusCode:500,
-        success:false,
-        message:error.message + " ERROR in get favourite restaurant api",
-        result:{}
-    })
+      statusCode: 500,
+      success: false,
+      message: error.message + " ERROR in get favourite restaurant api",
+      result: {},
+    });
   }
 };
