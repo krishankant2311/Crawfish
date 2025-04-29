@@ -684,3 +684,87 @@ exports.topRatedData = async (req, res) => {
     });
   }
 };
+
+// exports.nearMeData = async (req, res) => {
+//   try {
+//     let { lat, lng, address, maxDistance = 5, rating = 1 } = req.body;
+
+//     maxDistance = Number.parseFloat(maxDistance) * 1000; // km to meters
+//     rating = Number.parseFloat(rating);
+
+//     if (!lat || !lng) {
+//       return res.send({
+//         statusCode: 400,
+//         success: false,
+//         message: "Latitude and Longitude are mandatory",
+//         result: {},
+//       });
+//     }
+
+//     if (!address) {
+//       return res.send({
+//         statusCode: 400,
+//         success: false,
+//         message: "Address is mandatory",
+//         result: {},
+//       });
+//     }
+
+//     const counts = await Restaurant.countDocuments({
+//       "location.coordinates": [lng, lat],
+//       // status: "Active"
+//     });
+
+//     // Scraping logic
+//     if (counts > 5) {
+//       scrapeGoogleMaps(lat, lng, address); // background
+//     } else {
+//       await scrapeGoogleMaps(lat, lng, address); // wait
+//     }
+
+//     // Fetch nearby restaurants
+//     const nearByRestaurants = await Restaurant.aggregate([
+//       {
+//         $geoNear: {
+//           near: {
+//             type: "Point",
+//             coordinates: [Number(lng), Number(lat)],
+//           },
+//           key: "location.coordinates",
+//           distanceField: "dist.calculated",
+//           spherical: true,
+//         },
+//       },
+//       {
+//         $addFields: {
+//           "dist.calculatedInKm": { $divide: ["$dist.calculated", 1000] },
+//         },
+//       },
+//       {
+//         $match: {
+//           "dist.calculatedInKm": { $lte: parseFloat(maxDistance) },
+//           rating: { $gte: rating },
+//         },
+//       },
+//       {
+//         $limit: 10,
+//       },
+//     ]);
+
+//     return res.send({
+//       statusCode: 200,
+//       success: true,
+//       message: "Nearby restaurants fetched successfully.",
+//       result: {
+//         nearByRestaurants,
+//       },
+//     });
+//   } catch (error) {
+//     return res.send({
+//       statusCode: 500,
+//       success: false,
+//       message: error.message || "Internal Server Error",
+//       result: {},
+//     });
+//   }
+// };
