@@ -2465,6 +2465,45 @@ exports.getRestaurantbyUser = async (req, res) => {
 }
 
 
+exports.nearmerestaurants = async(req,res) => {
+  try {
+    let token = req.token;
+
+    const user = await User.findOne({_id:token._id, status:"Active"})
+    if(!user){
+      return res.send({
+        statusCode:404,
+        success:false,
+        message:"user not found",
+        result:{}
+      })
+    }
+
+    const restaurant = await Restaurant.find({status:"Active"}).limit(10)
+    if(!restaurant){
+      return res.send({
+        statusCode:404,
+        success:false,
+        message:"restaurant not found",
+        result:{}
+      })
+    }
+    return res.send({
+      statusCode:200,
+      success:true,
+      message:"near by restaurant fetch successfully",
+      result:{restaurant}
+    })
+  } catch (error) {
+    return res.send({
+      statusCode:500,
+      succes:false,
+      message:error.message + " ERROR in nearme restaurant api",
+      result:{}
+    })
+  }
+}
+
 
 
 

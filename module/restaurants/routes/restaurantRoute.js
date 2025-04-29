@@ -34,6 +34,7 @@ route.get("/get-restaurant-dashboard",verifyJWT,upload.none(),restaurantControll
 route.get("/get-nearby-restaurant",upload.none(),restaurantController.getNearbyRestaurants)
 route.get("/get-nearmeAndToprated-restaurant",verifyJWT,upload.none(),restaurantController.NearmeAndTopratedrestaurant)
 route.get("/get-restaurant-by-user/:resId",verifyJWT,upload.none(),restaurantController.getRestaurantbyUser)
+route.get("/get-nearme-restaurant",verifyJWT,restaurantController.nearmerestaurants)
 
 
 
