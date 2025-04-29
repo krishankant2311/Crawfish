@@ -5,7 +5,7 @@ const {verifyJWT} = require("../../../middlewares/jwt")
 
 const upload = require("../../../middlewares/multer")
 
-route.post("/create-review/:restaurantId",verifyJWT,upload.fields('photos'),reviewController.createReview)
+route.post("/create-review/:restaurantId",verifyJWT,upload.fields([{ name: 'photos', maxCount: 5 }]),reviewController.createReview)
 route.post("/edit-review/:reviewId",verifyJWT,upload.none(),reviewController.editReview)
 route.get("/get-review/:restaurantId",verifyJWT,reviewController.getallreviewbyuser)
 route.post("/delete-review/:reviewId",verifyJWT,upload.none(),reviewController.deleteReview)

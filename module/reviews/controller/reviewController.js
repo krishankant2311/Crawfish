@@ -722,3 +722,28 @@ exports.getreviewaverages = async (req, res) => {
   }
 }
 
+
+
+// exports.getReviewAverage = async (req,res) => {
+//   try {
+//     let token = req.token;
+//     let {restaurantId} =req.params;
+//     if(!restaurantId){
+//       return res.send({
+//         statusCode:400,
+//         success:false,
+//         message:"restaurantId",
+//         result:{}
+//       })
+//     }
+
+//     const totalReview = await Review.Count({restaurantId,status:"Active"})
+
+//     const ratng = await Review.aggregate([{
+//    $match :{restaurantId:new mongoose.Types.ObjectId(restaurantId)},
+//       $group :{id:null, avg:{avg:"rating"}}
+//     }])
+//   } catch (error) {
+    
+//   }
+// }
