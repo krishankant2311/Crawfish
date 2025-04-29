@@ -405,9 +405,17 @@ puppeteer.use(StealthPlugin());
 //   }
 // }
 
+
+
+
+
+
+
+
+
 exports.homepageData = async (req, res) => {
   try {
-    let { lat, lng, address, maxDistance = 5, rating = 1 } = req.body;
+    let { lat, lng, address, maxDistance = 5, rating = 1 } = req.query;
     maxDistance = Number.parseFloat(maxDistance) * 1000;
     rating = Number.parseFloat(rating);
     if (!lat || !lng) {
