@@ -413,108 +413,108 @@ puppeteer.use(StealthPlugin());
 
 
 
-exports.homepageData = async (req, res) => {
-  try {
-    let { lat, lng, address, maxDistance = 5, rating = 1 } = req.query;
-    maxDistance = Number.parseFloat(maxDistance) * 1000;
-    rating = Number.parseFloat(rating);
-    if (!lat || !lng) {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "Latitude and Longitude are mandatory",
-        result: {},
-      });
-    }
-    if (!address) {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "Address is mandatory",
-        result: {},
-      });
-    }
-    // Check the count of restaurants for the location
-    const counts = await Restaurant.countDocuments({
-      "location.coordinates": [lng, lat],
-      // status: "Active"
-    });
-    // Lock to prevent multiple scrapes for the same lat/lng
-    if (counts > 5) {
-      // Start scraping in the background, but don't block API response
-      scrapeGoogleMaps(lat, lng, address);
-    } else {
-      await scrapeGoogleMaps(lat, lng, address);
-    }
-    // Fetch restaurant data concurrently
-    const [featuredRestaurant, topRatedRestaurants, nearByRestaurants] =
-      await Promise.all([
-        Restaurant.find({
-          "location.coordinates": [lng, lat],
-          rating: { $gte: rating },
-          // status : "Active"
-        })
-          .limit(5)
-          .lean(),
-        Restaurant.find({
-          "location.coordinates": [lng, lat],
-          rating: { $gte: rating },
-          // status : "Active"
-        })
-          .sort({
-            rating: -1,
-          })
-          .limit(5)
-          .lean(),
-        Restaurant.aggregate([
-          {
-            $geoNear: {
-              near: {
-                type: "Point",
-                coordinates: [Number(lng), Number(lat)],
-              },
-              key: "location.coordinates",
-              distanceField: "dist.calculated",
-              spherical: true,
-            },
-          },
-          {
-            $addFields: {
-              "dist.calculatedInKm": { $divide: ["$dist.calculated", 1000] },
-            },
-          },
-          {
-            $match: {
-              "dist.calculatedInKm": { $lte: parseFloat(maxDistance) }, // 2000 kilometers
-            },
-          },
-          {
-            $match: {
-              rating: { $gte: rating },
-            },
-          },
-          { $limit: 5 },
-        ]),
-      ]);
-    return res.send({
-      statusCode: 200,
-      success: true,
-      message: "Data fetched successfully.",
-      result: {
-        featuredRestaurant,
-        topRatedRestaurants,
-        nearByRestaurants,
-      },
-    });
-  } catch (error) {
-    return res.send({
-      statusCode: 500,
-      success: false,
-      message: error.message || "Internal Server Error",
-      result: {},
-    });
-  }
-};
+// exports.homepageData = async (req, res) => {
+//   try {
+//     let { lat, lng, address, maxDistance = 5, rating = 1 } = req.query;
+//     maxDistance = Number.parseFloat(maxDistance) * 1000;
+//     rating = Number.parseFloat(rating);
+//     if (!lat || !lng) {
+//       return res.send({
+//         statusCode: 400,
+//         success: false,
+//         message: "Latitude and Longitude are mandatory",
+//         result: {},
+//       });
+//     }
+//     if (!address) {
+//       return res.send({
+//         statusCode: 400,
+//         success: false,
+//         message: "Address is mandatory",
+//         result: {},
+//       });
+//     }
+//     // Check the count of restaurants for the location
+//     const counts = await Restaurant.countDocuments({
+//       "location.coordinates": [lng, lat],
+//       // status: "Active"
+//     });
+//     // Lock to prevent multiple scrapes for the same lat/lng
+//     if (counts > 5) {
+//       // Start scraping in the background, but don't block API response
+//       scrapeGoogleMaps(lat, lng, address);
+//     } else {
+//       await scrapeGoogleMaps(lat, lng, address);
+//     }
+//     // Fetch restaurant data concurrently
+//     const [featuredRestaurant, topRatedRestaurants, nearByRestaurants] =
+//       await Promise.all([
+//         Restaurant.find({
+//           "location.coordinates": [lng, lat],
+//           rating: { $gte: rating },
+//           // status : "Active"
+//         })
+//           .limit(5)
+//           .lean(),
+//         Restaurant.find({
+//           "location.coordinates": [lng, lat],
+//           rating: { $gte: rating },
+//           // status : "Active"
+//         })
+//           .sort({
+//             rating: -1,
+//           })
+//           .limit(5)
+//           .lean(),
+//         Restaurant.aggregate([
+//           {
+//             $geoNear: {
+//               near: {
+//                 type: "Point",
+//                 coordinates: [Number(lng), Number(lat)],
+//               },
+//               key: "location.coordinates",
+//               distanceField: "dist.calculated",
+//               spherical: true,
+//             },
+//           },
+//           {
+//             $addFields: {
+//               "dist.calculatedInKm": { $divide: ["$dist.calculated", 1000] },
+//             },
+//           },
+//           {
+//             $match: {
+//               "dist.calculatedInKm": { $lte: parseFloat(maxDistance) }, // 2000 kilometers
+//             },
+//           },
+//           {
+//             $match: {
+//               rating: { $gte: rating },
+//             },
+//           },
+//           { $limit: 5 },
+//         ]),
+//       ]);
+//     return res.send({
+//       statusCode: 200,
+//       success: true,
+//       message: "Data fetched successfully.",
+//       result: {
+//         featuredRestaurant,
+//         topRatedRestaurants,
+//         nearByRestaurants,
+//       },
+//     });
+//   } catch (error) {
+//     return res.send({
+//       statusCode: 500,
+//       success: false,
+//       message: error.message || "Internal Server Error",
+//       result: {},
+//     });
+//   }
+// };
 exports.getFilteredRestaurants = async (req, res) => {
   try {
     let { lat, lng, address, maxDistance = 5, rating = 1 } = req.body;
