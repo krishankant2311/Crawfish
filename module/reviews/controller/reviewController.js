@@ -3,13 +3,13 @@ const generateJWT = require("../../../middlewares/jwt");
 const User = require("../../user/model/userModel");
 const Admin = require("../../admin/model/adminModel");
 const Restaurant = require("../../restaurants/model/restaurantModel");
-
+const mongoose = require("mongoose");
 exports.createReview = async (req, res) => {
   try {
     let token = req.token;
     // let userId = token._id;
     let {restaurantId} = req.params
-    let { rating, content,userName,userEmail } = req.body;
+    let { rating, content } = req.body;
     // if(!userId){
     //     return res.send({
     //         statusCode:400,
@@ -18,6 +18,7 @@ exports.createReview = async (req, res) => {
     //         result:{}
     //     })
     // }
+    let photos =req.file ? req.file.path : null;
     if (!restaurantId) {
       return res.send({
         statusCode: 400,
@@ -120,6 +121,9 @@ exports.createReview = async (req, res) => {
       content,
       restaurantId:restaurantId,
       userprofilePhoto:user.profilePhoto,
+      if (photos) {
+        createNewReview.photos = photos;
+      }
     });
     await createNewReview.save();
     return res.send({
@@ -646,3 +650,75 @@ exports.updateRestaurantstatus = async(req,res) => {
     })
   }
 }
+
+
+exports.getreviewaverages = async (req, res) => {
+  try {
+    let token = req.token;
+    let { restaurantId } = req.params;
+
+    if(!restaurantId){
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"RestaurantId required",
+        result:{}
+      })
+    }
+
+    const totalReviews = await Review.countDocuments({ restaurantId });
+
+    const ratings = await Review.aggregate([
+      { $match: { restaurantId: new mongoose.Types.ObjectId(restaurantId) } },
+      {
+        $group: {
+          _id: '$rating',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    let ratingMap = {
+      5: 0, // Excellent
+      4: 0, // Very Good
+      3: 0, // Average
+      2: 0, // Poor
+      1: 0  // Terrible
+    };
+
+    ratings.forEach(r => {
+      ratingMap[r._id] = r.count;
+    });
+
+    const averageRating = await Review.aggregate([
+      { $match: { restaurantId: new mongoose.Types.ObjectId(restaurantId) } },
+      { $group: { _id: null, avg: { $avg: "$rating" } } }
+    ]);
+
+    res.send({
+      statusCode:200,
+      success:true,
+      message:"Review average fetch successfully",
+      result:
+      {averageRating: (averageRating[0]?.avg || 0).toFixed(1),
+      totalReviews,
+      breakdown: {
+        Excellent: { count: ratingMap[5], percent: ((ratingMap[5] / totalReviews) * 100).toFixed(0) },
+        VeryGood:  { count: ratingMap[4], percent: ((ratingMap[4] / totalReviews) * 100).toFixed(0) },
+        Average:   { count: ratingMap[3], percent: ((ratingMap[3] / totalReviews) * 100).toFixed(0) },
+        Poor:      { count: ratingMap[2], percent: ((ratingMap[2] / totalReviews) * 100).toFixed(0) },
+        Terrible:  { count: ratingMap[1], percent: ((ratingMap[1] / totalReviews) * 100).toFixed(0) },
+      }
+    }
+    });
+
+  } catch (error) {
+    return res.send({
+      statusCode:500,
+      success:false,
+      message:error.message + " ERROR in get review average api",
+      result:{}
+    })
+  }
+}
+
