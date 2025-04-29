@@ -620,70 +620,70 @@ exports.getFilteredRestaurants = async (req, res) => {
   }
 };
 
-exports.topRatedData = async (req, res) => {
-  try {
-    let { lat, lng, address, maxDistance = 5, rating = 1 } = req.body;
+// exports.topRatedData = async (req, res) => {
+//   try {
+//     let { lat, lng, address, maxDistance = 5, rating = 1 } = req.body;
 
-    maxDistance = Number.parseFloat(maxDistance) * 1000;
-    rating = Number.parseFloat(rating);
+//     maxDistance = Number.parseFloat(maxDistance) * 1000;
+//     rating = Number.parseFloat(rating);
 
-    if (!lat || !lng) {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "Latitude and Longitude are mandatory",
-        result: {},
-      });
-    }
+//     if (!lat || !lng) {
+//       return res.send({
+//         statusCode: 400,
+//         success: false,
+//         message: "Latitude and Longitude are mandatory",
+//         result: {},
+//       });
+//     }
 
-    if (!address) {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "Address is mandatory",
-        result: {},
-      });
-    }
+//     if (!address) {
+//       return res.send({
+//         statusCode: 400,
+//         success: false,
+//         message: "Address is mandatory",
+//         result: {},
+//       });
+//     }
 
-    const counts = await Restaurant.countDocuments({
-      "location.coordinates": [lng, lat],
-      // status: "Active"
-    });
+//     const counts = await Restaurant.countDocuments({
+//       "location.coordinates": [lng, lat],
+//       // status: "Active"
+//     });
 
-    // Scraping logic
-    if (counts > 5) {
-      scrapeGoogleMaps(lat, lng, address); // non-blocking
-    } else {
-      await scrapeGoogleMaps(lat, lng, address); // wait for scrape
-    }
+//     // Scraping logic
+//     if (counts > 5) {
+//       scrapeGoogleMaps(lat, lng, address); // non-blocking
+//     } else {
+//       await scrapeGoogleMaps(lat, lng, address); // wait for scrape
+//     }
 
-    // Fetch top-rated restaurants only
-    const topRatedRestaurants = await Restaurant.find({
-      "location.coordinates": [lng, lat],
-      rating: { $gte: rating },
-      // status: "Active"
-    })
-      .sort({ rating: -1 })
-      .limit(10)
-      .lean();
+//     // Fetch top-rated restaurants only
+//     const topRatedRestaurants = await Restaurant.find({
+//       "location.coordinates": [lng, lat],
+//       rating: { $gte: rating },
+//       // status: "Active"
+//     })
+//       .sort({ rating: -1 })
+//       .limit(10)
+//       .lean();
 
-    return res.send({
-      statusCode: 200,
-      success: true,
-      message: "Top rated restaurants fetched successfully.",
-      result: {
-        topRatedRestaurants,
-      },
-    });
-  } catch (error) {
-    return res.send({
-      statusCode: 500,
-      success: false,
-      message: error.message || "Internal Server Error",
-      result: {},
-    });
-  }
-};
+//     return res.send({
+//       statusCode: 200,
+//       success: true,
+//       message: "Top rated restaurants fetched successfully.",
+//       result: {
+//         topRatedRestaurants,
+//       },
+//     });
+//   } catch (error) {
+//     return res.send({
+//       statusCode: 500,
+//       success: false,
+//       message: error.message || "Internal Server Error",
+//       result: {},
+//     });
+//   }
+// };
 
 // exports.nearMeData = async (req, res) => {
 //   try {
