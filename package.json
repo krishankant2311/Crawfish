@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.jx",
-    "dev": "node index.js"
+    "dev": "node index.js",
+    "postinstall": "echo Chromium is used via puppeteer-core"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +16,7 @@
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
+    "chromium": "^3.0.3",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
     "dotenv": "^16.4.7",
@@ -29,7 +31,7 @@
     "nodemailer": "^6.10.0",
     "nodemon": "^3.1.9",
     "onesignal-node": "^3.4.0",
-    "puppeteer": "^24.7.2",
+    "puppeteer-core": "^24.7.2",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "socket.io": "^4.8.1",
