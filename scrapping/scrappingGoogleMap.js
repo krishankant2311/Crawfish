@@ -543,13 +543,10 @@ async function scrapeGoogleMaps(lat, lng, address) {
   console.log('Opening:', mapUrl);
   const browser = await puppeteer.launch({
     headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--use-fake-ui-for-media-stream',
-    ],
-    defaultViewport: null,
+    executablePath: puppeteer.executablePath(), // Use Puppeteer's executablePath dynamically
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
+
   
   // Use default context
   const page = await browser.newPage();
@@ -603,6 +600,7 @@ async function scrapeGoogleMaps(lat, lng, address) {
       console.log(`Skipping existing restaurant: ${r.title}`);
       continue;
     }
+
     const restaurant = new Restaurant({
       restaurantName: r.title,
       fullAddress: r.address,
@@ -612,15 +610,15 @@ async function scrapeGoogleMaps(lat, lng, address) {
         coordinates: [lng, lat],
       },
       isScraped: true,
-      status:"Active",
+      status: "Active",
       rating: r.rating,
       restaurantLogo: r.image,
       website: r.link,
       email: `${r.title.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
       password: 'Temp@123',
-
       phoneNumber: '0000000000',
     });
+
     try {
       await restaurant.save();
       console.log(`Saved: ${r.title}`);

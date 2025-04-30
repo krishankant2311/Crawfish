@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.jx",
-    "dev": "node index.js",
-    "postinstall": "echo Chromium is used via puppeteer-core"
+    "dev": "node index.js"
+    
   },
   "keywords": [],
   "author": "",
