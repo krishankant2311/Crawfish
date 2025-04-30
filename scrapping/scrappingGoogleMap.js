@@ -507,12 +507,118 @@
 
 
 
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-console.log(puppeteer.executablePath());
+// const puppeteer = require('puppeteer');
+
+// const mongoose = require('mongoose');
+// const Restaurant = require("../module/restaurants/model/restaurantModel");
+// async function autoScroll(page, itemCount = 10) {
+//   try {
+//     let lastCount = 0;
+//     let retries = 0;
+//     while (true) {
+//       const items = await page.$$('.Nv2PK');
+//       if (items.length >= itemCount || retries > 5) break;
+//       await page.evaluate(() => {
+//         const scrollable = document.querySelector('div[role="feed"]');
+//         if (scrollable) {
+//           scrollable.scrollBy(0, 1000); // scroll more aggressively
+//         }
+//       });
+//       // await page.waitForTimeout(2000); // wait 2 seconds for new items
+//       await new Promise(resolve => setTimeout(resolve, 2000));
+//       const newCount = (await page.$$('.Nv2PK')).length;
+//       if (newCount === lastCount) retries++;
+//       else retries = 0;
+//       lastCount = newCount;
+//     }
+//   } catch (err) {
+//     console.error("Scroll error:", err.message);
+//   };
+// };
+// // tyuiyuio
+// async function scrapeGoogleMaps(lat, lng, address) {
+//   const mapUrl = `https://www.google.com/maps/search/restaurants+in+${address}/@${lat},${lng},10z`;
+//   console.log('Opening:', mapUrl);
+ 
+
+//   const browser = await puppeteer.launch({
+//     headless: true,
+//     args: ['--no-sandbox', '--disable-setuid-sandbox'],
+//   });
+
+//   // const browser = await puppeteer.launch({
+//   //   executablePath: chromium.path,
+//   //   headless: chromium.headless,
+//   //   args: chromium.args || ['--no-sandbox', '--disable-setuid-sandbox'],
+//   // });
+//   const page = await browser.newPage();
+//   await page.goto(mapUrl, { waitUntil: 'networkidle2' });
+//   try {
+//     await page.waitForSelector('.Nv2PK', { timeout: 10000 });
+//     await autoScroll(page, 30); // load at least 20 restaurants
+//   } catch (err) {
+//     console.error('Error waiting for restaurant elements:', err.message);
+//   }
+//   const results = await page.evaluate(() => {
+//     const data = [];
+//     document.querySelectorAll('.Nv2PK').forEach(el => {
+//       const title = el.querySelector('.qBF1Pd')?.innerText.trim() || '';
+//       const rating = parseFloat(el.querySelector('.MW4etd')?.innerText) || 0;
+//       const reviews = el.querySelector('[aria-label*="stars"] .UY7F9')?.innerText || '';
+//       const address = el.querySelector('.W4Efsd span:nth-child(2) span:nth-child(2)')?.innerText || '';
+//       const image = el.querySelector('img')?.src || '';
+//       const link = el.querySelector('a')?.href || '';
+//       data.push({ title, rating, reviews, address, image, link });
+//     });
+//     return data;
+//   });
+//   await browser.close();
+//   for (const r of results) {
+//     if (!r.title) continue;
+//     const existing = await Restaurant.findOne({
+//       restaurantName: r.title,
+//       'location.coordinates': [lng, lat],
+//     });
+//     if (existing) {
+//       console.log(`Skipping existing restaurant: ${r.title}`);
+//       continue;
+//     }
+//     const restaurant = new Restaurant({
+//       restaurantName: r.title,
+//       fullAddress: r.address,
+//       address: r.address,
+//       location: {
+//         type: 'Point',
+//         coordinates: [lng, lat],
+//       },
+//       isScraped: true,
+//       status:"Active",
+//       rating: r.rating,
+//       restaurantLogo: r.image,
+//       website: r.link,
+//       email: `${r.title.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
+//       password: 'Temp@123',
+
+//       phoneNumber: '0000000000',
+//     });
+//     try {
+//       await restaurant.save();
+//       console.log(`Saved: ${r.title}`);
+//     } catch (err) {
+//       console.error(`Error saving ${r.title}:`, err.message);
+//     }
+//   }
+// }
+// module.exports = scrapeGoogleMaps;
+
+
+const puppeteer = require('puppeteer');
 const mongoose = require('mongoose');
 const Restaurant = require("../module/restaurants/model/restaurantModel");
-puppeteer.use(StealthPlugin());
+
+// Add chromium for cloud deployment
+const chromium = require('@sparticuz/chromium');
+
 async function autoScroll(page, itemCount = 10) {
   try {
     let lastCount = 0;
@@ -523,10 +629,9 @@ async function autoScroll(page, itemCount = 10) {
       await page.evaluate(() => {
         const scrollable = document.querySelector('div[role="feed"]');
         if (scrollable) {
-          scrollable.scrollBy(0, 1000); // scroll more aggressively
+          scrollable.scrollBy(0, 1000);
         }
       });
-      // await page.waitForTimeout(2000); // wait 2 seconds for new items
       await new Promise(resolve => setTimeout(resolve, 2000));
       const newCount = (await page.$$('.Nv2PK')).length;
       if (newCount === lastCount) retries++;
@@ -535,48 +640,55 @@ async function autoScroll(page, itemCount = 10) {
     }
   } catch (err) {
     console.error("Scroll error:", err.message);
-  };
-};
-// tyuiyuio
-async function scrapeGoogleMaps(lat, lng, address) {
-  const mapUrl = `https://www.google.com/maps/search/restaurants/@${lat},${lng},14z`;
-  console.log('Opening:', mapUrl);
-  const browser = await puppeteer.launch({
-    executablePath:  'C:/Users/DELL/.cache/puppeteer/chrome/win64-135.0.7049.114/chrome-win64/chrome.exe',
-    headless: true,
-    // executablePath: puppeteer.executablePath(), // Use Puppeteer's executablePath dynamically
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  }
+}
 
-  
-  // Use default context
+async function scrapeGoogleMaps(lat, lng, address) {
+  const mapUrl = `https://www.google.com/maps/search/restaurants+in+${address}/@${lat},${lng},10z`;
+  console.log('Opening:', mapUrl);
+
+  // Cloud detection (add this line)
+  const isCloud = process.env.RENDER || process.env.AWS_LAMBDA_FUNCTION_NAME || false;
+
+  // Modified browser launch configuration
+  const browserConfig = isCloud 
+    ? {
+        executablePath: await chromium.executablePath(),
+        headless: true,
+        args: [
+          ...chromium.args,
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--single-process'
+        ],
+        ignoreHTTPSErrors: true
+      }
+    : {
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      };
+
+  const browser = await puppeteer.launch(browserConfig);
+
   const page = await browser.newPage();
   
-  // Grant geolocation permission to Google
-  const context = browser.defaultBrowserContext();
-  await context.overridePermissions("https://www.google.com", ['geolocation']);
-  
-  // Set fake geolocation
-  await page.setGeolocation({
-    latitude: parseFloat(lat),
-    longitude: parseFloat(lng),
-  });
-  
-  
-  // const browser = await puppeteer.launch({
-  //   executablePath: chromium.path,
-  //   headless: chromium.headless,
-  //   args: chromium.args || ['--no-sandbox', '--disable-setuid-sandbox'],
-  // });
-  // const page = await browser.newPage();
-  await page.goto(mapUrl, { waitUntil: 'networkidle2', timeout: 0 });
+  // Set longer timeouts for cloud environment
+  page.setDefaultNavigationTimeout(60000);
+  page.setDefaultTimeout(30000);
 
   try {
-    await page.waitForSelector('.Nv2PK', { timeout: 10000 });
+    await page.goto(mapUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+    
+    // More robust element waiting
+    await page.waitForSelector('.Nv2PK', { timeout: 30000 }).catch(() => {});
     await autoScroll(page, 30);
   } catch (err) {
-    console.error('Error waiting for restaurant elements:', err.message);
+    console.error('Navigation/loading error:', err.message);
+    await browser.close();
+    return [];
   }
+
   const results = await page.evaluate(() => {
     const data = [];
     document.querySelectorAll('.Nv2PK').forEach(el => {
@@ -590,42 +702,50 @@ async function scrapeGoogleMaps(lat, lng, address) {
     });
     return data;
   });
+
   await browser.close();
+
+  // Database operations
   for (const r of results) {
     if (!r.title) continue;
-    const existing = await Restaurant.findOne({
-      restaurantName: r.title,
-      'location.coordinates': [lng, lat],
-    });
-    if (existing) {
-      console.log(`Skipping existing restaurant: ${r.title}`);
-      continue;
-    }
-
-    const restaurant = new Restaurant({
-      restaurantName: r.title,
-      fullAddress: r.address,
-      address: r.address,
-      location: {
-        type: 'Point',
-        coordinates: [lng, lat],
-      },
-      isScraped: true,
-      status: "Active",
-      rating: r.rating,
-      restaurantLogo: r.image,
-      website: r.link,
-      email: `${r.title.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
-      password: 'Temp@123',
-      phoneNumber: '0000000000',
-    });
-
+    
     try {
+      const existing = await Restaurant.findOne({
+        restaurantName: r.title,
+        'location.coordinates': [lng, lat],
+      });
+      
+      if (existing) {
+        console.log(`Skipping existing restaurant: ${r.title}`);
+        continue;
+      }
+
+      const restaurant = new Restaurant({
+        restaurantName: r.title,
+        fullAddress: r.address,
+        address: r.address,
+        location: {
+          type: 'Point',
+          coordinates: [lng, lat],
+        },
+        isScraped: true,
+        status: "Active",
+        rating: r.rating,
+        restaurantLogo: r.image,
+        website: r.link,
+        email: `${r.title.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
+        password: 'Temp@123',
+        phoneNumber: '0000000000',
+      });
+
       await restaurant.save();
       console.log(`Saved: ${r.title}`);
     } catch (err) {
-      console.error(`Error saving ${r.title}:`, err.message);
+      console.error(`Error processing ${r.title}:`, err.message);
     }
   }
+  
+  return results;
 }
+
 module.exports = scrapeGoogleMaps;
