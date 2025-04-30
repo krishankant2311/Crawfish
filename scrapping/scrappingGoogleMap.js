@@ -507,12 +507,12 @@
 
 
 
-const puppeteer = require('puppeteer');
-// const chromium = require('chromium');
+const puppeteer = require('puppeteer-core');
+const chromium = require('chromium');
 
 const mongoose = require('mongoose');
 const Restaurant = require("../module/restaurants/model/restaurantModel");
-async function autoScroll(page, itemCount = 20) {
+async function autoScroll(page, itemCount = 10) {
   try {
     let lastCount = 0;
     let retries = 0;
@@ -540,16 +540,16 @@ async function autoScroll(page, itemCount = 20) {
 async function scrapeGoogleMaps(lat, lng, address) {
   const mapUrl = `https://www.google.com/maps/search/restaurants+in+${address}/@${lat},${lng},10z`;
   console.log('Opening:', mapUrl);
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
-
   // const browser = await puppeteer.launch({
-  //   executablePath: chromium.path,
-  //   headless: chromium.headless,
-  //   args: chromium.args || ['--no-sandbox', '--disable-setuid-sandbox'],
+  //   headless: true,
+  //   args: ['--no-sandbox', '--disable-setuid-sandbox'],
   // });
+
+  const browser = await puppeteer.launch({
+    executablePath: chromium.path,
+    headless: chromium.headless,
+    args: chromium.args || ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
   const page = await browser.newPage();
   await page.goto(mapUrl, { waitUntil: 'networkidle2' });
   try {
