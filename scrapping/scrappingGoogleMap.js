@@ -1,606 +1,259 @@
-// // const express = require("express");
-// // const puppeteer = require("puppeteer-extra");
-// // const StealthPlugin = require("puppeteer-extra-plugin-stealth");
-
-// // puppeteer.use(StealthPlugin());
-
-// // const router = express.Router();
-
-// // router.get("/scrap-restaurants", async (req, res) => {
-// //   try {
-// //     const { lat, lng } = req.query;
-
-// //     if (!lat || !lng) {
-// //       return res.status(400).json({ error: "Latitude and Longitude are required!" });
-// //     }
-
-// //     const searchQuery = `restaurants near ${lat},${lng}`;
-// //     const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(searchQuery)}`;
-
-// //     console.log("🚀 Launching Puppeteer...");
-// //     const browser = await puppeteer.launch({
-// //       headless: "new",
-// //       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-// //       defaultViewport: null,
-// //     });
-
-// //     const page = await browser.newPage();
-// //     await page.setUserAgent(
-// //       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
-// //     );
-
-// //     console.log("🔍 Navigating to Google Maps...");
-// //     try {
-// //       await page.goto(mapsUrl, { waitUntil: "networkidle2", timeout: 60000 });
-// //     } catch (error) {
-// //       console.error("⚠️ Navigation Timeout or Failed:", error);
-// //       return res.status(500).json({ error: "Failed to load Google Maps" });
-// //     }
-
-// //     console.log("⏳ Waiting for results...");
-// //     try {
-// //       await page.waitForSelector(".Nv2PK", { timeout: 30000 });
-// //     } catch (error) {
-// //       console.error("⚠️ No restaurant results found:", error);
-// //       return res.status(404).json({ error: "No restaurants found in this area" });
-// //     }
-
-// //     console.log("📜 Scrolling to load more restaurants...");
-// //     let previousHeight = 0;
-// //     for (let i = 0; i < 5; i++) {
-// //       await page.evaluate("window.scrollBy(0, document.body.scrollHeight)");
-
-// //       // ✅ Fixed: Using setTimeout() instead of page.waitForTimeout()
-// //       await new Promise(resolve => setTimeout(resolve, 2000));
-
-// //       let newHeight = await page.evaluate("document.body.scrollHeight");
-// //       if (newHeight === previousHeight) break;
-// //       previousHeight = newHeight;
-// //     }
-
-// //     console.log("📦 Extracting restaurant data...");
-// //     const restaurants = await page.evaluate(() => {
-// //       let results = [];
-// //       let list = document.querySelectorAll(".Nv2PK");
-
-// //       list.forEach((item, index) => {
-// //         let name = item.querySelector(".qBF1Pd")?.innerText.trim() || "N/A";
-
-// //         // ✅ Extract Rating
-// //         let rating = item.querySelector(".ZkP5Je")?.innerText.trim() || "N/A";
-
-// //         // ✅ Extract Total Reviews
-// //         let total_reviews = "N/A";
-// //         const reviewElement = item.querySelector(".UY7F9");
-// //         if (reviewElement) {
-// //           let match = reviewElement.innerText.match(/\(([\d,]+)\)/);
-// //           total_reviews = match ? match[1].replace(/,/g, "") : "N/A";
-// //         }
-
-// //         // ✅ Extract Price
-// //         let price = "N/A";
-// //         item.querySelectorAll("span, div").forEach((el) => {
-// //           let text = el.innerText.trim();
-// //           if (text.match(/^₹+/)) price = text;
-// //         });
-
-// //         // ✅ Extract Address & Timing
-// //         let address = "N/A";
-// //         let timing = "N/A";
-// //         item.querySelectorAll(".W4Efsd").forEach((el) => {
-// //           let text = el.innerText.trim();
-// //           if (text.includes("Open") || text.includes("Closes") || text.includes("Reopens")) {
-// //             timing = text;
-// //           } else if (text.length > 10 && !text.includes("₹")) {
-// //             address = text;
-// //           }
-// //         });
-
-// //         results.push({ index: index + 1, name, rating, total_reviews, price, address, timing });
-// //       });
-
-// //       return results;
-// //     });
-
-// //     console.log("📌 Final Data Extracted:", JSON.stringify(restaurants, null, 2));
-
-// //     await browser.close();
-// //     res.json({ success: true, data: restaurants });
-// //   } catch (error) {
-// //     console.error("❌ Error scraping restaurants:", error);
-// //     res.status(500).json({ error: "Internal Server Error" });
-// //   }
-// // });
-
-// // module.exports = router;
-
-// // const puppeteer = require('puppeteer-extra');
-// // const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-// // puppeteer.use(StealthPlugin());
-// // const puppeteer = require("puppeteer");
-
-// // async function scrapeGoogleRestaurants(lat, lng) {
-
-// //   const browser = await puppeteer.launch({
-// //     headless: false, // headless true/new is flaky for Google Maps
-// //     defaultViewport: null,
-// //     args: [
-// //       "--start-maximized",
-// //       "--no-sandbox",
-// //       "--disable-setuid-sandbox",
-// //       "--disable-dev-shm-usage"
-// //     ]
-// //   });
-
-// //   const url = `https://www.google.com/maps/search/restaurants/@${lat},${lng},15z`;
-// //   await page.goto(url, { waitUntil: "networkidle2"});
-
-// //   // await page.waitForSelector('[role="article"]', { timeout: 30000 });// wait for list
-
-// //   // await page.waitForTimeout(5000);
-
-// // const consent = await page.$('form[action*="consent"] button');
-// // if (consent) {
-// //   await consent.click();
-// //   console.log("Clicked consent popup");
-// //   await page.waitForTimeout(3000);
-// // }
-// //   const data = await page.evaluate(() => {
-// //     const cards = Array.from(document.querySelectorAll('[role="article"]'));
-// //     return cards.slice(0, 10).map((el) => {
-// //       const name = el.querySelector("div[aria-label]")?.getAttribute("aria-label");
-// //       const ratingText = el.innerText.match(/(\d\.\d) ★/);
-// //       const rating = ratingText ? parseFloat(ratingText[1]) : null;
-
-// //       return {
-// //         placeId: el.getAttribute("data-result-id") || Math.random().toString(),
-// //         name,
-// //         rating,
-// //         address: el.innerText.split("\n")[2] || "",
-// //       };
-// //     });
-// //   });
-
-// //   console.log("Data ", data)
-
-// //   await browser.close();
-
-// //   return data.map((r) => ({
-// //     ...r,
-// //     latitude: parseFloat(lat),
-// //     longitude: parseFloat(lng),
-// //     location: {
-// //       type: "Point",
-// //       coordinates: [parseFloat(lng), parseFloat(lat)],
-// //     },
-// //   }));
-// // }
-
-// // const puppeteer = require('puppeteer-extra');
-// // const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-// // const fs = require('fs');
-// // puppeteer.use(StealthPlugin());
-
-// // async function scrapeGoogleRestaurants(lat, lng) {
-// //   const browser = await puppeteer.launch({
-// //     headless: false, // run with browser visible
-// //     defaultViewport: null,
-// //     args: [
-// //       "--start-maximized",
-// //       "--no-sandbox",
-// //       "--disable-setuid-sandbox",
-// //       "--disable-dev-shm-usage"
-// //     ]
-// //   });
-
-// //   const page = await browser.newPage();
-// //   console.log("Function Called");
-
-// //   const url = `https://www.google.com/maps/search/restaurants/@${lat},${lng},15z`;
-// //   await page.goto(url, { waitUntil: "domcontentloaded" });
-
-// //   // Wait for things to settle and handle cookie consent if it appears
-// //   await page.waitForTimeout(5000);
-
-// //   const consentBtn = await page.$('form[action*="consent"] button');
-// //   if (consentBtn) {
-// //     console.log("Consent popup found. Clicking...");
-// //     await consentBtn.click();
-// //     await page.waitForTimeout(3000);
-// //   }
-
-// //   try {
-// //     await page.waitForSelector('[role="article"]', { timeout: 30000 }); // wait for restaurant cards
-// //   } catch (err) {
-// //     console.error("Selector wait failed:", err.message);
-// //     const html = await page.content();
-// //     fs.writeFileSync("debug.html", html);
-// //     console.log("Saved current page HTML to debug.html for inspection.");
-// //     await browser.close();
-// //     throw err;
-// //   }
-
-// //   const data = await page.evaluate(() => {
-// //     const cards = Array.from(document.querySelectorAll('[role="article"]'));
-// //     return cards.slice(0, 10).map((el) => {
-// //       const name = el.querySelector("div[aria-label]")?.getAttribute("aria-label");
-// //       const ratingText = el.innerText.match(/(\d\.\d) ★/);
-// //       const rating = ratingText ? parseFloat(ratingText[1]) : null;
-
-// //       return {
-// //         placeId: el.getAttribute("data-result-id") || Math.random().toString(),
-// //         name,
-// //         rating,
-// //         address: el.innerText.split("\n")[2] || "",
-// //       };
-// //     });
-// //   });
-
-// //   console.log("Scraped Data:", data);
-
-// //   await browser.close();
-
-// //   return data.map((r) => ({
-// //     ...r,
-// //     latitude: parseFloat(lat),
-// //     longitude: parseFloat(lng),
-// //     location: {
-// //       type: "Point",
-// //       coordinates: [parseFloat(lng), parseFloat(lat)],
-// //     },
-// //   }));
-// // }
-
-// // module.exports = scrapeGoogleRestaurants;
-
-// // module.exports = scrapeGoogleRestaurants;
-
-// // const puppeteer = require('puppeteer-extra');
-// // const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-// // puppeteer.use(StealthPlugin());
-
-// // async function scrapeGoogleRestaurants(lat, lng) {
-// //   const browser = await puppeteer.launch({
-// //     headless: "new",
-// //     defaultViewport: null,
-// //     args: ["--no-sandbox", "--disable-setuid-sandbox"]
-// //   });
-
-// //   const page = await browser.newPage();
-// //   console.log("Function Called");
-
-// //   const url = `https://www.google.com/maps/search/restaurants/@${lat},${lng},15z`;
-// //   await page.goto(url, { waitUntil: "domcontentloaded" });
-
-// //   // Correct wait
-// //   await new Promise(res => setTimeout(res, 5000));
-// //   // Handle consent if needed
-// //   const consentBtn = await page.$('form[action*="consent"] button');
-// //   if (consentBtn) {
-// //     console.log("Clicking consent button");
-// //     await consentBtn.click();
-// //     await page.waitForSelector('some-selector', { timeout: 30000 });  // for waiting an element
-// //     // await page.waitForTimeout(5000);
-// //   }
-
-// //   try {
-// //     await page.waitForSelector('[role="article"]', { timeout: 30000 });
-// //   } catch (err) {
-// //     console.error("Timeout waiting for articles:", err.message);
-// //     await browser.close();
-// //     throw err;
-// //   }
-
-// //   const data = await page.evaluate(() => {
-// //     const cards = Array.from(document.querySelectorAll('[role="article"]'));
-// //     return cards.slice(0, 10).map((el) => {
-// //       const name = el.querySelector("div[aria-label]")?.getAttribute("aria-label");
-// //       const ratingText = el.innerText.match(/(\d\.\d) ★/);
-// //       const rating = ratingText ? parseFloat(ratingText[1]) : null;
-
-// //       return {
-// //         placeId: el.getAttribute("data-result-id") || Math.random().toString(),
-// //         name,
-// //         rating,
-// //         address: el.innerText.split("\n")[2] || "",
-// //       };
-// //     });
-// //   });
-
-// //   await browser.close();
-
-// //   return data.map((r) => ({
-// //     ...r,
-// //     latitude: parseFloat(lat),
-// //     longitude: parseFloat(lng),
-// //     location: {
-// //       type: "Point",
-// //       coordinates: [parseFloat(lng), parseFloat(lat)],
-// //     },
-// //   }));
-// // }
-
-// // module.exports = scrapeGoogleRestaurants;
-
-// // const puppeteer = require("puppeteer-extra");
-// // const StealthPlugin = require("puppeteer-extra-plugin-stealth");
-// // puppeteer.use(StealthPlugin());
-
-// // async function scrapeGoogleRestaurants(lat, lng) {
-// //   const browser = await puppeteer.launch({
-// //     headless: true,
-// //     defaultViewport: null,
-// //     args: ["--no-sandbox", "--disable-setuid-sandbox"],
-// //   });
-
-// //   const page = await browser.newPage();
-// //   console.log("Function Called");
-
-// //   const url = `https://www.google.com/maps/search/restaurants/@${lat},${lng},15z`;
-// //   await page.goto(url, { waitUntil: "domcontentloaded" });
-
-// //   // Accept Google consent popup if it appears
-// //   try {
-// //     await page.waitForSelector('form[action*="consent"] button', {
-// //       timeout: 5000,
-// //     });
-// //     await page.click('form[action*="consent"] button');
-// //     console.log("Consent accepted");
-// //   } catch (e) {
-// //     console.log("No consent popup");
-// //   }
-
-// //   // Wait for the map search results to load
-// //   await page.waitForSelector(".hfpxzc", { timeout: 30000 }); // More reliable than [role="article"]
-
-// //   // Scroll to load more restaurants
-// //   let previousHeight;
-// //   try {
-// //     for (let i = 0; i < 5; i++) {
-// //       previousHeight = await page.evaluate(
-// //         'document.querySelector(".m6QErb.DxyBCb.kA9KIf.dS8AEf.ecceSd").scrollHeight'
-// //       );
-// //       await page.evaluate(
-// //         'document.querySelector(".m6QErb.DxyBCb.kA9KIf.dS8AEf.ecceSd").scrollBy(0, document.querySelector(".m6QErb.DxyBCb.kA9KIf.dS8AEf.ecceSd").scrollHeight)'
-// //       );
-// //       await new Promise(resolve => setTimeout(resolve, 5000));
-// //       const newHeight = await page.evaluate(
-// //         'document.querySelector(".m6QErb.DxyBCb.kA9KIf.dS8AEf.ecceSd").scrollHeight'
-// //       );
-// //       if (newHeight === previousHeight) break;
-// //     }
-// //   } catch (err) {
-// //     console.log("Scrolling failed", err);
-// //   }
-
-// //   const data = await page.evaluate(() => {
-// //     const cards = Array.from(document.querySelectorAll(".hfpxzc"));
-// //     return cards.slice(0, 10).map((el) => {
-// //       const name = el.querySelector(".qBF1Pd")?.textContent;
-// //       const ratingText = el.querySelector(".MW4etd")?.textContent;
-// //       const rating = ratingText ? parseFloat(ratingText) : null;
-// //       const address = el.querySelector(".W4Efsd")?.textContent || "";
-
-// //       const placeId =
-// //         el.getAttribute("data-result-id") || Math.random().toString();
-
-// //       return {
-// //         placeId,
-// //         name,
-// //         rating,
-// //         address,
-// //       };
-// //     });
-// //   });
-
-// //   await browser.close();
-
-// //   return data.map((r) => ({
-// //     ...r,
-// //     latitude: parseFloat(lat),
-// //     longitude: parseFloat(lng),
-// //     location: {
-// //       type: "Point",
-// //       coordinates: [parseFloat(lng), parseFloat(lat)],
-// //     },
-// //   }));
-// // }
-
-// // module.exports = scrapeGoogleRestaurants;
-
-
-
-
-
-
-
-
-
-
-// // 
-
-// const puppeteer = require('puppeteer-extra');
-// const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-// puppeteer.use(StealthPlugin());
-
-// async function scrapeGoogleRestaurants(lat, lng) {
-//   const browser = await puppeteer.launch({
-//     headless: true,
-//     defaultViewport: null,
-//     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-//   });
-
-//   const page = await browser.newPage();
-//   console.log("Function Called");
-
-//   const url = `https://www.google.com/maps/search/restaurants/@${lat},${lng},15z`;
-//   await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
-
-//   await new Promise((r) => setTimeout(r, 5000));
-
-//   // Handle consent
-//   const consentBtn = await page.$('form[action*="consent"] button');
-//   if (consentBtn) {
-//     console.log("Clicking consent button");
-//     await consentBtn.click();
-//     await page.waitForNavigation({ waitUntil: "networkidle2" });
-//   } else {
-//     console.log("No consent popup");
-//   }
-
-//   // Scroll multiple times to trigger lazy loading
-//   try {
-//     for (let i = 0; i < 10; i++) {
-//       await page.keyboard.press("PageDown");
-//       await new Promise((r) => setTimeout(r, 1000));
-//     }
-//   } catch (e) {
-//     console.log("Scrolling error", e);
-//   }
-
-//   // Check raw HTML to debug
-//   const html = await page.content();
-//   if (!html.includes('[role="article"]')) {
-//     console.log("❌ No [role='article'] in HTML");
-//   }
-
-//   try {
-//     await page.waitForSelector('[role="article"]', { timeout: 30000 });
-//   } catch (err) {
-//     console.log("Timeout waiting for articles:", err.message);
-//     await browser.close();
-//     return [];
-//   }
-
-//   const data = await page.evaluate(() => {
-//     const cards = Array.from(document.querySelectorAll('[role="article"]'));
-//     return cards.map((el) => {
-//       const name = el.querySelector("div[aria-label]")?.getAttribute("aria-label") || "";
-//       const ratingMatch = el.innerText.match(/(\d\.\d) ★/);
-//       const rating = ratingMatch ? parseFloat(ratingMatch[1]) : null;
-//       const address = el.innerText.split("\n")[2] || "";
-
-//       return {
-//         placeId: el.getAttribute("data-result-id") || Math.random().toString(),
-//         name,
-//         rating,
-//         address,
-//       };
-//     });
-//   });
-
-//   await browser.close();
-
-//   console.log("✅ Scraped items:", data.length);
-//   return data.map((r) => ({
-//     ...r,
-//     latitude: parseFloat(lat),
-//     longitude: parseFloat(lng),
-//     location: {
-//       type: "Point",
-//       coordinates: [parseFloat(lng), parseFloat(lat)],
-//     },
-//   }));
-// }
-
-// module.exports = scrapeGoogleRestaurants;
-
-
-
-// const puppeteer = require('puppeteer');
-
-// const mongoose = require('mongoose');
+// const puppeteer = require("puppeteer-core");
+// const chromium = require("chromium");
+// const mongoose = require("mongoose");
 // const Restaurant = require("../module/restaurants/model/restaurantModel");
+
 // async function autoScroll(page, itemCount = 10) {
 //   try {
 //     let lastCount = 0;
 //     let retries = 0;
 //     while (true) {
-//       const items = await page.$$('.Nv2PK');
+//       const items = await page.$$(".Nv2PK");
 //       if (items.length >= itemCount || retries > 5) break;
 //       await page.evaluate(() => {
 //         const scrollable = document.querySelector('div[role="feed"]');
 //         if (scrollable) {
-//           scrollable.scrollBy(0, 1000); // scroll more aggressively
+//           scrollable.scrollBy(0, 1000);
 //         }
 //       });
-//       // await page.waitForTimeout(2000); // wait 2 seconds for new items
-//       await new Promise(resolve => setTimeout(resolve, 2000));
-//       const newCount = (await page.$$('.Nv2PK')).length;
+//       await new Promise((resolve) => setTimeout(resolve, 2000));
+//       const newCount = (await page.$$(".Nv2PK")).length;
 //       if (newCount === lastCount) retries++;
 //       else retries = 0;
 //       lastCount = newCount;
 //     }
 //   } catch (err) {
 //     console.error("Scroll error:", err.message);
-//   };
-// };
-// // tyuiyuio
+//   }
+// }
+// // do not remove this function
+// // async function getRestaurantDetails(page, link) {
+// //   try {
+// //     await page.goto(link, { waitUntil: "networkidle2" });
+// //     await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait for dynamic content
+
+// //     const details = await page.evaluate(() => {
+// //       const name = document.querySelector("h1")?.innerText || "";
+// //       const description =
+// //         document.querySelector('[aria-label^="About"] ~ div div span')
+// //           ?.innerText || "";
+
+// //       // Business hours
+// //       const businessHours = [];
+// //       const hoursTable = document.querySelectorAll(".OqCZI span");
+// //       hoursTable.forEach((el) => {
+// //         const text = el.innerText;
+// //         if (text && text.includes(":")) businessHours.push(text);
+// //       });
+
+// //       // Full address
+// //       const addressEl =
+// //         document.querySelector('[data-item-id="address"]') ||
+// //         Array.from(document.querySelectorAll("button, div")).find((el) =>
+// //           el.innerText?.includes("Address")
+// //         );
+// //       let fullAddress = addressEl?.innerText?.trim() || "";
+
+// //       // Phone number
+// //       const phoneEl =
+// //         document.querySelector('[data-item-id="phone"]') ||
+// //         Array.from(document.querySelectorAll("button, div")).find((el) =>
+// //           el.innerText?.match(/\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/)
+// //         );
+// //       const phoneNumber = phoneEl?.innerText?.trim() || "";
+
+// //       return {
+// //         name,
+// //         description,
+// //         businessHours: businessHours.join(", "),
+// //         phoneNumber,
+// //         fullAddress,
+// //       };
+// //     });
+
+// //     // 🔍 Clean unreadable characters and extract city/country
+// //     const cleanedFullAddress = details.fullAddress
+// //       .replace(/[^\x20-\x7E]/g, "")
+// //       .trim(); // removes non-ASCII
+// //     const addressParts = cleanedFullAddress.split(",").map((p) => p.trim());
+// //     const city =
+// //       addressParts.length >= 3 ? addressParts[addressParts.length - 3] : "";
+// //     const country =
+// //       addressParts.length >= 1 ? addressParts[addressParts.length - 1] : "";
+
+// //     return {
+// //       name: details.name,
+// //       description: details.description,
+// //       businessHours: details.businessHours,
+// //       phoneNumber: details.phoneNumber,
+// //       fullAddress: cleanedFullAddress,
+// //       city,
+// //       country,
+// //     };
+// //   } catch (err) {
+// //     console.error("Error fetching restaurant details:", err.message);
+// //     return {
+// //       name: "",
+// //       description: "",
+// //       businessHours: "",
+// //       phoneNumber: "",
+// //       fullAddress: "",
+// //       city: "",
+// //       country: "",
+// //     };
+// //   }
+// // }
+
+// async function getRestaurantDetails(page, link) {
+//   try {
+//     await page.goto(link, { waitUntil: "networkidle2" });
+//     await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait for dynamic content
+//     const details = await page.evaluate(() => {
+//       const name = document.querySelector("h1")?.innerText || "";
+//       const description =
+//         document.querySelector('[aria-label^="About"] ~ div div span')
+//           ?.innerText || "";
+//       // Business hours
+//       const businessHours = [];
+//       const hoursTable = document.querySelectorAll(".OqCZI span");
+//       hoursTable.forEach((el) => {
+//         const text = el.innerText;
+//         if (text && text.includes(":")) businessHours.push(text);
+//       });
+//       // Full address
+//       const addressEl =
+//         document.querySelector('[data-item-id="address"]') ||
+//         Array.from(document.querySelectorAll("button, div")).find((el) =>
+//           el.innerText?.includes("Address")
+//         );
+//       let fullAddress = addressEl?.innerText?.trim() || "";
+//       // Phone number
+//       const phoneEl =
+//         document.querySelector('[data-item-id="phone"]') ||
+//         Array.from(document.querySelectorAll("button, div")).find((el) =>
+//           el.innerText?.match(/\(?\d{2,4}\)?[-.\s]?\d{3,5}[-.\s]?\d{3,5}/)
+//         );
+//       const rawPhone = phoneEl?.innerText?.trim() || "";
+//       const phoneMatch = rawPhone.match(/(\+?\d{1,3})?[-.\s]?\(?\d{2,5}\)?[-.\s]?\d{3,5}[-.\s]?\d{3,5}/);
+//       const phoneNumber = phoneMatch ? phoneMatch[0] : "";
+//       return {
+//         name,
+//         description,
+//         businessHours: businessHours.join(", "),
+//         phoneNumber,
+//         fullAddress,
+//       };
+//     });
+//     // Clean unreadable characters and extract city/country
+//     const cleanedFullAddress = details.fullAddress
+//       .replace(/[^\x20-\x7E]/g, "")
+//       .trim();
+//     const addressParts = cleanedFullAddress.split(",").map((p) => p.trim());
+//     const city =
+//       addressParts.length >= 3 ? addressParts[addressParts.length - 3] : "";
+//     const country =
+//       addressParts.length >= 1 ? addressParts[addressParts.length - 1] : "";
+//     return {
+//       name: details.name,
+//       description: details.description,
+//       businessHours: details.businessHours,
+//       phoneNumber: details.phoneNumber,
+//       fullAddress: cleanedFullAddress,
+//       city,
+//       country,
+//     };
+//   } catch (err) {
+//     console.error(":x: Error fetching restaurant details:", err.message);
+//     return {
+//       name: "",
+//       description: "",
+//       businessHours: "",
+//       phoneNumber: "",
+//       fullAddress: "",
+//       city: "",
+//       country: "",
+//     };
+//   }
+// }
 // async function scrapeGoogleMaps(lat, lng, address) {
 //   const mapUrl = `https://www.google.com/maps/search/restaurants+in+${address}/@${lat},${lng},10z`;
-//   console.log('Opening:', mapUrl);
- 
+//   console.log("Opening:", mapUrl);
 
 //   const browser = await puppeteer.launch({
-//     headless: true,
-//     args: ['--no-sandbox', '--disable-setuid-sandbox'],
+//     executablePath: chromium.path,
+//     headless: chromium.headless,
+//     args: chromium.args || ["--no-sandbox", "--disable-setuid-sandbox"],
 //   });
-
-//   // const browser = await puppeteer.launch({
-//   //   executablePath: chromium.path,
-//   //   headless: chromium.headless,
-//   //   args: chromium.args || ['--no-sandbox', '--disable-setuid-sandbox'],
-//   // });
 //   const page = await browser.newPage();
-//   await page.goto(mapUrl, { waitUntil: 'networkidle2' });
+//   await page.goto(mapUrl, { waitUntil: "networkidle2" });
+
 //   try {
-//     await page.waitForSelector('.Nv2PK', { timeout: 10000 });
-//     await autoScroll(page, 30); // load at least 20 restaurants
+//     await page.waitForSelector(".Nv2PK", { timeout: 10000 });
+//     await autoScroll(page, 30);
 //   } catch (err) {
-//     console.error('Error waiting for restaurant elements:', err.message);
+//     console.error("Error waiting for restaurant elements:", err.message);
 //   }
-//   const results = await page.evaluate(() => {
+
+//   const basicResults = await page.evaluate(() => {
 //     const data = [];
-//     document.querySelectorAll('.Nv2PK').forEach(el => {
-//       const title = el.querySelector('.qBF1Pd')?.innerText.trim() || '';
-//       const rating = parseFloat(el.querySelector('.MW4etd')?.innerText) || 0;
-//       const reviews = el.querySelector('[aria-label*="stars"] .UY7F9')?.innerText || '';
-//       const address = el.querySelector('.W4Efsd span:nth-child(2) span:nth-child(2)')?.innerText || '';
-//       const image = el.querySelector('img')?.src || '';
-//       const link = el.querySelector('a')?.href || '';
+//     document.querySelectorAll(".Nv2PK").forEach((el) => {
+//       const title = el.querySelector(".qBF1Pd")?.innerText.trim() || "";
+//       const rating = parseFloat(el.querySelector(".MW4etd")?.innerText) || 0;
+//       const reviews =
+//         el.querySelector('[aria-label*="stars"] .UY7F9')?.innerText || "";
+//       const address =
+//         el.querySelector(".W4Efsd span:nth-child(2) span:nth-child(2)")
+//           ?.innerText || "";
+//       const image = el.querySelector("img")?.src || "";
+//       const link = el.querySelector("a")?.href || "";
 //       data.push({ title, rating, reviews, address, image, link });
 //     });
 //     return data;
 //   });
-//   await browser.close();
-//   for (const r of results) {
+
+//   for (const r of basicResults) {
 //     if (!r.title) continue;
+
 //     const existing = await Restaurant.findOne({
 //       restaurantName: r.title,
-//       'location.coordinates': [lng, lat],
+//       "location.coordinates": [lng, lat],
 //     });
+
 //     if (existing) {
 //       console.log(`Skipping existing restaurant: ${r.title}`);
 //       continue;
 //     }
+
+//     const details = await getRestaurantDetails(page, r.link);
+//     console.log("Details of city", details.city);
+//     console.log("Details of county", details.country);
+//     console.log("Details of hours", details.businessHours);
+//     console.log("Details of fulladress", details.fullAddress);
+//     console.log("Details of PHone number", details.phoneNumber);
+//     console.log("Details56789yugfuikhjo", details);
+
 //     const restaurant = new Restaurant({
 //       restaurantName: r.title,
-//       fullAddress: r.address,
-//       address: r.address,
+//       fullAddress: details.fullAddress,
+//       address:details.fullAddress|| r.address,
+//       city: details.city,
+//       country: details.country,
 //       location: {
-//         type: 'Point',
+//         type: "Point",
 //         coordinates: [lng, lat],
 //       },
 //       isScraped: true,
-//       status:"Active",
+//       status: "Active",
 //       rating: r.rating,
 //       restaurantLogo: r.image,
 //       website: r.link,
-//       email: `${r.title.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
-//       password: 'Temp@123',
-
-//       phoneNumber: '0000000000',
+//       email: `${r.title.toLowerCase().replace(/\s+/g, "")}@gmail.com`,
+//       password: "Temp@123",
+//       phoneNumber: details.phoneNumber.replace("\n","") || "0000000000",
+//       discription: details.description,
+//       businessHours: details.businessHours,
 //     });
+
 //     try {
 //       await restaurant.save();
 //       console.log(`Saved: ${r.title}`);
@@ -608,144 +261,267 @@
 //       console.error(`Error saving ${r.title}:`, err.message);
 //     }
 //   }
+
+//   await browser.close();
 // }
+
 // module.exports = scrapeGoogleMaps;
 
 
-const puppeteer = require('puppeteer');
-const mongoose = require('mongoose');
+
+
+
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const mongoose = require("mongoose");
 const Restaurant = require("../module/restaurants/model/restaurantModel");
 
-// Add chromium for cloud deployment
-const chromium = require('@sparticuz/chromium');
+// Dynamic imports based on environment
+let puppeteer;
+let chromium;
 
+if (IS_PRODUCTION) {
+  puppeteer = require("puppeteer-core");
+  chromium = require("@sparticuz/chromium-min");
+} else {
+  puppeteer = require("puppeteer");
+}
+
+// Improved autoScroll with better error handling
 async function autoScroll(page, itemCount = 10) {
   try {
     let lastCount = 0;
     let retries = 0;
-    while (true) {
-      const items = await page.$$('.Nv2PK');
-      if (items.length >= itemCount || retries > 5) break;
+    const maxRetries = 5;
+    const scrollDelay = 2000;
+    
+    while (retries <= maxRetries) {
+      const items = await page.$$(".Nv2PK");
+      if (items.length >= itemCount) break;
+      
       await page.evaluate(() => {
-        const scrollable = document.querySelector('div[role="feed"]');
-        if (scrollable) {
-          scrollable.scrollBy(0, 1000);
-        }
+        const scrollable = document.querySelector('div[role="feed"]') || window;
+        scrollable.scrollBy(0, 1000);
       });
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const newCount = (await page.$$('.Nv2PK')).length;
+      
+      await new Promise(resolve => setTimeout(resolve, scrollDelay));
+      
+      const newCount = (await page.$$(".Nv2PK")).length;
       if (newCount === lastCount) retries++;
       else retries = 0;
+      
       lastCount = newCount;
     }
   } catch (err) {
     console.error("Scroll error:", err.message);
+    throw err;
   }
 }
 
-async function scrapeGoogleMaps(lat, lng, address) {
-  const mapUrl = `https://www.google.com/maps/search/restaurants+in+${address}/@${lat},${lng},10z`;
-  console.log('Opening:', mapUrl);
-
-  // Cloud detection (add this line)
-  const isCloud = process.env.RENDER || process.env.AWS_LAMBDA_FUNCTION_NAME || false;
-
-  // Modified browser launch configuration
-  const browserConfig = isCloud 
-    ? {
-        executablePath: await chromium.executablePath(),
-        headless: true,
-        args: [
-          ...chromium.args,
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--single-process'
-        ],
-        ignoreHTTPSErrors: true
-      }
-    : {
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      };
-
-  const browser = await puppeteer.launch(browserConfig);
-
-  const page = await browser.newPage();
-  
-  // Set longer timeouts for cloud environment
-  page.setDefaultNavigationTimeout(60000);
-  page.setDefaultTimeout(30000);
-
+// Optimized restaurant details extraction
+async function getRestaurantDetails(page, link) {
   try {
-    await page.goto(mapUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+    await page.goto(link, { 
+      waitUntil: "networkidle2",
+      timeout: 30000 
+    });
     
-    // More robust element waiting
-    await page.waitForSelector('.Nv2PK', { timeout: 30000 }).catch(() => {});
-    await autoScroll(page, 30);
+    await page.waitForSelector('h1', { timeout: 10000 });
+
+    const details = await page.evaluate(() => {
+      const getCleanText = (selector) => 
+        (document.querySelector(selector)?.textContent || "").trim();
+      
+      const name = getCleanText("h1");
+      const description = getCleanText('[aria-label^="About"] ~ div div span');
+      
+      // Business hours
+      const businessHours = Array.from(document.querySelectorAll(".OqCZI span"))
+        .map(el => el.textContent.trim())
+        .filter(text => text.includes(":"));
+      
+      // Address
+      const addressEl = document.querySelector('[data-item-id="address"]') || 
+        Array.from(document.querySelectorAll("button, div")).find(el => 
+          el.textContent?.includes("Address")
+        );
+      
+      // Phone (more robust regex)
+      const phoneEl = document.querySelector('[data-item-id="phone"]') ||
+        Array.from(document.querySelectorAll("button, div")).find(el => 
+          /\+\d[\d -]{8,}\d/.test(el.textContent)
+        );
+      
+      const rawPhone = phoneEl?.textContent?.trim() || "";
+      const phoneMatch = rawPhone.match(/(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,5}\)?[-.\s]?\d{3,5}[-.\s]?\d{3,5}/);
+      
+      return {
+        name,
+        description,
+        businessHours: businessHours.join(", "),
+        phoneNumber: phoneMatch?.[0] || "",
+        fullAddress: (addressEl?.textContent || "").trim()
+      };
+    });
+
+    // Clean and parse address
+    const cleanedFullAddress = details.fullAddress.replace(/[^\x20-\x7E]/g, "").trim();
+    const addressParts = cleanedFullAddress.split(",").map(p => p.trim());
+    
+    return {
+      ...details,
+      fullAddress: cleanedFullAddress,
+      city: addressParts.length >= 3 ? addressParts[addressParts.length - 3] : "",
+      country: addressParts.length >= 1 ? addressParts[addressParts.length - 1] : ""
+    };
+    
   } catch (err) {
-    console.error('Navigation/loading error:', err.message);
-    await browser.close();
-    return [];
+    console.error("Error fetching restaurant details:", err.message);
+    return {
+      name: "",
+      description: "",
+      businessHours: "",
+      phoneNumber: "",
+      fullAddress: "",
+      city: "",
+      country: ""
+    };
+  }
+}
+
+// Main scraping function with environment-aware configuration
+async function scrapeGoogleMaps(lat, lng, address) {
+  // Validate address
+  if (!address) {
+    throw new Error('Address parameter is required');
   }
 
-  const results = await page.evaluate(() => {
-    const data = [];
-    document.querySelectorAll('.Nv2PK').forEach(el => {
-      const title = el.querySelector('.qBF1Pd')?.innerText.trim() || '';
-      const rating = parseFloat(el.querySelector('.MW4etd')?.innerText) || 0;
-      const reviews = el.querySelector('[aria-label*="stars"] .UY7F9')?.innerText || '';
-      const address = el.querySelector('.W4Efsd span:nth-child(2) span:nth-child(2)')?.innerText || '';
-      const image = el.querySelector('img')?.src || '';
-      const link = el.querySelector('a')?.href || '';
-      data.push({ title, rating, reviews, address, image, link });
-    });
-    return data;
-  });
+  const mapUrl = `https://www.google.com/maps/search/restaurants+in+${encodeURIComponent(address)}/@${lat},${lng},10z`;
+  console.log("Opening:", mapUrl);
 
-  await browser.close();
+  let browser;
+  try {
+    // Environment-specific configuration
+    const browserConfig = IS_PRODUCTION 
+      ? {
+          executablePath: await chromium.executablePath(),
+          args: [
+            ...chromium.args,
+            "--disable-gpu",
+            "--disable-dev-shm-usage",
+            "--disable-setuid-sandbox",
+            "--no-sandbox",
+            "--single-process"
+          ],
+          headless: chromium.headless,
+          defaultViewport: chromium.defaultViewport,
+          ignoreHTTPSErrors: true,
+        }
+      : {
+          headless: false, // Visible browser for local debugging
+          args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage"
+          ]
+        };
 
-  // Database operations
-  for (const r of results) {
-    if (!r.title) continue;
+    browser = await puppeteer.launch(browserConfig);
+    const page = await browser.newPage();
     
+    // Set realistic user agent and timeouts
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+    page.setDefaultNavigationTimeout(60000);
+    
+    await page.goto(mapUrl, { 
+      waitUntil: "networkidle2",
+      timeout: 60000 
+    });
+
     try {
-      const existing = await Restaurant.findOne({
-        restaurantName: r.title,
-        'location.coordinates': [lng, lat],
-      });
-      
-      if (existing) {
-        console.log(`Skipping existing restaurant: ${r.title}`);
-        continue;
-      }
-
-      const restaurant = new Restaurant({
-        restaurantName: r.title,
-        fullAddress: r.address,
-        address: r.address,
-        location: {
-          type: 'Point',
-          coordinates: [lng, lat],
-        },
-        isScraped: true,
-        status: "Active",
-        rating: r.rating,
-        restaurantLogo: r.image,
-        website: r.link,
-        email: `${r.title.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
-        password: 'Temp@123',
-        phoneNumber: '0000000000',
-      });
-
-      await restaurant.save();
-      console.log(`Saved: ${r.title}`);
+      await page.waitForSelector(".Nv2PK", { timeout: 15000 });
+      await autoScroll(page, 30);
     } catch (err) {
-      console.error(`Error processing ${r.title}:`, err.message);
+      console.error("Error waiting for restaurant elements:", err.message);
+      throw err;
+    }
+
+    const basicResults = await page.evaluate(() => {
+      return Array.from(document.querySelectorAll(".Nv2PK")).map(el => {
+        const title = el.querySelector(".qBF1Pd")?.textContent.trim() || "";
+        const rating = parseFloat(el.querySelector(".MW4etd")?.textContent) || 0;
+        const reviews = el.querySelector('[aria-label*="stars"] .UY7F9')?.textContent || "";
+        const address = el.querySelector(".W4Efsd span:nth-child(2) span:nth-child(2)")?.textContent || "";
+        const image = el.querySelector("img")?.src || "";
+        const link = el.querySelector("a")?.href || "";
+        
+        return { title, rating, reviews, address, image, link };
+      });
+    });
+
+    // Process results in batches
+    const batchSize = IS_PRODUCTION ? 3 : 5; // Smaller batches in production
+    for (let i = 0; i < basicResults.length; i += batchSize) {
+      const batch = basicResults.slice(i, i + batchSize);
+      
+      for (const r of batch) {
+        if (!r.title) continue;
+
+        try {
+          const existing = await Restaurant.findOne({
+            restaurantName: r.title,
+            "location.coordinates": [lng, lat],
+          });
+
+          if (existing) {
+            console.log(`Skipping existing restaurant: ${r.title}`);
+            continue;
+          }
+
+          const details = await getRestaurantDetails(page, r.link);
+          
+          const restaurant = new Restaurant({
+            restaurantName: r.title,
+            fullAddress: details.fullAddress,
+            address: details.fullAddress || r.address,
+            city: details.city,
+            country: details.country,
+            location: {
+              type: "Point",
+              coordinates: [lng, lat],
+            },
+            isScraped: true,
+            status: "Active",
+            rating: r.rating,
+            restaurantLogo: r.image,
+            website: r.link,
+            email: `${r.title.toLowerCase().replace(/\s+/g, "")}@gmail.com`,
+            password: "Temp@123",
+            phoneNumber: details.phoneNumber.replace(/\D/g, "").slice(0, 15) || "0000000000",
+            discription: details.description,
+            businessHours: details.businessHours,
+          });
+
+          await restaurant.save();
+          console.log(`Saved: ${r.title}`);
+          
+        } catch (err) {
+          console.error(`Error processing ${r.title}:`, err.message);
+          continue;
+        }
+      }
+      
+      // Longer delay in production
+      await new Promise(resolve => setTimeout(resolve, IS_PRODUCTION ? 3000 : 2000));
+    }
+
+  } catch (err) {
+    console.error("Scraping failed:", err);
+    throw err;
+  } finally {
+    if (browser) {
+      await browser.close().catch(err => console.error("Browser close error:", err));
     }
   }
-  
-  return results;
 }
 
 module.exports = scrapeGoogleMaps;
