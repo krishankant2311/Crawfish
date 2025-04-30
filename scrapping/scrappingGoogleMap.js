@@ -542,7 +542,7 @@ async function scrapeGoogleMaps(lat, lng, address) {
   const mapUrl = `https://www.google.com/maps/search/restaurants/@${lat},${lng},14z`;
   console.log('Opening:', mapUrl);
   const browser = await puppeteer.launch({
-    executablePath: 'C:\\Users\\DELL\\.cache\\puppeteer\\chrome\\win64-135.0.7049.114\\chrome-win64\\chrome.exe',
+    executablePath:  'C:/Users/DELL/.cache/puppeteer/chrome/win64-135.0.7049.114/chrome-win64/chrome.exe',
     headless: true,
     // executablePath: puppeteer.executablePath(), // Use Puppeteer's executablePath dynamically
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
