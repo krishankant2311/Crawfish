@@ -5,7 +5,6 @@
   "scripts": {
     "start": "nodemon index.jx",
     "dev": "node index.js"
-    
   },
   "keywords": [],
   "author": "",

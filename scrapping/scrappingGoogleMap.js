@@ -509,7 +509,7 @@
 
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-
+console.log(puppeteer.executablePath());
 const mongoose = require('mongoose');
 const Restaurant = require("../module/restaurants/model/restaurantModel");
 puppeteer.use(StealthPlugin());
@@ -542,8 +542,9 @@ async function scrapeGoogleMaps(lat, lng, address) {
   const mapUrl = `https://www.google.com/maps/search/restaurants/@${lat},${lng},14z`;
   console.log('Opening:', mapUrl);
   const browser = await puppeteer.launch({
+    executablePath: 'C:\\Users\\DELL\\.cache\\puppeteer\\chrome\\win64-135.0.7049.114\\chrome-win64\\chrome.exe',
     headless: true,
-    executablePath: puppeteer.executablePath(), // Use Puppeteer's executablePath dynamically
+    // executablePath: puppeteer.executablePath(), // Use Puppeteer's executablePath dynamically
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
 
