@@ -507,10 +507,12 @@
 
 
 
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
 const mongoose = require('mongoose');
 const Restaurant = require("../module/restaurants/model/restaurantModel");
+puppeteer.use(StealthPlugin());
 async function autoScroll(page, itemCount = 10) {
   try {
     let lastCount = 0;
@@ -552,10 +554,11 @@ async function scrapeGoogleMaps(lat, lng, address) {
   //   args: chromium.args || ['--no-sandbox', '--disable-setuid-sandbox'],
   // });
   const page = await browser.newPage();
-  await page.goto(mapUrl, { waitUntil: 'networkidle2' });
+  await page.goto(mapUrl, { waitUntil: 'networkidle2', timeout: 0 });
+
   try {
     await page.waitForSelector('.Nv2PK', { timeout: 10000 });
-    await autoScroll(page, 30); // load at least 20 restaurants
+    await autoScroll(page, 30);
   } catch (err) {
     console.error('Error waiting for restaurant elements:', err.message);
   }
