@@ -391,9 +391,9 @@ async function getRestaurantDetails(page, link) {
 // Main scraping function with environment-aware configuration
 async function scrapeGoogleMaps(lat, lng, address) {
   // Validate address
-  if (!address) {
-    throw new Error('Address parameter is required');
-  }
+  // if (!address) {
+  //   throw new Error('Address parameter is required');
+  // }
 
   const mapUrl = `https://www.google.com/maps/search/restaurants+in+${encodeURIComponent(address)}/@${lat},${lng},10z`;
   console.log("Opening:", mapUrl);

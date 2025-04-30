@@ -426,14 +426,14 @@ exports.homepageData = async (req, res) => {
         result: {},
       });
     }
-    if (!address) {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "Address is mandatory",
-        result: {},
-      });
-    }
+    // if (!address) {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "Address is mandatory",
+    //     result: {},
+    //   });
+    // }
     // Check the count of restaurants for the location
     const counts = await Restaurant.countDocuments({
       "location.coordinates": [lng, lat],
