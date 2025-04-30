@@ -539,21 +539,38 @@ async function autoScroll(page, itemCount = 10) {
 };
 // tyuiyuio
 async function scrapeGoogleMaps(lat, lng, address) {
-  const mapUrl = `https://www.google.com/maps/search/restaurants+in+${address}/@${lat},${lng},10z`;
+  const mapUrl = `https://www.google.com/maps/search/restaurants/@${lat},${lng},14z`;
   console.log('Opening:', mapUrl);
- 
-
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--use-fake-ui-for-media-stream',
+    ],
+    defaultViewport: null,
   });
-
+  
+  // Use default context
+  const page = await browser.newPage();
+  
+  // Grant geolocation permission to Google
+  const context = browser.defaultBrowserContext();
+  await context.overridePermissions("https://www.google.com", ['geolocation']);
+  
+  // Set fake geolocation
+  await page.setGeolocation({
+    latitude: parseFloat(lat),
+    longitude: parseFloat(lng),
+  });
+  
+  
   // const browser = await puppeteer.launch({
   //   executablePath: chromium.path,
   //   headless: chromium.headless,
   //   args: chromium.args || ['--no-sandbox', '--disable-setuid-sandbox'],
   // });
-  const page = await browser.newPage();
+  // const page = await browser.newPage();
   await page.goto(mapUrl, { waitUntil: 'networkidle2', timeout: 0 });
 
   try {
