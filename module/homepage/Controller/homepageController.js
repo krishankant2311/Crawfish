@@ -1,14 +1,3 @@
-// const User = require("../../user/model/userModel");
-// const Restaurant = require("../../restaurants/model/restaurantModel");
-// const Address = require("../../../module/address/model/addressModel");
-// const Favourite = require("../../favourite/model/favouritemodel");
-// const express = require("express");
-// const puppeteer = require("puppeteer-extra");
-// const StealthPlugin = require("puppeteer-extra-plugin-stealth");
-// const scrapeGoogleMaps = require("../../../scrapping/scrappingGoogleMap");
-// puppeteer.use(StealthPlugin());
-
-
 const User = require("../../user/model/userModel");
 const Restaurant = require("../../restaurants/model/restaurantModel");
 const Address = require("../../../module/address/model/addressModel");
@@ -18,208 +7,6 @@ const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 const scrapeGoogleMaps = require("../../../scrapping/scrappingGoogleMap");
 puppeteer.use(StealthPlugin());
-
-exports.homepageData = async (req, res) => {
-  try {
-    let { lat, lng, address, maxDistance = 5, rating = 1 } = req.query;
-    maxDistance = Number.parseFloat(maxDistance) * 1000; // convert to meters
-    rating = Number.parseFloat(rating);
-    
-    // Check for valid lat/lng
-    if (!lat || !lng) {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "Latitude and Longitude are mandatory",
-        result: {},
-      });
-    }
-
-    // Prevent scraping multiple times for the same location
-    const counts = await Restaurant.countDocuments({
-      "location.coordinates": [lng, lat],
-    });
-
-    if (counts <= 5) {
-      try {
-        console.log("Starting scrape for lat:", lat, "lng:", lng);
-        await scrapeGoogleMaps(lat, lng, address);
-        console.log("Scraping completed.");
-      } catch (scrapeError) {
-        console.error("Scraping failed:", scrapeError);
-      }
-    } else {
-      console.log("Scraping skipped as data already exists.");
-    }
-
-    // Fetch restaurant data concurrently with proper error handling
-    const [featuredRestaurant, topRatedRestaurants, nearByRestaurants] = await Promise.all([
-      Restaurant.find({
-        "location.coordinates": [lng, lat],
-        rating: { $gte: rating },
-      })
-        .limit(5)
-        .lean(),
-      
-      Restaurant.find({
-        "location.coordinates": [lng, lat],
-        rating: { $gte: rating },
-      })
-        .sort({ rating: -1 })
-        .limit(5)
-        .lean(),
-      
-      Restaurant.aggregate([
-        {
-          $geoNear: {
-            near: {
-              type: "Point",
-              coordinates: [Number(lng), Number(lat)],
-            },
-            key: "location.coordinates",
-            distanceField: "dist.calculated",
-            spherical: true,
-          },
-        },
-        {
-          $addFields: {
-            "dist.calculatedInKm": { $divide: ["$dist.calculated", 1000] },
-          },
-        },
-        {
-          $match: {
-            "dist.calculatedInKm": { $lte: parseFloat(maxDistance) },
-            rating: { $gte: rating },
-          },
-        },
-        { $limit: 5 },
-      ]).catch((err) => console.error("Error fetching nearby restaurants:", err)),
-    ]);
-
-    return res.send({
-      statusCode: 200,
-      success: true,
-      message: "Data fetched successfully.",
-      result: {
-        featuredRestaurant,
-        topRatedRestaurants,
-        nearByRestaurants,
-      },
-    });
-  } catch (error) {
-    console.error("API Error:", error);
-    return res.send({
-      statusCode: 500,
-      success: false,
-      message: error.message || "Internal Server Error",
-      result: {},
-    });
-  }
-};
-
-
-// exports.homepageData = async (req, res) => {
-//   try {
-//     let { lat, lng, address, maxDistance = 5, rating = 1 } = req.query;
-//     maxDistance = Number.parseFloat(maxDistance) * 1000;
-//     rating = Number.parseFloat(rating);
-//     if (!lat || !lng) {
-//       return res.send({
-//         statusCode: 400,
-//         success: false,
-//         message: "Latitude and Longitude are mandatory",
-//         result: {},
-//       });
-//     }
-//     // if (!address) {
-//     //   return res.send({
-//     //     statusCode: 400,
-//     //     success: false,
-//     //     message: "Address is mandatory",
-//     //     result: {},
-//     //   });
-//     // }
-//     // Check the count of restaurants for the location
-//     const counts = await Restaurant.countDocuments({
-//       "location.coordinates": [lng, lat],
-//       // status: "Active"
-//     });
-//     // Lock to prevent multiple scrapes for the same lat/lng
-//     if (counts > 5) {
-//       // Start scraping in the background, but don't block API response
-//       scrapeGoogleMaps(lat, lng, address);
-//     } else {
-//       await scrapeGoogleMaps(lat, lng, address);
-//     }
-//     // Fetch restaurant data concurrently
-//     const [featuredRestaurant, topRatedRestaurants, nearByRestaurants] =
-//       await Promise.all([
-//         Restaurant.find({
-//           "location.coordinates": [lng, lat],
-//           rating: { $gte: rating },
-//           // status : "Active"
-//         })
-//           .limit(5)
-//           .lean(),
-//         Restaurant.find({
-//           "location.coordinates": [lng, lat],
-//           rating: { $gte: rating },
-//           // status : "Active"
-//         })
-//           .sort({
-//             rating: -1,
-//           })
-//           .limit(5)
-//           .lean(),
-//         Restaurant.aggregate([
-//           {
-//             $geoNear: {
-//               near: {
-//                 type: "Point",
-//                 coordinates: [Number(lng), Number(lat)],
-//               },
-//               key: "location.coordinates",
-//               distanceField: "dist.calculated",
-//               spherical: true,
-//             },
-//           },
-//           {
-//             $addFields: {
-//               "dist.calculatedInKm": { $divide: ["$dist.calculated", 1000] },
-//             },
-//           },
-//           {
-//             $match: {
-//               "dist.calculatedInKm": { $lte: parseFloat(maxDistance) }, // 2000 kilometers
-//             },
-//           },
-//           {
-//             $match: {
-//               rating: { $gte: rating },
-//             },
-//           },
-//           { $limit: 5 },
-//         ]),
-//       ]);
-//     return res.send({
-//       statusCode: 200,
-//       success: true,
-//       message: "Data fetched successfully.",
-//       result: {
-//         featuredRestaurant,
-//         topRatedRestaurants,
-//         nearByRestaurants,
-//       },
-//     });
-//   } catch (error) {
-//     return res.send({
-//       statusCode: 500,
-//       success: false,
-//       message: error.message || "Internal Server Error",
-//       result: {},
-//     });
-//   }
-// };
 
 // const Restaurant = require('./models/Restaurant');
 
@@ -626,7 +413,108 @@ exports.homepageData = async (req, res) => {
 
 
 
-
+exports.homepageData = async (req, res) => {
+  try {
+    let { lat, lng, address, maxDistance = 5, rating = 1 } = req.query;
+    maxDistance = Number.parseFloat(maxDistance) * 1000;
+    rating = Number.parseFloat(rating);
+    if (!lat || !lng) {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "Latitude and Longitude are mandatory",
+        result: {},
+      });
+    }
+    // if (!address) {
+    //   return res.send({
+    //     statusCode: 400,
+    //     success: false,
+    //     message: "Address is mandatory",
+    //     result: {},
+    //   });
+    // }
+    // Check the count of restaurants for the location
+    const counts = await Restaurant.countDocuments({
+      "location.coordinates": [lng, lat],
+      // status: "Active"
+    });
+    // Lock to prevent multiple scrapes for the same lat/lng
+    if (counts > 5) {
+      // Start scraping in the background, but don't block API response
+      scrapeGoogleMaps(lat, lng, address);
+    } else {
+      await scrapeGoogleMaps(lat, lng, address);
+    }
+    // Fetch restaurant data concurrently
+    const [featuredRestaurant, topRatedRestaurants, nearByRestaurants] =
+      await Promise.all([
+        Restaurant.find({
+          "location.coordinates": [lng, lat],
+          rating: { $gte: rating },
+          // status : "Active"
+        })
+          .limit(5)
+          .lean(),
+        Restaurant.find({
+          "location.coordinates": [lng, lat],
+          rating: { $gte: rating },
+          // status : "Active"
+        })
+          .sort({
+            rating: -1,
+          })
+          .limit(5)
+          .lean(),
+        Restaurant.aggregate([
+          {
+            $geoNear: {
+              near: {
+                type: "Point",
+                coordinates: [Number(lng), Number(lat)],
+              },
+              key: "location.coordinates",
+              distanceField: "dist.calculated",
+              spherical: true,
+            },
+          },
+          {
+            $addFields: {
+              "dist.calculatedInKm": { $divide: ["$dist.calculated", 1000] },
+            },
+          },
+          {
+            $match: {
+              "dist.calculatedInKm": { $lte: parseFloat(maxDistance) }, // 2000 kilometers
+            },
+          },
+          {
+            $match: {
+              rating: { $gte: rating },
+            },
+          },
+          { $limit: 5 },
+        ]),
+      ]);
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: "Data fetched successfully.",
+      result: {
+        featuredRestaurant,
+        topRatedRestaurants,
+        nearByRestaurants,
+      },
+    });
+  } catch (error) {
+    return res.send({
+      statusCode: 500,
+      success: false,
+      message: error.message || "Internal Server Error",
+      result: {},
+    });
+  }
+};
 // exports.getFilteredRestaurants = async (req, res) => {
 //   try {
 //     let { lat, lng, address, maxDistance = 5, rating = 1 } = req.body;
@@ -979,4 +867,3 @@ exports.nearMeData = async (req, res) => {
     });
   }
 };
-
