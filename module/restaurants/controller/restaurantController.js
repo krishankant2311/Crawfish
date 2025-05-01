@@ -2504,7 +2504,53 @@ exports.nearmerestaurants = async(req,res) => {
   }
 }
 
+exports.getRestaurantById = async(req,res) => {
+  try {
+    let token = req.token;
+  let {restaurantId} = req.params;
 
+    if(!restaurantId){
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"Required restaurantId",
+        result:{}
+      })
+    }
+
+    const user = await User.findOne({_id:token._id, status:"Active"})
+    if(!user){
+      return res.send({
+        statusCode:404,
+        success:false,
+        message:"user not found",
+        result:{}
+      })
+    }
+    const restaurant = await Restaurant.findOne({_id:restaurantId}).select("-token -otp -securityToken -password")
+    if(!restaurant){
+      return res.send({
+        statusCode:404,
+        success:false,
+        message:"resturant not found",
+        result:{}
+      })
+    }
+
+    return res.send({
+      statusCode:200,
+      success:true,
+      message:"restaurant fetch successfully",
+      result:{restaurant}
+    })
+  } catch (error) {
+    return res.send({
+      statusCode:500,
+      message:error.message + " ERROR in get restaurant by id api",
+      result:{}
+    })
+  }
+}
 
 
 
