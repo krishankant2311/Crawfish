@@ -1777,7 +1777,7 @@ exports.topRatedRestaurant = async (req, res) => {
     }
     if (user.status === "Delete") {
       return res.send({
-        statusCode,
+        statusCode:400,
         success: false,
         message: "user has been deleted",
         result: {},
