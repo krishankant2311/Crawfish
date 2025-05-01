@@ -1802,7 +1802,7 @@ exports.topRatedRestaurant = async (req, res) => {
     const restaurant = await Restaurant.find({ status: "Active" })
       .sort({ rating: -1 })
       .limit(10)
-      .select("-password  -token -securityToken -phoneNumber -otp ");
+      .select("-password  -token -securityToken -otp ");
     if (!restaurant) {
       return res.send({
         statusCode: 404,
