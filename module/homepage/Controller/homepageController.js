@@ -515,14 +515,129 @@ exports.homepageData = async (req, res) => {
     });
   }
 };
+// exports.getFilteredRestaurants = async (req, res) => {
+//   try {
+//     let { lat, lng, address, maxDistance = 5, rating = 1 } = req.body;
+//     let {page = 1, limit = 5} = req.query;
+//     maxDistance = Number.parseFloat(maxDistance) * 1000;
+//     rating = Number.parseFloat(rating);
+//     page = Number.parseInt(page);
+//     limit = Number.parseInt(limit);
+//     if (!lat || !lng) {
+//       return res.send({
+//         statusCode: 400,
+//         success: false,
+//         message: "Latitude and Longitude are mandatory",
+//         result: {},
+//       });
+//     }
+//     if (!address) {
+//       return res.send({
+//         statusCode: 400,
+//         success: false,
+//         message: "Address is mandatory",
+//         result: {},
+//       });
+//     }
+//     const nearbyRestaurants = await Restaurant.aggregate([
+//       {
+//         $geoNear: {
+//           near: {
+//             type: "Point",
+//             coordinates: [Number(lng), Number(lat)],
+//           },
+//           key: "location.coordinates",
+//           distanceField: "dist.calculated",
+//           spherical: true,
+//         },
+//       },
+//       {
+//         $addFields: {
+//           "dist.calculatedInKm": { $divide: ["$dist.calculated", 1000] },
+//         },
+//       },
+//       {
+//         $match: {
+//           "dist.calculatedInKm": { $lte: parseFloat(maxDistance) }, // maxDistance in km
+//         },
+//       },
+//       {
+//         $match: {
+//           rating: { $gte: rating }, // min rating filter
+//         },
+//       },
+//       {
+//         $skip: (page - 1) * limit,  // Skip documents based on page number
+//       },
+//       {
+//         $limit: limit,  // Limit the number of results per page
+//       },
+//     ]);
+//     // Count the total number of matching restaurants for pagination info
+//     const totalCount = await Restaurant.aggregate([
+//       {
+//         $geoNear: {
+//           near: {
+//             type: "Point",
+//             coordinates: [Number(lng), Number(lat)],
+//           },
+//           key: "location.coordinates",
+//           distanceField: "dist.calculated",
+//           spherical: true,
+//         },
+//       },
+//       {
+//         $addFields: {
+//           "dist.calculatedInKm": { $divide: ["$dist.calculated", 1000] },
+//         },
+//       },
+//       {
+//         $match: {
+//           "dist.calculatedInKm": { $lte: parseFloat(maxDistance) }, // maxDistance in km
+//         },
+//       },
+//       {
+//         $match: {
+//           rating: { $gte: rating }, // min rating filter
+//         },
+//       },
+//       {
+//         $count: "total",
+//       },
+//     ]);
+//     const totalResults = totalCount.length > 0 ? totalCount[0].total : 0;
+//     const totalPages = Math.ceil(totalResults / limit);
+//     return res.send({
+//       statusCode: 200,
+//       success: true,
+//       message: "Data fetched successfully.",
+//       result: {
+//           data : nearbyRestaurants,
+//           currentPage: page,
+//           totalPages,
+//           totalRecords : totalResults,
+//       },
+//     });
+//   } catch (error) {
+//     return res.send({
+//       statusCode: 500,
+//       success: false,
+//       message: error.message + " ERROR in get filtered api",
+//       result: {},
+//     });
+//   }
+// };
+
 exports.getFilteredRestaurants = async (req, res) => {
   try {
-    let { lat, lng, address, maxDistance = 5, rating = 1 } = req.body;
-    let {page = 1, limit = 5} = req.query;
+    let { lat, lng, address, maxDistance = 5, rating = 1, search = "" } = req.body; // ✅ search added
+    let { page = 1, limit = 5 } = req.query;
+
     maxDistance = Number.parseFloat(maxDistance) * 1000;
     rating = Number.parseFloat(rating);
     page = Number.parseInt(page);
     limit = Number.parseInt(limit);
+
     if (!lat || !lng) {
       return res.send({
         statusCode: 400,
@@ -531,6 +646,7 @@ exports.getFilteredRestaurants = async (req, res) => {
         result: {},
       });
     }
+
     if (!address) {
       return res.send({
         statusCode: 400,
@@ -539,83 +655,57 @@ exports.getFilteredRestaurants = async (req, res) => {
         result: {},
       });
     }
+
+    // ✅ Base pipeline with geoNear, distance, rating, and name search
+    const basePipeline = [
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [Number(lng), Number(lat)],
+          },
+          key: "location.coordinates",
+          distanceField: "dist.calculated",
+          spherical: true,
+        },
+      },
+      {
+        $addFields: {
+          "dist.calculatedInKm": { $divide: ["$dist.calculated", 1000] },
+        },
+      },
+      {
+        $match: {
+          "dist.calculatedInKm": { $lte: parseFloat(maxDistance) },
+          rating: { $gte: rating },
+          restaurantName: { $regex: search, $options: "i" }, // ✅ name search added
+        },
+      },
+    ];
+
     const nearbyRestaurants = await Restaurant.aggregate([
-      {
-        $geoNear: {
-          near: {
-            type: "Point",
-            coordinates: [Number(lng), Number(lat)],
-          },
-          key: "location.coordinates",
-          distanceField: "dist.calculated",
-          spherical: true,
-        },
-      },
-      {
-        $addFields: {
-          "dist.calculatedInKm": { $divide: ["$dist.calculated", 1000] },
-        },
-      },
-      {
-        $match: {
-          "dist.calculatedInKm": { $lte: parseFloat(maxDistance) }, // maxDistance in km
-        },
-      },
-      {
-        $match: {
-          rating: { $gte: rating }, // min rating filter
-        },
-      },
-      {
-        $skip: (page - 1) * limit,  // Skip documents based on page number
-      },
-      {
-        $limit: limit,  // Limit the number of results per page
-      },
+      ...basePipeline,
+      { $skip: (page - 1) * limit },
+      { $limit: limit },
     ]);
-    // Count the total number of matching restaurants for pagination info
+
     const totalCount = await Restaurant.aggregate([
-      {
-        $geoNear: {
-          near: {
-            type: "Point",
-            coordinates: [Number(lng), Number(lat)],
-          },
-          key: "location.coordinates",
-          distanceField: "dist.calculated",
-          spherical: true,
-        },
-      },
-      {
-        $addFields: {
-          "dist.calculatedInKm": { $divide: ["$dist.calculated", 1000] },
-        },
-      },
-      {
-        $match: {
-          "dist.calculatedInKm": { $lte: parseFloat(maxDistance) }, // maxDistance in km
-        },
-      },
-      {
-        $match: {
-          rating: { $gte: rating }, // min rating filter
-        },
-      },
-      {
-        $count: "total",
-      },
+      ...basePipeline,
+      { $count: "total" },
     ]);
+
     const totalResults = totalCount.length > 0 ? totalCount[0].total : 0;
     const totalPages = Math.ceil(totalResults / limit);
+
     return res.send({
       statusCode: 200,
       success: true,
       message: "Data fetched successfully.",
       result: {
-          data : nearbyRestaurants,
-          currentPage: page,
-          totalPages,
-          totalRecords : totalResults,
+        data: nearbyRestaurants,
+        currentPage: page,
+        totalPages,
+        totalRecords: totalResults,
       },
     });
   } catch (error) {
@@ -627,6 +717,7 @@ exports.getFilteredRestaurants = async (req, res) => {
     });
   }
 };
+
 
 exports.topRatedData = async (req, res) => {
   try {

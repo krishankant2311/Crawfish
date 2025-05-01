@@ -3,10 +3,6 @@ const mongoose = require("mongoose");
 // const { restaurantProfile } = require("../controller/restaurantController");
 
 const restaurantSchema = new mongoose.Schema({
-  placeId:{
-    type:String,
-    default:""
-  },
   restaurantName: {
     type: String,
     required: true,
