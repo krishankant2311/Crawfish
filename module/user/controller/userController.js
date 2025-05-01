@@ -1283,11 +1283,11 @@ exports.getAllUser = async (req, res) => {
       });
     }
 
-    const allUser = await User.find({})
+    const allUser = await User.find({$or: [{ status: "Active" }, { status: "Block" }]})
       .skip(skip)
       .limit(limit)
       .select("-token -password -otp");
-    const totalUser = await User.countDocuments({});
+    const totalUser = await User.countDocuments({$or: [{ status: "Active" }, { status: "Block" }]});
     return res.send({
       statusCode: 200,
       success: true,
@@ -1602,65 +1602,65 @@ exports.getprofile = async (req, res) => {
   }
 };
 
-exports.userStatus = async (req, res) => {
-  // const express = require("express");
-  // const http = require("http");
-  const socketIo = require("socket.io");
-  // const mongoose = require("mongoose");
-  const cors = require("cors");
-  // const User = require("./models/userModel");
+// exports.userStatus = async (req, res) => {
+//   // const express = require("express");
+//   // const http = require("http");
+//   const socketIo = require("socket.io");
+//   // const mongoose = require("mongoose");
+//   const cors = require("cors");
+//   // const User = require("./models/userModel");
 
-  const app = express();
-  // const server = http.createServer(app);
-  const io = socketIo(server, {
-    cors: {
-      origin: "*",
-    },
-  });
+//   const app = express();
+//   // const server = http.createServer(app);
+//   const io = socketIo(server, {
+//     cors: {
+//       origin: "*",
+//     },
+//   });
 
-  // mongoose.connect("mongodb://localhost:27017/restaurantApp", {
-  //   useNewUrlParser: true,
-  //   useUnifiedTopology: true,
-  // });
+//   // mongoose.connect("mongodb://localhost:27017/restaurantApp", {
+//   //   useNewUrlParser: true,
+//   //   useUnifiedTopology: true,
+//   // });
 
-  app.use(cors());
-  app.use(express.json());
+//   app.use(cors());
+//   app.use(express.json());
 
-  // ✅ Socket.io: Handle Online & Offline Status
-  io.on("connection", (socket) => {
-    console.log("User Connected:", socket.id);
+//   // ✅ Socket.io: Handle Online & Offline Status
+//   io.on("connection", (socket) => {
+//     console.log("User Connected:", socket.id);
 
-    // 🟢 Jab user app open kare to "Online" ho jaye
-    socket.on("userOnline", async (userId) => {
-      await User.findByIdAndUpdate(userId, {
-        userStatus: "Online",
-        lastActive: Date.now(),
-      });
-      io.emit("statusUpdated", { userId, status: "Online" });
-      console.log(`User ${userId} is Online`);
-    });
+//     // 🟢 Jab user app open kare to "Online" ho jaye
+//     socket.on("userOnline", async (userId) => {
+//       await User.findByIdAndUpdate(userId, {
+//         userStatus: "Online",
+//         lastActive: Date.now(),
+//       });
+//       io.emit("statusUpdated", { userId, status: "Online" });
+//       console.log(`User ${userId} is Online`);
+//     });
 
-    // 🔴 Jab user app band kare to "Offline" ho jaye
-    socket.on("userOffline", async (userId) => {
-      await User.findByIdAndUpdate(userId, {
-        userStatus: "Offline",
-        lastActive: Date.now(),
-      });
-      io.emit("statusUpdated", { userId, status: "Offline" });
-      console.log(`User ${userId} is Offline`);
-    });
+//     // 🔴 Jab user app band kare to "Offline" ho jaye
+//     socket.on("userOffline", async (userId) => {
+//       await User.findByIdAndUpdate(userId, {
+//         userStatus: "Offline",
+//         lastActive: Date.now(),
+//       });
+//       io.emit("statusUpdated", { userId, status: "Offline" });
+//       console.log(`User ${userId} is Offline`);
+//     });
 
-    // 🔴 Jab user app band kare ya net chala jaye to bhi offline ho
-    socket.on("disconnect", async () => {
-      console.log("User Disconnected:", socket.id);
-      await User.findOneAndUpdate(
-        { userStatus: "Online" },
-        { userStatus: "Offline", lastActive: Date.now() }
-      );
-      io.emit("statusUpdated", { status: "Offline" });
-    });
-  });
-};
+//     // 🔴 Jab user app band kare ya net chala jaye to bhi offline ho
+//     socket.on("disconnect", async () => {
+//       console.log("User Disconnected:", socket.id);
+//       await User.findOneAndUpdate(
+//         { userStatus: "Online" },
+//         { userStatus: "Offline", lastActive: Date.now() }
+//       );
+//       io.emit("statusUpdated", { status: "Offline" });
+//     });
+//   });
+// };
 
 exports.deleteUser = async (req, res) => {
   try {
