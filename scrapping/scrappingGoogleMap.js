@@ -372,11 +372,10 @@ async function scrapeGoogleMaps(lat, lng, address) {
   const mapUrl = `https://www.google.com/maps/search/restaurants/@${lat},${lng},15z`;
   console.log('Opening:', mapUrl);
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
-
+ const browser = await puppeteer.launch({
+  headless: true,
+  args: ["--no-sandbox", "--disable-setuid-sandbox"],
+});
   const page = await browser.newPage();
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/91 Safari/537.36');
   await page.goto(mapUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
