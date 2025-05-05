@@ -10,12 +10,12 @@ const MessageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Restaurant",
     }, // Restaurant ID
-    senderType: {
-      type: String,
-      enum: ["User", "Restaurant"],
-      // required: true,
-      default:""
-    },
+    // senderType: {
+    //   type: String,
+    //   enum: ["User", "Restaurant"],
+    //   // required: true,
+    //   default:""
+    // },
 
     message: {
       type: String,
