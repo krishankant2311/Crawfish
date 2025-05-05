@@ -13,7 +13,7 @@ const MessageSchema = new mongoose.Schema(
     senderType: {
       type: String,
       enum: ["User", "Restaurant"],
-      required: true,
+      // required: true,
       default:""
     },
 
