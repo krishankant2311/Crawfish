@@ -310,12 +310,12 @@ exports.getAllAddress = async (req, res) => {
 exports.getAllAddressbyUser = async (req, res) => {
   try {
     let token = req.token;
-    let { page = 1, limit = 10 } = req.query;
-    page = Number.parseInt(page);
-    limit = Number.parseInt(limit);
-    const skip = (page - 1) * limit;
+    // let { page = 1, limit = 10 } = req.query;
+    // page = Number.parseInt(page);
+    // limit = Number.parseInt(limit);
+    // const skip = (page - 1) * limit;
     const user = await User.findOne({ _id: token._id, status: "Active" });
-    if (!user) {
+    if (!user){
       return res.send({
         statusCode: 404,
         success: false,
@@ -324,18 +324,26 @@ exports.getAllAddressbyUser = async (req, res) => {
       });
     }
     const allAddress = await Address.find({ userId: token._id, status:"Active"})
-      .skip(skip)
-      .limit(limit);
-    const totalAddress = await Address.countDocuments({ userId: token._id , status:"Active"});
+    if(!allAddress){
+      return res.send({
+        statusCode:404,
+        success:false,
+        message:"All addresses are not found",
+        result:{}
+      })
+    }
+      // .skip(skip)
+      // .limit(limit);
+    // const totalAddress = await Address.countDocuments({ userId: token._id , status:"Active"});
     return res.send({
       statusCode: 200,
       success: true,
       message: "All Address get successfully",
       result: {
         Address: allAddress,
-        currentPage: page,
-        totalPage: Math.ceil(totalAddress / limit),
-        totalRecord: totalAddress,
+        // currentPage: page,
+        // totalPage: Math.ceil(totalAddress / limit),
+        // totalRecord: totalAddress,
       },
     });
   } catch (error) {

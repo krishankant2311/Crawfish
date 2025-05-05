@@ -628,95 +628,96 @@ exports.homepageData = async (req, res) => {
 //   }
 // };
 
-exports.getFilteredRestaurants = async (req, res) => {
-  try {
-    let { lat, lng, address, maxDistance = 5, rating = 1, search = "" } = req.body; // ✅ search added
-    let { page = 1, limit = 5 } = req.query;
+// exports.getFilteredRestaurants = async (req, res) => {
+//   try {
+//     let { type, distance, rating, search = "" } = req.body; // ✅ search added
+//     let { page = 1, limit = 5 } = req.query;
+//     type = Number.parseInt(type);
+//     distance = Number.parseFloat(distance)
+//     rating = Number.parseFloat(rating);
+//     page = Number.parseInt(page);
+//     limit = Number.parseInt(limit);
+    
 
-    maxDistance = Number.parseFloat(maxDistance) * 1000;
-    rating = Number.parseFloat(rating);
-    page = Number.parseInt(page);
-    limit = Number.parseInt(limit);
+//     // if (!lat || !lng) {
+//     //   return res.send({
+//     //     statusCode: 400,
+//     //     success: false,
+//     //     message: "Latitude and Longitude are mandatory",
+//     //     result: {},
+//     //   });
+//     // }
 
-    if (!lat || !lng) {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "Latitude and Longitude are mandatory",
-        result: {},
-      });
-    }
+//     // if (!address) {
+//     //   return res.send({
+//     //     statusCode: 400,
+//     //     success: false,
+//     //     message: "Address is mandatory",
+//     //     result: {},
+//     //   });
+//     // }
 
-    if (!address) {
-      return res.send({
-        statusCode: 400,
-        success: false,
-        message: "Address is mandatory",
-        result: {},
-      });
-    }
+//     // ✅ Base pipeline with geoNear, distance, rating, and name search
+//     const basePipeline = [
+//       {
+//         $geoNear: {
+//           near: {
+//             type: "Point",
+//             coordinates: [Number(lng), Number(lat)],
+//           },
+//           key: "location.coordinates",
+//           distanceField: "dist.calculated",
+//           spherical: true,
+//         },
+//       },
+//       {
+//         $addFields: {
+//           "dist.calculatedInKm": { $divide: ["$dist.calculated", 1000] },
+//         },
+//       },
+//       {
+//         $match: {
+//           "dist.calculatedInKm": { $lte: parseFloat(distance) },
+//           rating: { $gte: rating },
+//           restaurantName: { $regex: search, $options: "i" }, // ✅ name search added
+//         },
+//       },
+//     ];
 
-    // ✅ Base pipeline with geoNear, distance, rating, and name search
-    const basePipeline = [
-      {
-        $geoNear: {
-          near: {
-            type: "Point",
-            coordinates: [Number(lng), Number(lat)],
-          },
-          key: "location.coordinates",
-          distanceField: "dist.calculated",
-          spherical: true,
-        },
-      },
-      {
-        $addFields: {
-          "dist.calculatedInKm": { $divide: ["$dist.calculated", 1000] },
-        },
-      },
-      {
-        $match: {
-          "dist.calculatedInKm": { $lte: parseFloat(maxDistance) },
-          rating: { $gte: rating },
-          restaurantName: { $regex: search, $options: "i" }, // ✅ name search added
-        },
-      },
-    ];
+//     const nearbyRestaurants = await Restaurant.aggregate([
+//       ...basePipeline,
+//       { $skip: (page - 1) * limit },
+//       { $limit: limit },
+//     ]);
 
-    const nearbyRestaurants = await Restaurant.aggregate([
-      ...basePipeline,
-      { $skip: (page - 1) * limit },
-      { $limit: limit },
-    ]);
+//     const totalCount = await Restaurant.aggregate([
+//       ...basePipeline,
+//       { $count: "total" },
+//     ]);
 
-    const totalCount = await Restaurant.aggregate([
-      ...basePipeline,
-      { $count: "total" },
-    ]);
+//     const totalResults = totalCount.length > 0 ? totalCount[0].total : 0;
+//     const totalPages = Math.ceil(totalResults / limit);
 
-    const totalResults = totalCount.length > 0 ? totalCount[0].total : 0;
-    const totalPages = Math.ceil(totalResults / limit);
-
-    return res.send({
-      statusCode: 200,
-      success: true,
-      message: "Data fetched successfully.",
-      result: {
-        data: nearbyRestaurants,
-        currentPage: page,
-        totalPages,
-        totalRecords: totalResults,
-      },
-    });
-  } catch (error) {
-    return res.send({
-      statusCode: 500,
-      success: false,
-      message: error.message + " ERROR in get filtered api",
-      result: {},
-    });
-  }
-};
+//     return res.send({
+//       statusCode: 200,
+//       success: true,
+//       message: "Data fetched successfully.",
+//       result: {
+//         data: nearbyRestaurants,
+//         currentPage: page,
+//         totalPages,
+//         totalRecords: totalResults,
+//       },
+//     });
+//   } catch (error) {
+//     return res.send({
+//       statusCode: 500,
+//       success: false,
+//       message: error.message + " ERROR in get filtered api",
+//       result: {},
+//     });
+//   }
+// };
 
 
 exports.topRatedData = async (req, res) => {
@@ -867,3 +868,172 @@ exports.nearMeData = async (req, res) => {
     });
   }
 };
+
+
+// exports.getfilter = async(req,res) => {
+//   try {
+//     let token = req.body;
+//     let {type,distance,rating,both} = req.body;
+
+//     const user = await User.findOne({_id:token._id,status:"Active"})
+//     if(!user){
+//       return res.send({
+//         statusCode:404,
+//         success:false,
+//         message:"user not found",
+//         result:{}
+//       })
+//     }
+
+//     if(type=0){
+//       const restaurant = await Restaurant.find({restaurantName: { $regex: search, $options: "i" },}).sort({rating:-1})
+//       if(!restaurant){
+//         return res.send({
+//           statusCode:404,
+//           success:false,
+//           message:"restaurant not found",
+//           result:{}
+//         })
+//       }
+//     }
+//   } catch (error) {
+    
+//   }
+// }
+
+// exports.getFilteredRestaurants = async (req, res) => {
+//   try {
+//     let { type, distance, rating, search = "" } = req.body;
+
+//     // Type conversions
+//     type = Number(type);
+//     distance = Number(distance);
+//     rating = Number(rating);
+
+//     // Base match
+//     const baseMatch = {
+//       distanceInKm: { $lte: distance },
+//       rating: { $gte: rating },
+//       restaurantName: { $regex: search, $options: "i" },
+//     };
+
+//     // Sorting logic with fallback
+//     let sortStage = {};
+//     if (type === 0) {
+//       sortStage = { rating: -1 };
+//     } else if (type === 1) {
+//       sortStage = { distanceInKm: 1 };
+//     } else if (type === 2) {
+//       sortStage = { rating: -1, distanceInKm: 1 };
+//     } else {
+//       sortStage = { createdAt: -1 };
+//     }
+
+//     const pipeline = [
+//       { $match: baseMatch },
+//       { $sort: sortStage },
+//     ];
+
+//     const restaurants = await Restaurant.aggregate(pipeline);
+//     if(!restaurants){
+//       res.send({statusCode:404,
+//         success:false,
+//         messag:"restaurant not found",
+//         result:{}
+//       })
+//     }
+//     return res.send({
+//       statusCode: 200,
+//       success: true,
+//       message: "Data fetched successfully.",
+//       result: {
+//         data: restaurants,
+//         totalRecords: restaurants.length,
+//       },
+//     });
+//   } catch (error) {
+//     return res.send({
+//       statusCode: 500,
+//       success: false,
+//       message: error.message + " ERROR in getFilteredRestaurants",
+//       result: {},
+//     });
+//   }
+// };
+
+
+
+exports.getFilteredRestaurants = async (req, res) => {
+  try {
+    let { type, distance, rating, search = "", lat, lng } = req.body;
+
+    type = Number(type);
+    distance = Number(distance);
+    rating = Number(rating);
+
+    if (!lat || !lng) {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "Latitude and longitude are required",
+        result: {},
+      });
+    }
+
+    let sortStage = {};
+    if (type === 0) {
+      sortStage = { rating: -1 };
+    } else if (type === 1) {
+      sortStage = { distanceInKm: 1 };
+    } else if (type === 2) {
+      sortStage = { rating: -1, distanceInKm: 1 };
+    } else {
+      sortStage = { createdAt: -1 };
+    }
+
+    const pipeline = [
+      {
+        $geoNear: {
+          near: { type: "Point", coordinates: [Number(lng), Number(lat)] },
+          distanceField: "distanceInKm",
+          distanceMultiplier: 0.001, // convert meters to kilometers
+          spherical: true,
+          query: {
+            rating: { $gte: rating },
+            restaurantName: { $regex: search, $options: "i" },
+          },
+        },
+      },
+      { $sort: sortStage },
+    ];
+
+    const restaurants = await Restaurant.aggregate(pipeline);
+
+    if (!restaurants || restaurants.length === 0) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "No restaurants found",
+        result: {},
+      });
+    }
+
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: "Data fetched successfully.",
+      result: {
+        data: restaurants,
+        totalRecords: restaurants.length,
+      },
+    });
+  } catch (error) {
+    return res.send({
+      statusCode: 500,
+      success: false,
+      message: error.message + " ERROR in getFilteredRestaurants",
+      result: {},
+    });
+  }
+};
+

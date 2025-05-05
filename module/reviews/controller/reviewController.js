@@ -677,6 +677,7 @@ exports.getreviewaverages = async (req, res) => {
         }
       }
     ]);
+    
 
     let ratingMap = {
       5: 0, // Excellent
@@ -741,7 +742,10 @@ exports.getreviewaverages = async (req, res) => {
 
 //     const ratng = await Review.aggregate([{
 //    $match :{restaurantId:new mongoose.Types.ObjectId(restaurantId)},
-//       $group :{id:null, avg:{avg:"rating"}}
+//    $group: {
+//     _id: '$rating',
+//     count: { $sum: 1 }
+//   }
 //     }])
 //   } catch (error) {
     

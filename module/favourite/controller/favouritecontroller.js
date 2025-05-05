@@ -91,8 +91,10 @@ exports.addfavourite = async (req, res) => {
       userId: token._id,
       restaurantId: resId,
       isFavourite: true,
+      status:"Active"
     });
     restaurant.isFavourite = true;
+
     await restaurant.save();
     await newfavourite.save();
     return res.send({
@@ -216,7 +218,7 @@ exports.deleteFavouriteRestaurant = async (req, res) => {
         result: {},
       });
     }
-    if (user.status === "delete") {
+    if (user.status === "Delete") {
       return res.send({
         statusCode: 400,
         success: false,
