@@ -42,7 +42,7 @@ exports.addfavourite = async (req, res) => {
         result: {},
       });
     }
-    if (!restaurant.status === "Delete") {
+    if (restaurant.status === "Delete") {
       return res.send({
         statusCode: 400,
         success: false,
@@ -50,7 +50,7 @@ exports.addfavourite = async (req, res) => {
         result: {},
       });
     }
-    if (!restaurant.status === "Pending") {
+    if (restaurant.status === "Pending") {
       return res.send({
         statusCode: 400,
         success: false,
@@ -58,7 +58,7 @@ exports.addfavourite = async (req, res) => {
         result: {},
       });
     }
-    if (!restaurant.status === "Blocked") {
+    if (restaurant.status === "Blocked") {
       return res.send({
         statusCode: 400,
         success: false,
@@ -251,7 +251,7 @@ exports.deleteFavouriteRestaurant = async (req, res) => {
         result: {},
       });
     }
-    if (!restaurant.status === "Delete") {
+    if (restaurant.status === "Delete") {
       return res.send({
         statusCode: 400,
         success: false,
@@ -260,15 +260,15 @@ exports.deleteFavouriteRestaurant = async (req, res) => {
       });
     }
 
-    if (!restaurant.status === "Delete") {
+    if (restaurant.status === "Block") {
       return res.send({
         statusCode: 400,
         success: false,
-        message: "restaurant has been deleted",
+        message: "restaurant has been Blocked",
         result: {},
       });
     }
-    if (!restaurant.status === "Pending") {
+    if (restaurant.status === "Pending") {
       return res.send({
         statusCode: 400,
         success: false,
