@@ -496,7 +496,7 @@ exports.verifysignOTP = async (req, res) => {
       _id: user._id,
       email: user.email,
     });
-
+    const _id = user._id;
     user.token = token;
     const saveUser = await user.save();
     if (saveUser) {
@@ -504,7 +504,7 @@ exports.verifysignOTP = async (req, res) => {
         statusCode: 200,
         success: true,
         message: "otp verify successfully",
-        result: { token },
+        result: {_id, token, },
       });
     }
   } catch (error) {
@@ -602,7 +602,7 @@ exports.login = async (req, res) => {
         result: {},
       });
     }
-
+    const _id = user._id;
     const token = await generateJWT({
       _id: user._id,
       email: user.email,
@@ -616,7 +616,9 @@ exports.login = async (req, res) => {
       statusCode: 200,
       success: true,
       message: "Login successfully",
-      result: { token },
+      result: {
+        _id,
+         token },
     });
   } catch (error) {
     return res.send({
