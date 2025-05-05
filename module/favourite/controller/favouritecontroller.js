@@ -50,15 +50,23 @@ exports.addfavourite = async (req, res) => {
         result: {},
       });
     }
-
-    if (restaurant.status === "Pending" || restaurant.status === "Block") {
+    if (!restaurant.status === "Pending") {
       return res.send({
-        statusCode: 401,
+        statusCode: 400,
         success: false,
-        message: "Inactive restaurant",
+        message: "restaurant not found",
         result: {},
       });
     }
+    if (!restaurant.status === "Blocked") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "restaurant has been Blocked",
+        result: {},
+      });
+    }
+   
     const favourite = await Favourite.findOne({
       userId: token._id,
       restaurantId: resId,
@@ -252,11 +260,19 @@ exports.deleteFavouriteRestaurant = async (req, res) => {
       });
     }
 
-    if (restaurant.status === "Pending" || restaurant.status === "Block") {
+    if (!restaurant.status === "Delete") {
       return res.send({
-        statusCode: 401,
+        statusCode: 400,
         success: false,
-        message: "Inactive restaurant",
+        message: "restaurant has been deleted",
+        result: {},
+      });
+    }
+    if (!restaurant.status === "Pending") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "restaurant not found",
         result: {},
       });
     }
