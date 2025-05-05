@@ -101,7 +101,7 @@ const { Conversation } = require("../../socketIO/model/conversationModel");
 
 exports.getMessages = async (req, res) => {
   try {
-    const { userId, restaurantId } = req.body;
+    const { userId, restaurantId } = req.query;
     const token = req.token;
     // User & Restaurant Validation
     const user = await User.findById(token._id);
