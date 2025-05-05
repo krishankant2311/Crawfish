@@ -115,6 +115,6 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 userSchema.index({ "currentLocation.coordinates": "2dsphere" });
-const User = mongoose.model("user", userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
