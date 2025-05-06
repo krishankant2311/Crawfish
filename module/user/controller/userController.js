@@ -321,6 +321,7 @@ exports.signup = async (req, res) => {
       //     result: { otpValue },
       //   });
       // }
+      
       if (user.status === "Pending") {
         // Generate OTP only here
         const { otpValue, otpExpiry } = generateOTP();
@@ -353,14 +354,7 @@ exports.signup = async (req, res) => {
           result: { otpValue },
         });
       }
-      if (user.status === "Block") {
-        return res.send({
-          statusCode: 400,
-          success: false,
-          message: "User has been blocked",
-          result: {},
-        });
-      }
+     
       // let message = "User already exists";
       // if (user.status === "Pending")
       //   message = "OTP already sent. Please verify.";
@@ -1285,11 +1279,11 @@ exports.getAllUser = async (req, res) => {
       });
     }
 
-    const allUser = await User.find({$or: [{ status: "Active" }, { status: "Block" }]})
+    const allUser = await User.find({$or: [{ status: "Active" }, { status: "Block" },{ status: "Pending" }]})
       .skip(skip)
       .limit(limit)
       .select("-token -password -otp");
-    const totalUser = await User.countDocuments({$or: [{ status: "Active" }, { status: "Block" }]});
+    const totalUser = await User.countDocuments({$or: [{ status: "Active" }, { status: "Block" },{ status: "Pending" }]});
     return res.send({
       statusCode: 200,
       success: true,
@@ -1811,7 +1805,14 @@ exports.handleStatus = async (req, res) => {
       message: "User Status Update successfully",
       result: {},
     });
-  } catch (error) {}
+  } catch (error) {
+    return res.send({
+      statusCode:500,
+      success:false,
+      message:error.message + " ERROR in hadle status by user api",
+      result:{}
+    })
+  }
 };
 exports.saveLocation = async (req, res) => {
   const { userId } = req.params;

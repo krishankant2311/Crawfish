@@ -2774,3 +2774,75 @@ exports.ClameYourBusiness = async (req,res) =>{
 
 }
 
+exports.handleStatus = async (req, res) => {
+  try {
+    let token = req.token;
+    let { resId } = req.params;
+    let { status } = req.body;
+
+    if (!status) {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "Status required",
+        result: {},
+      });
+    }
+
+    const admin = await Admin.findOne({ _id: token._id });
+
+    if (!admin) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "Unauthorized admin",
+        result: {},
+      });
+    }
+
+    if (admin.status === "Delete") {
+      return res.send({
+        statusCode: 403,
+        success: false,
+        message: "Your account has been deleted",
+        result: {},
+      });
+    }
+    if (admin.status === "Blocked") {
+      return res.send({
+        statusCode: 403,
+        success: false,
+        message: "Your account has been blocked",
+        result: {},
+      });
+    }
+
+    const restaurant = await Restaurant.findOne({ _id: resId });
+
+    if (!restaurant) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "Unauthorized restaurant",
+        result: {},
+      });
+    }
+    restaurant.status = status;
+
+    await restaurant.save();
+
+    return res.send({
+      statusCode: 200,
+      succes: true,
+      message: "restaurant Status Update successfully",
+      result: {},
+    });
+  } catch (error) {
+    return res.send({
+      statusCode:500,
+      success:false,
+      message:error.message + " ERROR in hadle status by restaurant api",
+      result:{}
+    })
+  }
+};

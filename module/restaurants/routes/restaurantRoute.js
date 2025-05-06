@@ -37,6 +37,7 @@ route.get("/get-restaurant-by-user/:resId",verifyJWT,upload.none(),restaurantCon
 route.get("/get-nearme-restaurant",verifyJWT,restaurantController.nearmerestaurants)
 route.get("/get-restaurantbyId/:restaurantId",verifyJWT,restaurantController.getRestaurantById)
 route.post("/clame-your-business/:restaurantId",verifyJWT,restaurantController.ClameYourBusiness)
+route.post("/handle-status/:resId",verifyJWT,upload.none(),restaurantController.handleStatus)
 
 
 
