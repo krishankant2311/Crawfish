@@ -2553,10 +2553,224 @@ exports.getRestaurantById = async(req,res) => {
 }
 
 
+exports.saveLocation = async (req, res) => {
+  const { restaurantId } = req.params;
+  const token = req.token;
+  const { latitude, longitude } = req.body;
+
+  if (!latitude || !longitude) {
+    return res
+      .status(400)
+      .json({ message: "Latitude and Longitude are required" });
+  }
+  console.log("cordinates", latitude, longitude);
+  try {
+    const restaurant = await Restaurant.findOne({ _id: token._id });
+    if (!restaurant) {
+      return res.send({
+        statusCode: 404,
+        success: false,
+        message: "restaurant not found",
+        result: {},
+      });
+    }
+    if (restaurant.status === "Delete") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "restaurant has been deleted",
+        result: {},
+      });
+    }
+    if (restaurant.status === "Pending") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "unauthorise access",
+        result: {},
+      });
+    }
+    if (restaurant.status === "Block") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "restaurant has been blocked",
+        result: {},
+      });
+    }
+    restaurant.location.coordinates = [latitude, longitude];
+    await restaurant.save();
+    return res.send({
+      statusCode: 200,
+      success: true,
+      message: "restaurant Location saved successfully",
+      result: {},
+    });
+  } catch (err) {
+    // console.error(err);
+    return res.send({
+      statusCode: 500,
+      message: " ERROR in save location of restaurant" + err.message,
+      success: false,
+      result: {},
+    });
+  }
+};
+
+// exports.claimedrestaurant = async(req,res) => {
+// try {
+//   let restaurantId = req.params;
+
+//   if(!restaurantId){
+//     return res.send({
+//       statusCode:400,
+//       success:false,
+//       message:"Restaurant Id required",
+//       result:{}
+//     })
+//   }
+// const restaurant = await findOne({_id:restaurantId, status:"Active"})  
+// if(!restaurant){
+//   return res.send({
+//     statusCode:404,
+//     success:false,
+//     message:"restaurant not found",
+//     result:{}
+//   })
+// }
+// if(restaurant.isVerified ==="false"){
+//   const title = "Signup";
+//   const body = `<html>
+//     <p>
+//       please claimed your business first and u can upload your menu also
+//     </p>
+//   </html>`
+  
+//   await sendEmail(title, restaurant.email, body);
+// }
+// }catch (error) {
+//   return res.send({
+//     statusCode:500,
+//     success:false,
+//     message:error.message + " ERROR in claim your restaurant Api",
+//     resuly:{}
+//   })
+// }
+ 
+// }
+
+exports.ClameYourBusiness = async (req,res) =>{
+  try {
+    let {restaurantId} = req.params;
+    // console.log("restaurantId=", restaurantId)
+    let token = req.token
+    let user = await User.findOne({_id:token._id,status:"Active"})
+    if (!user) {
+      return res.send({
+        statusCode:400,
+        success:false,
+        message:"Unauthorized access",
+        result:{}
+      })
+    }
+    let restaurant = await Restaurant.findOne({_id:restaurantId})
+    if (!restaurant) {
+      return res.send({
+        statusCode:404,
+        success:false,
+        message:"Unauthorized restaurant",
+        result:{}
+      })
+    }
+    if (restaurant.status === "Delete") {
+      return res.send({
+        statusCode:400,
+        success: false,
+        message: "restaurant has been deleted",
+        result: {},
+      });
+    }
+    if (restaurant.status === "Block") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "unauthorise access",
+        result: {},
+      });
+    }
+    if (restaurant.status === "Pending") {
+      return res.send({
+        statusCode: 400,
+        success: false,
+        message: "restaurant unauthorise access",
+        result: {},
+      });
+    }
+    if (restaurant.isVerified !== true) {
+      let sub = "Request to register on craw fish";
+      const html = `<body style="background-color: #F7FAFC; margin: 0; padding: 0;">
+      <div style="max-width: 24rem; margin: 2rem auto; padding: 1rem; background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 0.5rem; text-align: center;">
+        <h1 style="font-size: 1.5rem; font-weight: bold; color: #2D3748;">Craw Fish</h1>
+        <p style="color: #718096; margin-top: 0.5rem;">We received a request to verify your account in Crawfish App.</p>
+        <p style="color: #718096; margin-top: 1rem;"></p>
+        <p style="font-size: 1.25rem; font-weight: bold; color: #3182CE; margin-top: 0.5rem;"></p>
+        <p style="color: #718096; margin-top: 1rem;">If you did not request this, please ignore this email.</p>
+      </div>
+    </body>`;
+     const mailSend = await sendEmail(sub, restaurant.email, html);
+            if (!mailSend) {
+              return res.send({
+                statusCode: 400,
+                success: false,
+                message: "Email didn't send",
+                result: {},
+              });
+            }
+      return res.send({
+        statusCode:200,
+        success:true,
+        message:"Please registered your restaurent in crawfish app",
+        result:{}
+      })
+    }
+    if(restaurant.menu == "" || restaurant.length == 0){
+      let sub = "Request to register on craw fish";
+      const html = `<body style="background-color: #F7FAFC; margin: 0; padding: 0;">
+      <div style="max-width: 24rem; margin: 2rem auto; padding: 1rem; background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 0.5rem; text-align: center;">
+        <h1 style="font-size: 1.5rem; font-weight: bold; color: #2D3748;">Craw Fish</h1>
+        <p style="color: #718096; margin-top: 0.5rem;">We received a request to verify your account in crawfish.</p>
+        <p style="color: #718096; margin-top: 1rem;">Please upload your menu to verify your restaurant </p>
+        <p style="font-size: 1.25rem; font-weight: bold; color: #3182CE; margin-top: 0.5rem;"></p>
+        <p style="color: #718096; margin-top: 1rem;">If you did not request this, please ignore this email.</p>
+      </div>
+    </body>`;
+     const mailSend = await sendEmail(sub, restaurant.email, html);
+            if (!mailSend) {
+              return res.send({
+                statusCode: 400,
+                success: false,
+                message: "Email didn't send",
+                result: {},
+              });
+            }
+      return res.send({
+        statusCode:200,
+        success:true,
+        message:"Please upload your restaurent menu in crawfish app",
+        result:{}
+      })
+    }
+    }
+  
+    catch(error){
+    return res.send({
+      statusCode:500,
+      success:false,
+      message:error.message + " ERROR in claim business ",
+      result:{}
+    })
+  }
 
 
-
-
-
-
+}
 
