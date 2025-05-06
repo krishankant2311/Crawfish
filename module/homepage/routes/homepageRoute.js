@@ -11,5 +11,5 @@ const upload = require("../../../middlewares/multer");
 route.get('/homepage-data', upload.none() , homepageData)
 route.get('/top-rated-restaurant', upload.none() , topRatedData)
 route.get('/near-meData', upload.none() , nearMeData)
-route.post('/get-filtered-restaurants', upload.none() , getFilteredRestaurants)
+route.get('/get-filtered-restaurants', upload.none() , getFilteredRestaurants)
 module.exports = route;

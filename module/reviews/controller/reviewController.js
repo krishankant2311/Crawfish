@@ -269,8 +269,9 @@ exports.getallreviewbyuser = async (req, res) => {
         result: {},
       });
     }
-    const review = await Review.find({ restaurantId:restaurantId });
-    if (!review) {
+    const review = await Review.find({ restaurantId:restaurantId, status:"Active" });
+    console.log("sdiboi",review)
+    if (!review || review.length == 0) {
       return res.send({
         statusCode: 404,
         success: false,

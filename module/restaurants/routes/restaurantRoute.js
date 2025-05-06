@@ -31,12 +31,12 @@ route.get('/getall-restaurantsbyAdmin',verifyJWT,upload.none(),restaurantControl
 route.get("/top-rated-restaurant",verifyJWT,upload.none(),restaurantController.topRatedRestaurant)
 route.post("/block-restaurant/:resId",verifyJWT,upload.none(),restaurantController.BlockedRestaurant)
 route.get("/get-restaurant-dashboard",verifyJWT,upload.none(),restaurantController.getRestaurantDashboard)
-route.get("/get-nearby-restaurant",upload.none(),restaurantController.getNearbyRestaurants)
+// route.get("/get-nearby-restaurant",upload.none(),restaurantController.getNearbyRestaurants)
 route.get("/get-nearmeAndToprated-restaurant",verifyJWT,upload.none(),restaurantController.NearmeAndTopratedrestaurant)
 route.get("/get-restaurant-by-user/:resId",verifyJWT,upload.none(),restaurantController.getRestaurantbyUser)
 route.get("/get-nearme-restaurant",verifyJWT,restaurantController.nearmerestaurants)
 route.get("/get-restaurantbyId/:restaurantId",verifyJWT,restaurantController.getRestaurantById)
-
+route.post("/clame-your-business/:restaurantId",verifyJWT,restaurantController.ClameYourBusiness)
 
 
 
