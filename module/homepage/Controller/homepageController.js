@@ -14,7 +14,6 @@ puppeteer.use(StealthPlugin());
 //   .then(() => console.log("✅ Index created"))
 //   .catch((err) => console.error("❌ Index creation error:", err));
 
-
 // exports.homepage = async (req, res) => {
 //   try {
 //     let token = req.token;
@@ -157,7 +156,6 @@ puppeteer.use(StealthPlugin());
 //   }
 // };
 
-
 // const scrapNearbyRestaurants = async (lat, lng) => {
 //   try {
 //     const searchQuery = `restaurants near ${lat},${lng}`;
@@ -210,9 +208,6 @@ puppeteer.use(StealthPlugin());
 //     return [];
 //   }
 // };
-
-
-
 
 // const puppeteer = require('puppeteer');
 
@@ -286,9 +281,6 @@ puppeteer.use(StealthPlugin());
 //     });
 //   });
 // }
-
-
-
 
 // const puppeteer = require('puppeteer');
 
@@ -371,22 +363,12 @@ puppeteer.use(StealthPlugin());
 //   });
 // }
 
-
-
-
-
-
 // module.exports = scrapeRestaurants;
-
 
 // 👇 Example call (can be API call too)
 // // scrapeRestaurants(latitude, longitude)
 //   .then(data => console.log(JSON.stringify(data, null, 2)))
 //   .catch(err => console.error('Scrape error:', err));
-
-
-
-
 
 //   const express = require('express');
 // const app = express();
@@ -404,14 +386,6 @@ puppeteer.use(StealthPlugin());
 //     res.status(500).send({ message: 'Failed to scrape restaurants' });
 //   }
 // }
-
-
-
-
-
-
-
-
 
 exports.homepageData = async (req, res) => {
   try {
@@ -637,7 +611,6 @@ exports.homepageData = async (req, res) => {
 //     rating = Number.parseFloat(rating);
 //     page = Number.parseInt(page);
 //     limit = Number.parseInt(limit);
-    
 
 //     // if (!lat || !lng) {
 //     //   return res.send({
@@ -718,7 +691,6 @@ exports.homepageData = async (req, res) => {
 //     });
 //   }
 // };
-
 
 exports.topRatedData = async (req, res) => {
   try {
@@ -869,7 +841,6 @@ exports.nearMeData = async (req, res) => {
   }
 };
 
-
 // exports.getfilter = async(req,res) => {
 //   try {
 //     let token = req.body;
@@ -897,7 +868,7 @@ exports.nearMeData = async (req, res) => {
 //       }
 //     }
 //   } catch (error) {
-    
+
 //   }
 // }
 
@@ -960,8 +931,6 @@ exports.nearMeData = async (req, res) => {
 //     });
 //   }
 // };
-
-
 
 // exports.getFilteredRestaurants = async (req, res) => {
 //   try {
@@ -1040,6 +1009,10 @@ exports.nearMeData = async (req, res) => {
 exports.getFilteredRestaurants = async (req, res) => {
   try {
     let { type, distance, rating, search = "", userLat, userLng } = req.body;
+    let { page = 1, limit = 10 } = req.query;
+    page = Number.parseInt(page);
+    limit = Number.parseInt(limit);
+    const skip = (page - 1) * limit;
     distance = Number(distance);
     rating = Number(rating);
     type = Number(type);
@@ -1069,7 +1042,9 @@ exports.getFilteredRestaurants = async (req, res) => {
       {
         $match: {
           restaurantName: { $regex: search, $options: "i" },
-          ...(type === 0 || type === 2 ? { distanceInKm: { $lte: distance } } : {}),
+          ...(type === 0 || type === 2
+            ? { distanceInKm: { $lte: distance } }
+            : {}),
           ...(type === 1 || type === 2 ? { rating: { $gte: rating } } : {}),
         },
       },
@@ -1084,7 +1059,7 @@ exports.getFilteredRestaurants = async (req, res) => {
     } else {
       pipeline.push({ $sort: { createdAt: -1 } });
     }
-    const restaurants = await Restaurant.aggregate(pipeline);
+    const restaurants = await Restaurant.aggregate(pipeline).skip(skip).limit(limit);
     if (!restaurants.length) {
       return res.send({
         statusCode: 404,
@@ -1093,6 +1068,15 @@ exports.getFilteredRestaurants = async (req, res) => {
         result: {},
       });
     }
+
+    // const allrestaurants = await Restaurant.find({ status: "Active" })
+    //   .skip(skip)
+    //   .limit(limit);
+
+    const totalRestaurant = await Restaurant.countDocuments({
+      status: "Active",
+    });
+
     return res.send({
       statusCode: 200,
       success: true,
@@ -1100,6 +1084,9 @@ exports.getFilteredRestaurants = async (req, res) => {
       result: {
         data: restaurants,
         totalRecords: restaurants.length,
+        currentPage: page,
+        totalPage: Math.ceil(totalRestaurant / limit),
+        totalRestaurant,
       },
     });
   } catch (error) {
