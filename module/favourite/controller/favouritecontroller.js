@@ -91,7 +91,7 @@ exports.addfavourite = async (req, res) => {
           statusCode: 200,
           success: true,
           message: "add to favourite successfully",
-          result: {},
+          result: {favourite},
         });
       }
     }
@@ -109,7 +109,7 @@ exports.addfavourite = async (req, res) => {
       statusCode: 200,
       success: true,
       message: "fav add successfully",
-      result: {},
+      result: {newfavourite},
     });
   } catch (error) {
     return res.send({
@@ -276,7 +276,7 @@ exports.deleteFavouriteRestaurant = async (req, res) => {
         result: {},
       });
     }
-    const favourite = await Favourite.findOne({ restaurantId: resId });
+    const favourite = await Favourite.findOne({ restaurantId: resId, userId: token._id });
     if (!favourite) {
       return res.send({
         statusCode: 404,
